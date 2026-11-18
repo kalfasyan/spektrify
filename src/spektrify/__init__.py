@@ -2,8 +2,9 @@
 
 From a shell::
 
-    spektrify cube.h5               # or .npy .npz .mat .hdr (ENVI) .tif
-    spektrify --demo                # synthetic cube with planted artifacts
+    spektrify view cube.h5          # or .npy .npz .mat .hdr (ENVI) .tif
+    spektrify view --demo           # synthetic cube with planted artifacts
+    spektrify quality cube.h5       # artefact report (``--json``, ``--strict`` for CI)
 
 From Python / Jupyter::
 
@@ -14,6 +15,7 @@ From Python / Jupyter::
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 from numpy.typing import ArrayLike
@@ -22,7 +24,12 @@ from spektrify.io import demo_cube, load_cube
 from spektrify.model import Cube
 from spektrify.server import Session, ViewerServer
 
-__all__ = ["Cube", "Viewer", "demo_cube", "load_cube", "show", "serve"]
+__all__ = ["Cube", "Viewer", "__version__", "demo_cube", "load_cube", "serve", "show"]
+
+try:
+    __version__ = version("spektrify")
+except PackageNotFoundError:  # running from a source tree without installing
+    __version__ = "0.0.0+unknown"
 
 
 class Viewer:
@@ -38,8 +45,10 @@ class Viewer:
     def update(
         self, array: ArrayLike | Cube, wavelengths: ArrayLike | None = None, *, layout: str = "auto"
     ) -> None:
-        """Replace the displayed cube; the browser tab picks it up automatically."""
-        self._server.session.set_cube(_as_cube(array, wavelengths, layout, "array"))
+        """Replace the displayed cube (keeping the preprocessing pipeline); the browser tab
+        picks it up automatically."""
+        session = self._server.session
+        session.set_cube(_as_cube(array, wavelengths, layout, "array"), session.pipeline)
 
     def stop(self) -> None:
         self._server.stop()
@@ -81,7 +90,7 @@ def show(
     viewer = Viewer(server)
     if inline:
         try:
-            from IPython.display import IFrame, display
+            from IPython.display import IFrame, display  # ty: ignore[import-not-found]
 
             display(IFrame(viewer.url, width="100%", height=height))
         except ImportError:
@@ -94,22 +103,13 @@ def show(
 
 
 def serve(
-    path: str | None = None,
+    cube: Cube | None = None,
     *,
-    demo: bool = False,
-    dataset: str | None = None,
-    layout: str = "auto",
-    mosaic: int | None = None,
     port: int = 8765,
     host: str = "127.0.0.1",
     open_browser: bool = True,
 ) -> None:
-    """Load ``path`` (or the demo cube) and serve the viewer until interrupted."""
-    cube = None
-    if demo:
-        cube = demo_cube()
-    elif path:
-        cube = load_cube(path, dataset=dataset, layout=layout, mosaic=mosaic)
+    """Serve the viewer on ``cube`` (or an empty viewer) until interrupted. Blocks."""
     server = ViewerServer(Session(cube), host=host, port=port)
     what = f"{cube.name}  ({cube.height}×{cube.width}×{cube.n_bands})" if cube else "no cube yet"
     print(f"spektrify · {what}\n  → {server.url}   (Ctrl+C to quit)")

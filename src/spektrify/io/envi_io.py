@@ -44,7 +44,7 @@ def parse_envi_header(text: str) -> dict[str, Any]:
 class EnviReader:
     """ENVI ``.hdr`` + raw data file (BSQ / BIL / BIP, any byte order)."""
 
-    suffixes = (".hdr",)
+    suffixes: tuple[str, ...] = (".hdr",)
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         return _read_envi(path)

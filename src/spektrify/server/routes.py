@@ -8,18 +8,20 @@ The wire contract is documented in ``docs/architecture.md``.
 
 from __future__ import annotations
 
+import io
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any
 
 import numpy as np
 
 from spektrify.compute import region_mask
 from spektrify.compute._util import finite_list
-from spektrify.io import load_cube, supported_suffixes
+from spektrify.io import demosaic_methods, load_cube, supported_suffixes
 from spektrify.model import Cube
+from spektrify.preprocess import Pipeline, step_schema
 from spektrify.server.session import Session
 
 MAX_UPLOAD = 8 * 1024**3
@@ -38,7 +40,7 @@ class ApiError(Exception):
 class Request:
     params: dict[str, list[str]] = field(default_factory=dict)
     body: dict[str, Any] = field(default_factory=dict)
-    stream: BinaryIO | None = None  # raw body, for uploads
+    stream: io.BufferedIOBase | None = None  # raw body, for uploads
     length: int = 0
 
     def get(self, key: str, default: Any = ..., cast: Callable[[str], Any] = str) -> Any:
@@ -85,10 +87,6 @@ def dispatch(session: Session, method: str, name: str, req: Request) -> Json | B
     return fn(session, req)
 
 
-def _f(v: Any) -> Any:
-    return None if isinstance(v, float) and not np.isfinite(v) else v
-
-
 # --------------------------------------------------------------------------- cube & data
 
 
@@ -112,9 +110,10 @@ def meta(s: Session, r: Request) -> Json:
             "meta": cube.json_meta(),
             "band_names": cube.meta.get("band_names"),
             "global": an.global_range,
-            "band_stats": [{k: _f(v) for k, v in st.items()} for st in an.band_stats],
+            "band_stats": an.band_stats,  # non-finite values are nulled by the JSON encoder
             "mean_spectrum": finite_list(an.mean_spectrum),
             "invalid_pixels": int((~an.finite_mask).sum()),
+            "pipeline": s.pipeline.to_json(),
             "recent": s.recent,
         }
     )
@@ -302,9 +301,35 @@ def open_(s: Session, r: Request) -> Json:
         dataset=r.body.get("dataset") or None,
         layout=r.body.get("layout") or "auto",
         mosaic=r.body.get("mosaic") or None,
+        demosaic_method=r.body.get("demosaic") or "block",
     )
-    s.set_cube(cube)
+    s.set_cube(cube, _pipeline(r.body.get("steps") or []))
     return Json({"ok": True, "seconds": time.perf_counter() - t0})
+
+
+# --------------------------------------------------------------------------- preprocessing
+
+
+def _pipeline(items: Any) -> Pipeline:
+    try:
+        return Pipeline.from_json(items)
+    except (KeyError, TypeError, ValueError) as e:
+        raise ApiError(400, str(e)) from e
+
+
+@route("GET", "steps")
+def steps(s: Session, r: Request) -> Json:
+    """The preprocessing steps the viewer can offer, with their parameters."""
+    return Json({"steps": step_schema(), "demosaic": demosaic_methods()})
+
+
+@route("POST", "pipeline")
+def pipeline(s: Session, r: Request) -> Json:
+    """Replace the preprocessing pipeline; the raw cube is re-processed and re-displayed."""
+    p = _pipeline(r.body.get("steps") or [])
+    t0 = time.perf_counter()
+    s.set_pipeline(p)
+    return Json({"ok": True, "steps": p.to_json(), "seconds": time.perf_counter() - t0})
 
 
 @route("POST", "upload")
@@ -314,7 +339,7 @@ def upload(s: Session, r: Request) -> Json:
         raise ApiError(400, "empty or too large upload")
     dest = s.upload_dir() / name
     remaining = r.length
-    with open(dest, "wb") as f:
+    with dest.open("wb") as f:
         while remaining > 0:
             chunk = r.stream.read(min(remaining, 1 << 22))
             if not chunk:
@@ -338,11 +363,13 @@ def upload(s: Session, r: Request) -> Json:
 @route("POST", "transpose")
 def transpose(s: Session, r: Request) -> Json:
     """Reinterpret the current cube's axes when the layout guess was wrong."""
-    cube, _ = s.require()
-    order = r.body.get("order")
-    if sorted(order or []) != [0, 1, 2]:
+    s.require()
+    cube = s.raw
+    assert cube is not None  # require() guarantees a loaded cube
+    order = list(r.body.get("order") or [])
+    if sorted(order) != [0, 1, 2]:
         raise ApiError(400, "order must be a permutation of [0, 1, 2]")
     data = np.ascontiguousarray(np.transpose(cube.data, order))
     wl = cube.wavelengths if order[0] == 0 else None
-    s.set_cube(Cube(data, wl, cube.name, cube.source, dict(cube.meta)))
+    s.set_cube(Cube(data, wl, cube.name, cube.source, dict(cube.meta)), s.pipeline)
     return Json({"ok": True})

@@ -7,7 +7,7 @@ This module has no I/O and no analysis code, so every other layer can depend on 
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import numpy as np
@@ -56,6 +56,11 @@ class Cube:
     @property
     def axis_unit(self) -> str:
         return str(self.meta.get("wavelength_units", "nm")) if self.wavelengths is not None else ""
+
+    def with_data(self, data: ArrayLike, **changes: Any) -> Cube:
+        """A new cube with ``data`` (``(C, H, W)``), a copy of the metadata, and optionally
+        other fields changed (e.g. ``wavelengths=...``)."""
+        return replace(self, data=np.asarray(data), meta=dict(self.meta), **changes)
 
     def json_meta(self) -> dict[str, Any]:
         """The JSON-serialisable subset of ``meta``."""
@@ -118,7 +123,7 @@ def _to_numpy(array: ArrayLike) -> np.ndarray:
     # Accept torch tensors / xarray / dask without importing them.
     for attr in ("detach",):
         if hasattr(array, attr):
-            array = array.detach().cpu().numpy()  # type: ignore[union-attr]
+            array = array.detach().cpu().numpy()  # ty: ignore[not-callable]
     if hasattr(array, "values") and not isinstance(array, np.ndarray):
         array = array.values  # xarray
     return np.asarray(array)

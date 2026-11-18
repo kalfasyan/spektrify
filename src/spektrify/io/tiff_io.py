@@ -11,7 +11,7 @@ from spektrify.io.base import RawArray, register_reader
 
 
 class TiffReader:
-    suffixes = (".tif", ".tiff")
+    suffixes: tuple[str, ...] = (".tif", ".tiff")
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         try:
@@ -19,7 +19,7 @@ class TiffReader:
 
             arr = tifffile.imread(path)
         except ImportError:
-            from PIL import Image, ImageSequence  # type: ignore[import-not-found]
+            from PIL import Image, ImageSequence  # ty: ignore[import-not-found]
 
             with Image.open(path) as im:
                 frames = [np.asarray(p) for p in ImageSequence.Iterator(im)]

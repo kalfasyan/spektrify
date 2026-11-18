@@ -1,27 +1,52 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.26", "hatch-vcs>=0.4"]
 build-backend = "hatchling.build"
 
 [project]
 name = "spektrify"
-version = "0.1.0"
-description = "A fast, friendly multi/hyperspectral cube viewer: channels, spectra, 3D and artifact hunting in your browser."
+dynamic = ["version"]  # from the git tag (vX.Y.Z), see docs/releasing.md
+description = "A fast, friendly multi/hyperspectral cube viewer: channels, spectra, 3D and artefact hunting in your browser."
 readme = "README.md"
 license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [{ name = "kalfasyan" }]
 keywords = ["hyperspectral", "multispectral", "spectral imaging", "viewer", "computer vision"]
-dependencies = ["numpy>=1.24"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = ["numpy>=1.24", "typer>=0.12"]
 
 [project.optional-dependencies]
 hdf5 = ["h5py>=3.8"]
 mat = ["scipy>=1.10"]
 tiff = ["tifffile>=2023.1"]
-all = ["h5py>=3.8", "scipy>=1.10", "tifffile>=2023.1"]
-dev = ["h5py>=3.8", "scipy>=1.10", "pytest>=8.0", "ruff>=0.4"]
+all = ["spektrify[hdf5,mat,tiff]"]
+
+[project.urls]
+Homepage = "https://github.com/kalfasyan/spektrify"
+Issues = "https://github.com/kalfasyan/spektrify/issues"
+Changelog = "https://github.com/kalfasyan/spektrify/blob/main/CHANGELOG.md"
 
 [project.scripts]
-spektrify = "spektrify.__main__:main"
+spektrify = "spektrify.cli:app"
+
+[dependency-groups]
+dev = [
+    "spektrify[all]",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.15",
+    "ty==0.0.105",  # pre-1.0: pinned so a new release can't break CI unannounced
+]
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/spektrify"]
@@ -30,7 +55,7 @@ packages = ["src/spektrify"]
 artifacts = ["src/spektrify/static/**"]
 
 [tool.hatch.build.targets.sdist]
-exclude = ["frontend/node_modules"]
+exclude = ["frontend/node_modules", "docs/img"]
 
 [tool.ruff]
 target-version = "py310"
@@ -38,8 +63,19 @@ line-length = 100
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "RUF", "PTH", "PIE", "RET", "C4"]
+ignore = ["RUF001", "RUF002", "RUF003"]  # λ, σ, × and friends are intentional
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PTH"]
+
+[tool.ty.environment]
+python-version = "3.10"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q --tb=short"
+addopts = "-q --tb=short --strict-markers"
+
+[tool.coverage.run]
+source = ["spektrify"]
+branch = true

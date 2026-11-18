@@ -9,27 +9,51 @@ and find sensor artefacts and anomalies without writing plotting code.
 ## Install and run
 
 ```bash
-pip install "spektrify[all] @ git+https://github.com/kalfasyan/spektrify"
+uv tool install "spektrify[all] @ git+https://github.com/kalfasyan/spektrify"   # or: pip install …
 
-spektrify cube.h5          # or .npy .npz .mat .tif, or ENVI .hdr + data
-spektrify --demo           # a synthetic scene with planted artefacts
-spektrify                  # opens the file browser; you can also drag & drop a file
+spektrify view cube.h5          # or .npy .npz .mat .tif, ENVI .hdr + data
+spektrify view --demo           # a synthetic scene with planted artefacts
+spektrify view                  # empty viewer: use the open dialog or drag & drop a file
 ```
 
-The UI comes prebuilt inside the package, so you don't need Node. The only hard dependency is
-NumPy. The extras add more readers: `hdf5` (h5py), `mat` (scipy), `tiff` (tifffile), or `all`.
+The UI comes prebuilt inside the package, so you don't need Node. The core needs only NumPy.
+The extras add more readers: `hdf5` (h5py), `mat` (scipy), `tiff` (tifffile), or `all`.
 
-To use it on a remote GPU box, run `spektrify cube.h5 --no-browser` there, then
+To use it on a remote GPU box, run `spektrify view cube.h5 --no-browser` there, then
 `ssh -L 8765:localhost:8765 box` and open http://localhost:8765.
 
-From Python or Jupyter:
+### Raw sensor data and preprocessing
+
+```bash
+spektrify view raw.h5                               # spektro raw mosaic: demosaiced automatically
+spektrify view raw.npy --mosaic 4 --demosaic bilinear   # any 2-D mosaic, full resolution
+spektrify view cube.hdr -s calibrate:dark=dark.hdr,white=white.hdr -s bin:2
+spektrify steps                                     # list steps and their parameters
+```
+
+Steps run in order on the loaded cube: `clip` (per-band percentile cap, as in spektro),
+`calibrate` (dark / white reference to reflectance), `crop`, `bands` and `bin`. The viewer's
+**Preprocess** panel edits the same pipeline live.
+
+### Jobs from the shell
+
+```bash
+spektrify info cube.h5 --json                 # shape, axis, value range, metadata
+spektrify quality cube.h5 --strict            # artefact report; exit code 1 if anything is found
+spektrify convert raw.h5 clean.npz -s clip -s bands:2,stop=-2   # preprocess and save
+```
+
+### From Python or Jupyter
 
 ```python
-from spektrify import show
+from spektrify import show, load_cube
+from spektrify.preprocess import Pipeline
 
 v = show(cube, wavelengths=wl)   # (H, W, C) or (C, H, W); layout is guessed or pass layout="hwc"
 v.update(denoised)               # the open tab switches to the new array
 show(cube, inline=True)          # embed in the notebook
+
+clean = Pipeline.parse(["clip", "bin:2"]).apply(load_cube("raw.h5"))
 ```
 
 ## What you can do
@@ -53,32 +77,22 @@ Press `?` in the app for all keyboard shortcuts. The most used ones: `← →` c
 
 ## Architecture
 
-The project is built so any layer can be replaced without touching the others. The main ones:
+The project is built so any layer can be replaced without touching the others:
 
-- **Readers** (`spektrify/io`): each file format is one small module registered by suffix.
+- **Readers and demosaicing** (`spektrify/io`): each file format is one small module registered
+  by suffix. Demosaicing methods are registered by name.
+- **Preprocessing** (`spektrify/preprocess`): steps are small dataclasses. Registering one makes
+  it available in Python, the CLI and the viewer at once.
 - **Compute backend** (`spektrify/compute`): an `Analyzer` protocol with a NumPy reference
   implementation. A Rust/PyO3 or GPU version only has to register itself.
-- **API** (`spektrify/server/routes.py`): transport-free handlers. The stdlib HTTP adapter is
-  a thin shell around them.
+- **API** (`spektrify/server/routes.py`): transport-free handlers. The stdlib HTTP adapter is a
+  thin shell around them.
 - **UI** (`frontend/`): Svelte for panels and state. The WebGL image renderer and the three.js
   3D engine are framework-free modules.
 
-[docs/architecture.md](docs/architecture.md) covers the module boundaries, the API contract,
-how to add a reader or backend, and how to rebuild the UI.
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-pytest
-ruff check src tests
-
-# UI (only if you change frontend/)
-cd frontend && npm install
-spektrify --demo --no-browser &   # API on :8765
-npm run dev                       # hot-reloading UI on :5173, proxies /api
-npm run build                     # writes src/spektrify/static (commit the result)
-```
+[docs/architecture.md](docs/architecture.md) covers the module boundaries and the API
+contract. [CONTRIBUTING.md](CONTRIBUTING.md) covers the dev setup (uv, ruff, ty, pytest, the
+UI build), and [docs/releasing.md](docs/releasing.md) covers versions and releases.
 
 ## License
 

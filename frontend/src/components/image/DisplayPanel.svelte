@@ -8,6 +8,7 @@
   import StatsControls from './modes/StatsControls.svelte';
   import MathControls from './modes/MathControls.svelte';
   import StretchPanel from './StretchPanel.svelte';
+  import PreprocessPanel from './PreprocessPanel.svelte';
 
   const s = store.state;
   const modes = [
@@ -53,3 +54,5 @@
     {/each}
   </div>
 </div>
+
+{#if s.meta}<PreprocessPanel />{/if}

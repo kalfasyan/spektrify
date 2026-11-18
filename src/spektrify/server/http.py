@@ -22,7 +22,7 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
-from spektrify.compute._util import finite_list
+from spektrify._json import dumps
 from spektrify.server.routes import ApiError, Binary, Json, Request, dispatch
 from spektrify.server.session import Session
 
@@ -38,30 +38,14 @@ _CLIENT_ERRORS = (
 )
 
 
-def _json_default(o: Any) -> Any:
-    if isinstance(o, np.integer):
-        return int(o)
-    if isinstance(o, np.floating):
-        return float(o) if np.isfinite(o) else None
-    if isinstance(o, np.ndarray):
-        return finite_list(o)
-    if isinstance(o, Path):
-        return str(o)
-    raise TypeError(f"not JSON serialisable: {type(o).__name__}")
-
-
-def _dumps(obj: Any) -> str:
-    return json.dumps(obj, allow_nan=False, default=_json_default)
-
-
 def make_handler(session: Session) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         server_version = "spektrify"
         protocol_version = "HTTP/1.1"
 
-        def log_message(self, fmt: str, *args: Any) -> None:
-            if os.environ.get("SPEKTRO_VIEW_DEBUG"):
-                super().log_message(fmt, *args)
+        def log_message(self, format: str, *args: Any) -> None:  # noqa: A002 (base-class name)
+            if os.environ.get("SPEKTRIFY_DEBUG"):
+                super().log_message(format, *args)
 
         def _send(
             self, status: int, body: bytes, ctype: str, headers: dict[str, str] | None = None
@@ -78,7 +62,8 @@ def make_handler(session: Session) -> type[BaseHTTPRequestHandler]:
 
         def _write(self, res: Json | Binary) -> None:
             if isinstance(res, Json):
-                return self._send(res.status, _dumps(res.obj).encode(), "application/json")
+                self._send(res.status, dumps(res.obj).encode(), "application/json")
+                return
             arr = np.ascontiguousarray(res.array)
             if arr.dtype.byteorder == ">":
                 arr = arr.astype(arr.dtype.newbyteorder("<"))
@@ -87,16 +72,16 @@ def make_handler(session: Session) -> type[BaseHTTPRequestHandler]:
                 200,
                 arr.tobytes(),
                 "application/octet-stream",
-                {"X-Meta": _dumps(meta), "X-Generation": str(session.generation)},
+                {"X-Meta": dumps(meta), "X-Generation": str(session.generation)},
             )
 
-        def do_GET(self) -> None:  # noqa: N802
+        def do_GET(self) -> None:
             self._handle("GET")
 
-        def do_HEAD(self) -> None:  # noqa: N802
+        def do_HEAD(self) -> None:
             self._handle("GET")
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             self._handle("POST")
 
         def _handle(self, method: str) -> None:

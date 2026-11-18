@@ -1,0 +1,65 @@
+# Push a tag like v0.2.0 to release. The version comes from the tag (hatch-vcs), the wheel
+# carries the prebuilt UI, and the release notes are generated from merged PRs.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: UI bundle matches the sources
+        run: |
+          cd frontend && npm ci && npm run build && cd ..
+          test -z "$(git status --porcelain -- src/spektrify/static)"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked && uv run pytest
+      - run: uv build
+      - name: Version matches the tag
+        run: ls dist | grep -q "spektrify-${GITHUB_REF_NAME#v}-"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  pypi:
+    # Off until PyPI trusted publishing is set up (see docs/releasing.md), then set the
+    # repository variable PUBLISH_TO_PYPI=true.
+    if: vars.PUBLISH_TO_PYPI == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/spektrify
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

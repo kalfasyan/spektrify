@@ -10,6 +10,7 @@ from typing import Any
 
 from spektrify.compute import Analyzer, create_analyzer
 from spektrify.model import Cube
+from spektrify.preprocess import Pipeline
 
 
 class Session:
@@ -23,7 +24,9 @@ class Session:
         self._lock = threading.RLock()
         self.backend = backend
         self.generation = 0
-        self.cube: Cube | None = None
+        self.cube: Cube | None = None  # what is displayed: raw → pipeline
+        self.raw: Cube | None = None
+        self.pipeline = Pipeline()
         self.analyzer: Analyzer | None = None
         self.recent: list[str] = []
         self._cache: dict[str, Any] = {}
@@ -31,7 +34,26 @@ class Session:
         if cube is not None:
             self.set_cube(cube)
 
-    def set_cube(self, cube: Cube) -> None:
+    def set_cube(self, cube: Cube, pipeline: Pipeline | None = None) -> None:
+        """Show ``cube`` (kept as the raw input) after applying ``pipeline``."""
+        pipeline = pipeline or Pipeline()
+        shown = pipeline.apply(cube)  # outside the lock: may take a while
+        with self._lock:
+            self.raw, self.pipeline = cube, pipeline
+            self._show(shown)
+
+    def set_pipeline(self, pipeline: Pipeline) -> None:
+        """Re-run preprocessing on the raw cube."""
+        with self._lock:
+            raw = self.raw
+        if raw is None:
+            raise LookupError("No cube loaded")
+        shown = pipeline.apply(raw)
+        with self._lock:
+            self.pipeline = pipeline
+            self._show(shown)
+
+    def _show(self, cube: Cube) -> None:
         with self._lock:
             self.cube = cube
             self.analyzer = create_analyzer(cube, self.backend)

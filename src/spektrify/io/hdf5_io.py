@@ -12,7 +12,7 @@ from spektrify.io.base import RawArray, register_reader
 
 
 class HDF5Reader:
-    suffixes = (".h5", ".hdf5", ".he5")
+    suffixes: tuple[str, ...] = (".h5", ".hdf5", ".he5")
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         import h5py
@@ -30,8 +30,9 @@ class HDF5Reader:
             f.visititems(visit)
             tile = None
             if dataset is None and len(shapes.get("mosaic_image", ())) == 2:
-                # spektro's own format: a raw 4×4 snapshot mosaic.
-                key, tile = "mosaic_image", 4
+                # spektro's raw format: a snapshot mosaic plus its central wavelengths.
+                key = "mosaic_image"
+                tile = _tile_for(small.get("central_wavelengths"))
             else:
                 key = pick_cube_key(shapes, dataset)
             ds = f[key]
@@ -43,6 +44,13 @@ class HDF5Reader:
                         wl = np.asarray(ds.attrs[attr], dtype=float).ravel()
                         break
         return RawArray(arr, wl, meta={"dataset": key}, mosaic_tile=tile)
+
+
+def _tile_for(wavelengths: np.ndarray | None, default: int = 4) -> int:
+    """Macropixel size from the number of filters (16 → 4×4, 25 → 5×5, …)."""
+    n = 0 if wavelengths is None else int(np.size(wavelengths))
+    t = round(n**0.5)
+    return t if t >= 2 and t * t == n else default
 
 
 register_reader(HDF5Reader())

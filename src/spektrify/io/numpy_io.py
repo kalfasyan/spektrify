@@ -11,14 +11,14 @@ from spektrify.io.base import RawArray, register_reader
 
 
 class NpyReader:
-    suffixes = (".npy",)
+    suffixes: tuple[str, ...] = (".npy",)
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         return RawArray(np.load(path, mmap_mode="r"), sidecar_wavelengths(path))
 
 
 class NpzReader:
-    suffixes = (".npz",)
+    suffixes: tuple[str, ...] = (".npz",)
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         with np.load(path) as z:

@@ -10,6 +10,7 @@
   let dataset = $state('');
   let layout = $state('auto');
   let mosaic = $state('');
+  let method = $state('block');
   let listing = $state(null); // {dir, parent, entries, recent}
   let busy = $state(false);
   let input;
@@ -25,7 +26,7 @@
     if (!p || busy) return;
     busy = true;
     try {
-      await ctl.open({ path: p, dataset: dataset.trim() || null, layout, mosaic: +mosaic || null });
+      await ctl.open({ path: p, dataset: dataset.trim() || null, layout, mosaic: +mosaic || null, demosaic: method });
       ctl.ui.modal = null;
     } catch (e) { ctl.toast(e.message, 'error', 6000); }
     busy = false;
@@ -43,6 +44,7 @@
       <label>Dataset <input type="text" placeholder="auto" bind:value={dataset} /></label>
       <label>Axis order <select bind:value={layout}><option value="auto">auto</option><option value="hwc">H × W × C</option><option value="chw">C × H × W</option></select></label>
       <label>Mosaic <input type="number" min="0" max="8" placeholder="—" title="Demosaic a snapshot mosaic with this macropixel size" bind:value={mosaic} /></label>
+      <label>Demosaic <select bind:value={method} title="block: one pixel per macropixel (fast) · bilinear: full sensor resolution, channels co-registered"><option value="block">block</option><option value="bilinear">bilinear</option></select></label>
     </div>
   </details>
   <div class="browser">
