@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spektrify"
+version = "0.1.0"
+description = "A fast, friendly multi/hyperspectral cube viewer: channels, spectra, 3D and artifact hunting in your browser."
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+authors = [{ name = "kalfasyan" }]
+keywords = ["hyperspectral", "multispectral", "spectral imaging", "viewer", "computer vision"]
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+hdf5 = ["h5py>=3.8"]
+mat = ["scipy>=1.10"]
+tiff = ["tifffile>=2023.1"]
+all = ["h5py>=3.8", "scipy>=1.10", "tifffile>=2023.1"]
+dev = ["h5py>=3.8", "scipy>=1.10", "pytest>=8.0", "ruff>=0.4"]
+
+[project.scripts]
+spektrify = "spektrify.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/spektrify"]
+# The UI is prebuilt by `npm run build` (frontend/) into src/spektrify/static and committed,
+# so `pip install` ships it and nobody needs Node to run the viewer.
+artifacts = ["src/spektrify/static/**"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["frontend/node_modules"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short"

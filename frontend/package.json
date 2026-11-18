@@ -1,0 +1,19 @@
+{
+  "name": "spektrify-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Svelte UI for spektrify, the spectral cube viewer. `npm run build` writes into src/spektrify/static/.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "svelte": "^5.58.0",
+    "vite": "^8.3.8"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  }
+}
