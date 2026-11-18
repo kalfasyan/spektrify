@@ -1,0 +1,120 @@
+# Architecture
+
+spektrify has four layers. Each one talks to the next only through a small, documented
+contract, so any of them can be rewritten (in Rust, on the GPU, in another UI framework)
+without touching the rest.
+
+```
+ file ──► io (readers) ──► Cube ──► compute (Analyzer) ──► server/routes ──► HTTP ──► frontend
+           register_reader          register_backend        dispatch()        http.py    Svelte + engines
+```
+
+## Python package (`src/spektrify`)
+
+| Module | Role | Depends on |
+| --- | --- | --- |
+| `model.py` | `Cube`: band-major float32 `(C, H, W)` data, wavelengths or band axis, name, source, metadata. `Cube.from_array()` guesses `hwc` / `chw`. | numpy |
+| `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. | model |
+| `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`). `regions.py` rasterises UI shapes to masks. | model |
+| `server/session.py` | The cube on display, its analyzer, a product cache, a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute |
+| `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
+| `server/http.py` | stdlib `ThreadingHTTPServer` adapter: static files, error mapping, binary headers. Swap it for FastAPI / aiohttp / a desktop shell by calling `dispatch()`. | routes |
+| `__init__.py` | Public Python API: `show()`, `serve()`, `Viewer.update()`, `Viewer.stop()`. | everything |
+| `__main__.py` | The `spektrify` command. | `__init__` |
+
+Heavy optional libraries (h5py, scipy, tifffile) are imported inside the reader that needs
+them, so `import spektrify` stays light and the core needs only NumPy.
+
+### Adding a file format
+
+```python
+# spektrify/io/myformat_io.py
+from spektrify.io.base import RawArray, register_reader
+
+class MyReader:
+    suffixes = (".xyz",)
+    def read(self, path, *, dataset=None) -> RawArray:
+        arr, wl = ...                      # any (H, W, C) / (C, H, W) array
+        return RawArray(arr, wl, layout="hwc")
+
+register_reader(MyReader())
+```
+
+Import it in `io/__init__.py`, and the open dialog, drag and drop, and CLI pick it up.
+
+### Replacing the compute backend
+
+Implement the `Analyzer` protocol (`compute/base.py`) and register a factory:
+
+```python
+from spektrify.compute import register_backend
+register_backend("rust", lambda cube: RustAnalyzer(cube))
+Session(cube, backend="rust")
+```
+
+Array conventions: maps are `(H, W)` or `(k, H, W)` float32 with NaN for invalid pixels,
+and spectra are `(C,)`. The tests in `tests/test_viewer.py` describe the expected behaviour
+and work as a conformance suite for a new backend.
+
+## HTTP API
+
+All endpoints are under `/api/`. JSON responses are strict JSON: NaN and Inf become `null`.
+Binary responses are raw little-endian arrays with an `X-Meta` JSON header
+`{"dtype": "float32", "shape": [...], ...}`.
+
+| Method | Endpoint | Returns |
+| --- | --- | --- |
+| GET | `meta` | Cube description: dims, axis, unit, per-band mean/std, global percentiles, mean spectrum |
+| GET | `generation` | `{generation}`; changes when the cube is swapped |
+| GET | `band?i=` | Binary `(H, W)` |
+| GET | `thumbs?side=` | Binary `(C, h, w)` block-mean thumbnails |
+| GET | `spectrum?x=&y=` | `{x, y, values}` |
+| POST | `region` | Body `{kind: rect\|ellipse\|poly, …}`. Returns `{n, mean, std, min, max, p05, p95}` |
+| GET | `slice?axis=row\|col&i=` | Binary `(C, W)` or `(C, H)` cross-section |
+| GET | `line?x0=&y0=&x1=&y1=` | Binary `(n, C)` |
+| GET/POST | `product?kind=` | Binary `(k, H, W)`. Kinds: `pca` (`k`, `offset`), `rx`, `residual`, `sam` (body `reference`), `gradient`, `mean`, `std`, `max`, `argmax`, `invalid`, `math` (body `expr`) |
+| GET | `quality` | Per-band SNR, neighbour correlation, striping, NaN and saturation fractions, flags, line defects, findings |
+| GET | `correlation` | Binary `(C, C)` |
+| GET | `stripes?which=columns\|rows` | Binary `(C, W)` or `(C, H)` line-artefact scores in noise σ |
+| GET | `volume?max=` | Binary `(C', H', W')` uint8 downsampled volume |
+| GET | `scatter?n=` | Binary uint32: `n×3` float32 PCA scores (bit-cast) followed by `n` pixel indices |
+| GET | `browse?dir=` | Directory listing filtered to supported formats, plus recent files |
+| POST | `open` | Body `{path, dataset?, layout?, mosaic?}` |
+| POST | `upload?name=&layout=` | Raw file body (ENVI: send `.hdr` and data as two uploads) |
+| POST | `transpose` | Body `{order}` to fix a wrong axis guess |
+
+The server binds to `127.0.0.1` by default. It serves the local filesystem to the browser
+(through the open dialog), so don't expose it on a public interface.
+
+## Frontend (`frontend/`)
+
+Svelte 5 handles panels, controls and state. Anything that draws a lot is a plain JS
+"engine" with no framework dependency, so it can be reused or rewritten on its own.
+
+```
+src/
+  lib/
+    api.js                 fetch wrappers (JSON + binary)
+    store.svelte.js        app state ($state) + band cache, layer resolution, stretch, marks
+    controller.svelte.js   actions the UI performs; wires store changes to engines
+    shortcuts.js           one table drives both key handling and the help dialog
+    engines/               framework-free: imageView (WebGL2), view3d (three.js), spectrumPlot,
+                           histogram, scrubber, lineProfile, qualityCharts
+    gl/imageRenderer.js    float textures, LUTs, clip / NaN / threshold highlighting in GLSL
+  components/              TopBar, StatusBar, image/*, dialogs/*
+  views/                   ChannelsView, ThreeView (lazy-loads three.js), QualityView
+```
+
+How data flows: components call `ctl.*` or `store.set(...)`. The store emits the changed keys.
+The controller reacts by refreshing the current layer and pushing it to the engines that
+registered with `ctl.attach(name, engine)`. Engines emit events (`hover`, `band`, `region`, …)
+back to the controller.
+
+### Rebuilding the UI
+
+```bash
+cd frontend
+npm install
+npm run dev     # with `spektrify --demo --no-browser` running; Vite proxies /api to :8765
+npm run build   # writes ../src/spektrify/static — commit it so pip users never need Node
+```
