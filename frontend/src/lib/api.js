@@ -61,6 +61,10 @@ export const api = {
   browse: (dir = '') => json(`/api/browse?${qs({ dir })}`),
   open: (opts) => json('/api/open', opts),
   transpose: (order) => json('/api/transpose', { order }),
+  /** Preprocessing: the available steps (with parameter schemas) and demosaic methods. */
+  steps: () => json('/api/steps'),
+  /** Replace the preprocessing pipeline: [{name, params}] */
+  pipeline: (steps) => json('/api/pipeline', { steps }),
   async upload(file, layout = 'auto') {
     return (await request(`/api/upload?${qs({ name: file.name, layout })}`, { method: 'POST', body: file })).json();
   },

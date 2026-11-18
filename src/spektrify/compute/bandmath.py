@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import ast
 import operator
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
 
-_BINOPS = {
+_BINOPS: dict[type, Callable[[Any, Any], Any]] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
@@ -19,7 +20,7 @@ _BINOPS = {
     ast.BitAnd: operator.and_,
     ast.BitOr: operator.or_,
 }
-_CMPOPS = {
+_CMPOPS: dict[type, Callable[[Any, Any], Any]] = {
     ast.Lt: operator.lt,
     ast.LtE: operator.le,
     ast.Gt: operator.gt,
@@ -27,7 +28,11 @@ _CMPOPS = {
     ast.Eq: operator.eq,
     ast.NotEq: operator.ne,
 }
-_UNOPS = {ast.USub: operator.neg, ast.UAdd: operator.pos, ast.Invert: operator.invert}
+_UNOPS: dict[type, Callable[[Any], Any]] = {
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+    ast.Invert: operator.invert,
+}
 
 
 def safe_eval(expr: str, env: dict[str, Any]) -> Any:

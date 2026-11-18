@@ -5,8 +5,10 @@ contract, so any of them can be rewritten (in Rust, on the GPU, in another UI fr
 without touching the rest.
 
 ```
- file ──► io (readers) ──► Cube ──► compute (Analyzer) ──► server/routes ──► HTTP ──► frontend
-           register_reader          register_backend        dispatch()        http.py    Svelte + engines
+ file ──► io ──► Cube ──► preprocess ──► Cube ──► compute ──► server/routes ──► HTTP ──► frontend
+          register_reader  register_step           register_backend  dispatch()  http.py  Svelte
+          register_demosaicer                                          ▲
+                                                             cli.py ───┘ (info / quality / convert)
 ```
 
 ## Python package (`src/spektrify`)
@@ -15,12 +17,15 @@ without touching the rest.
 | --- | --- | --- |
 | `model.py` | `Cube`: band-major float32 `(C, H, W)` data, wavelengths or band axis, name, source, metadata. `Cube.from_array()` guesses `hwc` / `chw`. | numpy |
 | `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. | model |
+| `io/demosaic.py` | Snapshot-mosaic demosaicing methods by name: `block` (one pixel per macropixel) and `bilinear` (full resolution, co-registered channels). | numpy |
+| `preprocess/` | `base.py`: the step registry (`register_step`, `param`, `step_schema`) and `Pipeline` (parse CLI specs, JSON round trip, `apply`). `steps.py`: `clip`, `calibrate`, `crop`, `bands`, `bin`. Steps never mutate their input. | model, io |
 | `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`). `regions.py` rasterises UI shapes to masks. | model |
-| `server/session.py` | The cube on display, its analyzer, a product cache, a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute |
+| `server/session.py` | The raw cube, the preprocessing pipeline, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
 | `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
 | `server/http.py` | stdlib `ThreadingHTTPServer` adapter: static files, error mapping, binary headers. Swap it for FastAPI / aiohttp / a desktop shell by calling `dispatch()`. | routes |
 | `__init__.py` | Public Python API: `show()`, `serve()`, `Viewer.update()`, `Viewer.stop()`. | everything |
-| `__main__.py` | The `spektrify` command. | `__init__` |
+| `cli.py` | The `spektrify` command (Typer): `view`, `info`, `quality`, `convert`, `steps`. Imports are lazy so `--help` is instant. | everything |
+| `_json.py` | Strict JSON encoding (NaN → `null`, numpy types) shared by the API and the CLI. | numpy |
 
 Heavy optional libraries (h5py, scipy, tifffile) are imported inside the reader that needs
 them, so `import spektrify` stays light and the core needs only NumPy.
@@ -41,6 +46,24 @@ register_reader(MyReader())
 ```
 
 Import it in `io/__init__.py`, and the open dialog, drag and drop, and CLI pick it up.
+
+### Adding a preprocessing step
+
+```python
+from dataclasses import dataclass
+from spektrify.preprocess import param, register_step
+
+@register_step("scale", "Multiply by a constant.")
+@dataclass(frozen=True)
+class Scale:
+    k: float = param(2.0, "Factor.")
+
+    def __call__(self, cube):
+        return cube.with_data(cube.data * self.k)
+```
+
+It then works as `--step scale:3`, in `Pipeline.parse(["scale:3"])`, and in the viewer's
+Preprocess panel (the form is generated from the parameters and their help texts).
 
 ### Replacing the compute backend
 
@@ -64,7 +87,7 @@ Binary responses are raw little-endian arrays with an `X-Meta` JSON header
 
 | Method | Endpoint | Returns |
 | --- | --- | --- |
-| GET | `meta` | Cube description: dims, axis, unit, per-band mean/std, global percentiles, mean spectrum |
+| GET | `meta` | Cube description: dims, axis, unit, per-band mean/std, global percentiles, mean spectrum, current pipeline |
 | GET | `generation` | `{generation}`; changes when the cube is swapped |
 | GET | `band?i=` | Binary `(H, W)` |
 | GET | `thumbs?side=` | Binary `(C, h, w)` block-mean thumbnails |
@@ -79,7 +102,9 @@ Binary responses are raw little-endian arrays with an `X-Meta` JSON header
 | GET | `volume?max=` | Binary `(C', H', W')` uint8 downsampled volume |
 | GET | `scatter?n=` | Binary uint32: `n×3` float32 PCA scores (bit-cast) followed by `n` pixel indices |
 | GET | `browse?dir=` | Directory listing filtered to supported formats, plus recent files |
-| POST | `open` | Body `{path, dataset?, layout?, mosaic?}` |
+| POST | `open` | Body `{path, dataset?, layout?, mosaic?, demosaic?, steps?}` |
+| GET | `steps` | Preprocessing step schemas and demosaic method names |
+| POST | `pipeline` | Body `{steps: [{name, params}]}`; re-processes the raw cube |
 | POST | `upload?name=&layout=` | Raw file body (ENVI: send `.hdr` and data as two uploads) |
 | POST | `transpose` | Body `{order}` to fix a wrong axis guess |
 
@@ -115,6 +140,6 @@ back to the controller.
 ```bash
 cd frontend
 npm install
-npm run dev     # with `spektrify --demo --no-browser` running; Vite proxies /api to :8765
+npm run dev     # with `spektrify view --demo --no-browser` running; Vite proxies /api to :8765
 npm run build   # writes ../src/spektrify/static — commit it so pip users never need Node
 ```

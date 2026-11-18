@@ -12,7 +12,7 @@ from spektrify.io.hdf5_io import HDF5Reader
 
 
 class MatReader:
-    suffixes = (".mat",)
+    suffixes: tuple[str, ...] = (".mat",)
 
     def read(self, path: Path, *, dataset: str | None = None) -> RawArray:
         try:

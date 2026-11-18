@@ -19,13 +19,6 @@ WAVELENGTH_KEYS = (
 )
 
 
-def demosaic(mosaic: np.ndarray, tile: int) -> np.ndarray:
-    """Unpack a ``tile × tile`` snapshot mosaic into an ``(H/t, W/t, t²)`` cube."""
-    h, w = mosaic.shape[0] // tile, mosaic.shape[1] // tile
-    m = np.asarray(mosaic)[: h * tile, : w * tile]
-    return m.reshape(h, tile, w, tile).transpose(0, 2, 1, 3).reshape(h, w, tile * tile)
-
-
 def sidecar_wavelengths(path: Path) -> np.ndarray | None:
     for cand in (
         path.with_name(path.stem + "_wavelengths.npy"),
@@ -62,7 +55,5 @@ def pick_cube_key(shapes: dict[str, tuple[int, ...]], dataset: str | None) -> st
         k for k, s in shapes.items() if len(s) == 2 and min(s) > 1
     ]
     if not candidates:
-        raise ValueError(
-            f"No 2-D or 3-D array found. Arrays: { {k: s for k, s in shapes.items()} }"
-        )
+        raise ValueError(f"No 2-D or 3-D array found. Arrays: {dict(shapes.items())}")
     return max(candidates, key=lambda k: int(np.prod(shapes[k])))

@@ -170,7 +170,7 @@ class NumpyAnalyzer:
             step = max(1, along // 512)
             sub = data[:, ::step, :] if axis == 2 else data[:, :, ::step]
             mid = np.take(sub, range(1, n_line - 1), axis=axis)
-            lo = np.take(sub, range(0, n_line - 2), axis=axis)
+            lo = np.take(sub, range(n_line - 2), axis=axis)
             hi = np.take(sub, range(2, n_line), axis=axis)
             d2 = mid - 0.5 * (lo + hi)
             with warnings.catch_warnings():
