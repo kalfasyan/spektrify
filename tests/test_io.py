@@ -5,7 +5,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from spektrify.io import demosaic, demosaic_methods, load_cube, supported_suffixes
+from spektrify.io import (
+    demosaic,
+    demosaic_methods,
+    load_cube,
+    mosaic,
+    save_cube,
+    supported_suffixes,
+)
 from spektrify.model import Cube
 
 
@@ -74,20 +81,14 @@ def test_missing_file() -> None:
 # --------------------------------------------------------------------------- demosaicing
 
 
-def _mosaic(cube_hwc: np.ndarray, t: int) -> np.ndarray:
-    """Inverse of block demosaicing: interleave t² channels into a 2-D sensor frame."""
-    h, w, _ = cube_hwc.shape
-    return cube_hwc.reshape(h, w, t, t).transpose(0, 2, 1, 3).reshape(h * t, w * t)
-
-
 def test_block_demosaic_inverts_mosaicing() -> None:
     cube = np.random.rand(6, 5, 16).astype(np.float32)
-    np.testing.assert_array_equal(demosaic(_mosaic(cube, 4), 4, "block"), cube)
+    np.testing.assert_array_equal(demosaic(mosaic(cube, 4), 4, "block"), cube)
 
 
 def test_bilinear_demosaic_full_resolution_and_exact_on_samples() -> None:
     cube = np.random.rand(6, 5, 9).astype(np.float32)
-    raw = _mosaic(cube, 3)
+    raw = mosaic(cube, 3)
     out = demosaic(raw, 3, "bilinear")
     assert out.shape == (18, 15, 9)
     # Channel k = dy·3 + dx is exact where the sensor sampled it.
@@ -111,7 +112,7 @@ def test_spektro_raw_mosaic_file(tmp_path) -> None:
     cube = np.random.rand(10, 12, 25).astype(np.float32)
     wl = np.linspace(600, 900, 25)
     with h5py.File(tmp_path / "raw.h5", "w") as f:
-        f["mosaic_image"] = _mosaic(cube, 5)
+        f["mosaic_image"] = mosaic(cube, 5)
         f["central_wavelengths"] = wl
     loaded = load_cube(tmp_path / "raw.h5")  # tile size 5 inferred from 25 filters
     assert (loaded.height, loaded.width, loaded.n_bands) == (10, 12, 25)
@@ -123,5 +124,17 @@ def test_spektro_raw_mosaic_file(tmp_path) -> None:
 
 
 def test_forced_mosaic_on_npy(tmp_path) -> None:
-    np.save(tmp_path / "raw.npy", _mosaic(np.random.rand(4, 4, 4), 2))
+    np.save(tmp_path / "raw.npy", mosaic(np.random.rand(4, 4, 4), 2))
     assert load_cube(tmp_path / "raw.npy", mosaic=2).n_bands == 4
+
+
+@pytest.mark.parametrize("suffix", [".npz", ".h5"])
+def test_save_cube_roundtrip(tmp_path, suffix: str) -> None:
+    if suffix == ".h5":
+        pytest.importorskip("h5py")
+    cube = Cube.from_array(np.random.rand(7, 9, 5), np.linspace(500, 700, 5))
+    back = load_cube(save_cube(cube, tmp_path / f"c{suffix}"))
+    np.testing.assert_allclose(back.data, cube.data)
+    np.testing.assert_allclose(back.axis, cube.axis)
+    with pytest.raises(ValueError):
+        save_cube(cube, tmp_path / "c.tif")

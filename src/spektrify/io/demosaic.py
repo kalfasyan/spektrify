@@ -70,5 +70,14 @@ def _bilinear(m: np.ndarray, t: int) -> np.ndarray:
     return out
 
 
+def mosaic(cube_hwc: np.ndarray, tile: int) -> np.ndarray:
+    """The inverse of ``block`` demosaicing: interleave ``tile²`` channels into the 2-D frame a
+    snapshot-mosaic sensor would record (useful for simulation and tests)."""
+    h, w, c = cube_hwc.shape
+    if c != tile * tile:
+        raise ValueError(f"a {tile}×{tile} mosaic needs {tile * tile} channels, got {c}")
+    return cube_hwc.reshape(h, w, tile, tile).transpose(0, 2, 1, 3).reshape(h * tile, w * tile)
+
+
 register_demosaicer("block", _block)
 register_demosaicer("bilinear", _bilinear)

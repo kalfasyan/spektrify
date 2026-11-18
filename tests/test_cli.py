@@ -25,7 +25,7 @@ def cube_file(tmp_path_factory) -> str:
 def test_version_and_help() -> None:
     assert runner.invoke(app, ["--version"]).output.startswith("spektrify ")
     out = runner.invoke(app, ["--help"]).output
-    for cmd in ("view", "info", "quality", "convert", "steps"):
+    for cmd in ("view", "info", "quality", "convert", "demo", "steps"):
         assert cmd in out
 
 
@@ -60,3 +60,19 @@ def test_bad_input_is_a_clean_error(cube_file: str) -> None:
 def test_steps_listing() -> None:
     names = {s["name"] for s in json.loads(runner.invoke(app, ["steps", "--json"]).output)}
     assert {"clip", "calibrate", "crop", "bands", "bin"} <= names
+
+
+def test_demo_files(tmp_path) -> None:
+    pytest.importorskip("h5py")
+    cube_h5, raw_h5 = tmp_path / "demo.h5", tmp_path / "raw.h5"
+    assert (
+        runner.invoke(app, ["demo", str(cube_h5), "--size", "40x50", "--bands", "12"]).exit_code
+        == 0
+    )
+    info = json.loads(runner.invoke(app, ["info", str(cube_h5), "--json"]).output)
+    assert (info["height"], info["width"], info["bands"]) == (40, 50, 12)
+    r = runner.invoke(app, ["demo", str(raw_h5), "--raw", "--size", "40x50"])
+    assert r.exit_code == 0, r.output
+    info = json.loads(runner.invoke(app, ["info", str(raw_h5), "--json"]).output)
+    assert (info["height"], info["width"], info["bands"]) == (40, 50, 16)  # demosaiced on open
+    assert runner.invoke(app, ["demo", str(tmp_path / "x.h5"), "--size", "big"]).exit_code == 2

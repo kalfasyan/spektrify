@@ -10,9 +10,10 @@ from pathlib import Path
 
 from spektrify.io import envi_io, hdf5_io, matlab_io, numpy_io, tiff_io  # noqa: F401  (register)
 from spektrify.io.base import RawArray, Reader, reader_for, register_reader, supported_suffixes
-from spektrify.io.demosaic import demosaic, demosaic_methods, register_demosaicer
+from spektrify.io.demosaic import demosaic, demosaic_methods, mosaic, register_demosaicer
 from spektrify.io.envi_io import DATA_SUFFIXES, parse_envi_header
 from spektrify.io.synthetic import demo_cube
+from spektrify.io.writers import save_cube, save_raw_mosaic
 from spektrify.model import Cube
 
 __all__ = [
@@ -22,10 +23,13 @@ __all__ = [
     "demosaic",
     "demosaic_methods",
     "load_cube",
+    "mosaic",
     "parse_envi_header",
     "reader_for",
     "register_demosaicer",
     "register_reader",
+    "save_cube",
+    "save_raw_mosaic",
     "supported_suffixes",
 ]
 

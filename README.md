@@ -16,6 +16,18 @@ spektrify view --demo           # a synthetic scene with planted artefacts
 spektrify view                  # empty viewer: use the open dialog or drag & drop a file
 ```
 
+### Example data
+
+```bash
+spektrify demo demo.h5          # synthetic 192×256×96 cube with planted artefacts (or .npz)
+spektrify demo raw.h5 --raw     # the same scene as a raw 4×4 snapshot mosaic, spektro layout
+```
+
+For real close-range scenes, try [ICVL](https://icvl.cs.bgu.ac.il/pages/researches/hyperspectral-imaging.html)
+(.mat v7.3 = HDF5, 31 bands, 400–700 nm; open with `--dataset rad`),
+[CAVE](https://www.cs.columbia.edu/CAVE/databases/multispectral/) (one PNG per band) or
+[Harvard](https://vision.seas.harvard.edu/hyperspec/download.html).
+
 The UI comes prebuilt inside the package, so you don't need Node. The core needs only NumPy.
 The extras add more readers: `hdf5` (h5py), `mat` (scipy), `tiff` (tifffile), or `all`.
 

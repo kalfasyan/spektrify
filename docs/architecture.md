@@ -8,7 +8,7 @@ without touching the rest.
  file ──► io ──► Cube ──► preprocess ──► Cube ──► compute ──► server/routes ──► HTTP ──► frontend
           register_reader  register_step           register_backend  dispatch()  http.py  Svelte
           register_demosaicer                                          ▲
-                                                             cli.py ───┘ (info / quality / convert)
+                                                             cli.py ───┘ (info / quality / convert / demo)
 ```
 
 ## Python package (`src/spektrify`)
@@ -16,15 +16,15 @@ without touching the rest.
 | Module | Role | Depends on |
 | --- | --- | --- |
 | `model.py` | `Cube`: band-major float32 `(C, H, W)` data, wavelengths or band axis, name, source, metadata. `Cube.from_array()` guesses `hwc` / `chw`. | numpy |
-| `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. | model |
-| `io/demosaic.py` | Snapshot-mosaic demosaicing methods by name: `block` (one pixel per macropixel) and `bilinear` (full resolution, co-registered channels). | numpy |
+| `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. `writers.py` saves cubes (`save_cube`) and raw mosaics (`save_raw_mosaic`). | model |
+| `io/demosaic.py` | Snapshot-mosaic demosaicing methods by name: `block` (one pixel per macropixel) and `bilinear` (full resolution, co-registered channels). `mosaic()` is the inverse of `block`. | numpy |
 | `preprocess/` | `base.py`: the step registry (`register_step`, `param`, `step_schema`) and `Pipeline` (parse CLI specs, JSON round trip, `apply`). `steps.py`: `clip`, `calibrate`, `crop`, `bands`, `bin`. Steps never mutate their input. | model, io |
 | `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`). `regions.py` rasterises UI shapes to masks. | model |
 | `server/session.py` | The raw cube, the preprocessing pipeline, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
 | `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
 | `server/http.py` | stdlib `ThreadingHTTPServer` adapter: static files, error mapping, binary headers. Swap it for FastAPI / aiohttp / a desktop shell by calling `dispatch()`. | routes |
 | `__init__.py` | Public Python API: `show()`, `serve()`, `Viewer.update()`, `Viewer.stop()`. | everything |
-| `cli.py` | The `spektrify` command (Typer): `view`, `info`, `quality`, `convert`, `steps`. Imports are lazy so `--help` is instant. | everything |
+| `cli.py` | The `spektrify` command (Typer): `view`, `info`, `quality`, `convert`, `demo`, `steps`. Imports are lazy so `--help` is instant. | everything |
 | `_json.py` | Strict JSON encoding (NaN → `null`, numpy types) shared by the API and the CLI. | numpy |
 
 Heavy optional libraries (h5py, scipy, tifffile) are imported inside the reader that needs

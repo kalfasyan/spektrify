@@ -213,24 +213,78 @@ def quality(
 @app.command()
 def convert(
     path: CubePath,
-    output: Annotated[Path, typer.Argument(help="Output .npz (cube as H×W×C + wavelengths).")],
+    output: Annotated[
+        Path, typer.Argument(help="Output .npz or .h5 (cube as H×W×C + wavelengths).")
+    ],
     dataset: Dataset = None,
     layout: LayoutOpt = Layout.auto,
     mosaic: Mosaic = None,
     demosaic: Demosaic = "block",
     step: Steps = None,
 ) -> None:
-    """Load (demosaic, preprocess) a cube and save it as a portable .npz."""
-    import numpy as np
+    """Load (demosaic, preprocess) a cube and save it as .npz or .h5."""
 
-    if output.suffix.lower() != ".npz":
-        raise typer.BadParameter("only .npz output is supported", param_hint="OUTPUT")
     cube = _load(path, dataset, layout, mosaic, demosaic, step)
-    hwc = cube.data.transpose(1, 2, 0)
-    if cube.wavelengths is None:
-        np.savez_compressed(output, cube=hwc)
-    else:
-        np.savez_compressed(output, cube=hwc, wavelengths=cube.wavelengths)
+    _save(cube, output)
+
+
+@app.command()
+def demo(
+    output: Annotated[Path, typer.Argument(help="Where to write it: .h5 or .npz.")] = Path(
+        "demo.h5"
+    ),
+    raw: Annotated[
+        bool,
+        typer.Option(
+            help="Write a raw 4×4 snapshot-mosaic frame in spektro's HDF5 layout instead, "
+            "to try demosaicing."
+        ),
+    ] = False,
+    size: Annotated[str, typer.Option(help="Image size as HxW.")] = "192x256",
+    bands: Annotated[int, typer.Option(help="Number of bands (raw: always 16).")] = 96,
+) -> None:
+    """Write a synthetic cube with known objects and planted sensor artefacts to try things on.
+
+    It has a leaf with a red edge, coated discs, a small anomaly, a dead column, a striped
+    band, a noisy band, saturated pixels and a NaN patch.
+    """
+    from spektrify.io import demo_cube
+
+    try:
+        h, w = (int(v) for v in size.lower().split("x"))
+    except ValueError:
+        raise typer.BadParameter("use HxW, e.g. 192x256", param_hint="--size") from None
+    if not raw:
+        _save(demo_cube(h, w, bands), output)
+        return
+    from spektrify.io import mosaic, save_raw_mosaic
+
+    if output.suffix.lower() not in (".h5", ".hdf5"):
+        raise typer.BadParameter("raw mosaics are written as .h5", param_hint="OUTPUT")
+    cube = demo_cube(h, w, 16)
+    _require_h5py()
+    save_raw_mosaic(mosaic(cube.data.transpose(1, 2, 0), 4), cube.axis, output)
+    typer.echo(f"{output}  (raw {h * 4} × {w * 4} mosaic, 4×4 filters = 16 bands)")
+
+
+def _require_h5py() -> None:
+    try:
+        import h5py  # noqa: F401
+    except ImportError:
+        raise typer.BadParameter(
+            "writing .h5 needs h5py: pip install 'spektrify[hdf5]'", param_hint="OUTPUT"
+        ) from None
+
+
+def _save(cube: Cube, output: Path) -> None:
+    from spektrify.io import save_cube
+    from spektrify.io.writers import CUBE_SUFFIXES
+
+    if output.suffix.lower() not in CUBE_SUFFIXES:
+        raise typer.BadParameter(f"use one of {', '.join(CUBE_SUFFIXES)}", param_hint="OUTPUT")
+    if output.suffix.lower() != ".npz":
+        _require_h5py()
+    save_cube(cube, output)
     typer.echo(f"{output}  ({cube.height} × {cube.width} × {cube.n_bands})")
 
 
