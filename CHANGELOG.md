@@ -19,8 +19,12 @@ First release (to be tagged `v0.1.0`).
 - Preprocessing pipeline with registered, composable steps: `clip` (spektro's per-band
   percentile clipper), `calibrate` (dark / white reference), `crop`, `bands`, `bin`. Usable
   from Python (`Pipeline`), the CLI (`--step`) and the viewer's Preprocess panel.
-- Command line built with Typer: `spektrify view | info | quality | convert | steps`, with
-  `--json` output and `quality --strict` (exit code 1 on issues) for scripts and CI.
+- Command line built with Typer: `spektrify view | info | quality | convert | demo | steps`,
+  with `--json` output and `quality --strict` (exit code 1 on issues) for scripts and CI.
+- `spektrify demo` writes an example cube with planted artefacts to .h5 / .npz, or with
+  `--raw` a spektro-style 4×4 mosaic HDF5 to try demosaicing on.
+- Writers: `save_cube()` (.npz / .h5, H×W×C + wavelengths), `save_raw_mosaic()` and
+  `mosaic()` (the inverse of block demosaicing).
 - Python API: `show()` / `Viewer.update()` for notebooks, `serve()`, `load_cube()`.
 - uv project with a lock file, ruff, ty type checking, pytest with coverage. CI on Linux,
   macOS and Windows (Python 3.10–3.13), a wheel smoke test, and a tag-driven release workflow
