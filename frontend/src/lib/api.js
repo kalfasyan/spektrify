@@ -58,7 +58,7 @@ export const api = {
   stripes: (which) => bin(`/api/stripes?which=${which}`),
   volume: (max = 192) => bin(`/api/volume?max=${max}`),
   scatter: (n = 40000) => bin(`/api/scatter?n=${n}`),
-  browse: (dir = '') => json(`/api/browse?${qs({ dir })}`),
+  browse: (dir = '', refs = false) => json(`/api/browse?${qs({ dir, refs: refs ? 1 : '' })}`),
   open: (opts) => json('/api/open', opts),
   transpose: (order) => json('/api/transpose', { order }),
   /** Preprocessing: the available steps (with parameter schemas) and demosaic methods. */

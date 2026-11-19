@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 
 from spektrify.model import Cube
+from spektrify.preprocess import references as refs
 from spektrify.preprocess.base import param, register_step
 
 
@@ -34,15 +34,24 @@ class Clip:
 )
 @dataclass(frozen=True)
 class Calibrate:
-    dark: str = param("0", "A number, or a file with a spectrum (C,) or a cube of the same size.")
-    white: str = param("", "Same as dark. Empty = only subtract the dark level.")
+    dark: str | np.ndarray = param(
+        "0", "A number, or a file with a spectrum (C,) or a cube of the same size.", path=True
+    )
+    white: str | np.ndarray = param(
+        "", "Same as dark. Empty = only subtract the dark level.", path=True
+    )
+    clamp: bool = param(False, "Set negative reflectance (noise below the dark level) to 0.")
+    eps: float = param(1e-6, "Where white − dark is smaller than this, the result is NaN.")
 
     def __call__(self, cube: Cube) -> Cube:
-        dark = _reference(self.dark, cube)
+        dark = refs.per_band(self.dark, cube, what="dark reference")
         data = cube.data - dark
-        if self.white.strip():
-            with np.errstate(divide="ignore", invalid="ignore"):
-                data = data / (_reference(self.white, cube) - dark)
+        if refs.is_set(self.white):
+            span = refs.per_band(self.white, cube, what="white reference") - dark
+            span = np.where(np.abs(span) > self.eps, span, np.nan)
+            data = data / span
+        if self.clamp:
+            np.maximum(data, 0, out=data, where=np.isfinite(data))
         return cube.with_data(data)
 
 
@@ -92,30 +101,3 @@ class Bin:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN blocks stay NaN
             return cube.with_data(np.nanmean(blocks, axis=(2, 4)))
-
-
-def _reference(spec: str, cube: Cube) -> np.ndarray | float:
-    """A scalar, a per-band spectrum or a per-pixel cube, broadcastable to ``(C, H, W)``."""
-    spec = spec.strip()
-    try:
-        return float(spec)
-    except ValueError:
-        pass
-    from spektrify.io import load_cube
-
-    path = Path(spec).expanduser()
-    if path.suffix.lower() in (".txt", ".csv"):
-        ref = np.loadtxt(path, delimiter="," if path.suffix.lower() == ".csv" else None)
-    elif path.suffix.lower() == ".npy" and np.load(path, mmap_mode="r").ndim == 1:
-        ref = np.load(path)
-    else:
-        ref_cube = load_cube(path)
-        if ref_cube.data.shape == cube.data.shape:
-            return ref_cube.data
-        ref = np.nanmean(ref_cube.data.reshape(ref_cube.n_bands, -1), axis=1)
-    ref = np.asarray(ref, dtype=np.float32).ravel()
-    if ref.size != cube.n_bands:
-        raise ValueError(
-            f"{path.name}: reference has {ref.size} values, cube has {cube.n_bands} bands"
-        )
-    return ref[:, None, None]

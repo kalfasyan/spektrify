@@ -18,7 +18,7 @@ without touching the rest.
 | `model.py` | `Cube`: band-major float32 `(C, H, W)` data, wavelengths or band axis, name, source, metadata. `Cube.from_array()` guesses `hwc` / `chw`. | numpy |
 | `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. `writers.py` saves cubes (`save_cube`) and raw mosaics (`save_raw_mosaic`). | model |
 | `io/demosaic.py` | Snapshot-mosaic demosaicing methods by name: `block` (one pixel per macropixel) and `bilinear` (full resolution, co-registered channels). `mosaic()` is the inverse of `block`. | numpy |
-| `preprocess/` | `base.py`: the step registry (`register_step`, `param`, `step_schema`) and `Pipeline` (parse CLI specs, JSON round trip, `apply`). `steps.py`: `clip`, `calibrate`, `crop`, `bands`, `bin`. Steps never mutate their input. | model, io |
+| `preprocess/` | `base.py`: the step registry (`register_step`, `param`, `step_schema`) and `Pipeline` (parse CLI specs, JSON round trip, `apply`). `steps.py`: `clip`, `calibrate`, `crop`, `bands`, `bin`. `corrections.py`: `badpixels`, `flatfield`, `whitebalance`, `destripe`, `align`. `spectral.py`: `smooth`, `snv`, `msc`, `absorbance`. `references.py`: the one loader for external files (dark / white, flat frames, spectra, shifts). `_ops.py`: the array kernels behind the steps as plain NumPy functions, so any of them can be replaced by a faster implementation. Steps never mutate their input. | model, io |
 | `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`). `regions.py` rasterises UI shapes to masks. | model |
 | `server/session.py` | The raw cube, the preprocessing pipeline, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
 | `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
@@ -61,6 +61,11 @@ class Scale:
     def __call__(self, cube):
         return cube.with_data(cube.data * self.k)
 ```
+
+Mark a parameter that names a file with `param(default, help, path=True)`: the schema then
+reports `kind: "path"` and the Preprocess panel adds a Browse button. Load it with the helpers in
+`spektrify.preprocess.references` (`per_band`, `spectrum`, `image`), so every step accepts the same
+formats and gives the same errors.
 
 It then works as `--step scale:3`, in `Pipeline.parse(["scale:3"])`, and in the viewer's
 Preprocess panel (the form is generated from the parameters and their help texts).

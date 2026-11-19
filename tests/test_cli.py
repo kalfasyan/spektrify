@@ -76,3 +76,23 @@ def test_demo_files(tmp_path) -> None:
     info = json.loads(runner.invoke(app, ["info", str(raw_h5), "--json"]).output)
     assert (info["height"], info["width"], info["bands"]) == (40, 50, 16)  # demosaiced on open
     assert runner.invoke(app, ["demo", str(tmp_path / "x.h5"), "--size", "big"]).exit_code == 2
+
+
+def test_external_reference_files_via_cli(cube_file: str, tmp_path) -> None:
+    np.save(tmp_path / "white.npy", np.full(24, 2.0))
+    np.save(tmp_path / "flat.npy", np.ones((64, 80)))
+    steps = [
+        f"calibrate:dark=0,white={tmp_path / 'white.npy'}",
+        f"flatfield:frame={tmp_path / 'flat.npy'}",
+        "badpixels",
+        "smooth:5",
+    ]
+    args = ["info", cube_file, "--json"] + [a for s in steps for a in ("-s", s)]
+    r = runner.invoke(app, args)
+    assert r.exit_code == 0, r.output
+    assert "calibrate(" in json.loads(r.output)["meta"]["preprocessing"]
+
+
+def test_missing_reference_file_is_a_clean_error(cube_file: str) -> None:
+    r = runner.invoke(app, ["info", cube_file, "-s", "calibrate:white=/nope/white.npy"])
+    assert r.exit_code != 0 and "not found" in r.output
