@@ -155,9 +155,10 @@ class ViewerServer:
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
         return self
 
-    def serve_forever(self, open_browser: bool = True) -> None:
+    def serve_forever(self, open_browser: bool = True, page: str = "") -> None:
+        """Serve until Ctrl+C. ``page`` is appended to the URL opened in the browser."""
         if open_browser:
-            threading.Timer(0.4, lambda: webbrowser.open(self.url)).start()
+            threading.Timer(0.4, lambda: webbrowser.open(self.url + page)).start()
         try:
             self.httpd.serve_forever()
         except KeyboardInterrupt:

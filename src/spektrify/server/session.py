@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import tempfile
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
 
 from spektrify.compute import Analyzer, create_analyzer
+from spektrify.learn import Lesson, load_lessons
 from spektrify.model import Cube
 from spektrify.preprocess import Pipeline
 
@@ -20,7 +21,12 @@ class Session:
     (e.g. :meth:`spektrify.Viewer.update` from a notebook).
     """
 
-    def __init__(self, cube: Cube | None = None, backend: str = "numpy") -> None:
+    def __init__(
+        self,
+        cube: Cube | None = None,
+        backend: str = "numpy",
+        lesson_dirs: Iterable[str | Path] = (),
+    ) -> None:
         self._lock = threading.RLock()
         self.backend = backend
         self.generation = 0
@@ -31,6 +37,8 @@ class Session:
         self.recent: list[str] = []
         self._cache: dict[str, Any] = {}
         self._upload_dir: Path | None = None
+        self.lesson_dirs = tuple(lesson_dirs)
+        self._lessons: dict[str, Lesson] | None = None
         if cube is not None:
             self.set_cube(cube)
 
@@ -85,6 +93,12 @@ class Session:
                     self._cache.pop(next(iter(self._cache)))
                 self._cache[key] = res
         return res
+
+    def lessons(self) -> dict[str, Lesson]:
+        """The lesson catalog (bundled + ``lesson_dirs``), loaded on first use."""
+        if self._lessons is None:
+            self._lessons = load_lessons(self.lesson_dirs)
+        return self._lessons
 
     def upload_dir(self) -> Path:
         if self._upload_dir is None:

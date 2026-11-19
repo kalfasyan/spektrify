@@ -1,0 +1,83 @@
+id = "quality"
+title = "Spotting sensor problems"
+summary = "Noisy bands, stripes, dead columns and saturation: what they look like and why."
+level = "correction"
+order = 60
+demo = "scene"
+
+[[steps]]
+title = "A noisy band"
+text = """
+Sensors are least sensitive at the ends of their range, so the first and last bands are often
+noisy. One band in this demo is much worse than the others.
+"""
+show = { mode = "band", band = 520 }
+
+[steps.task]
+kind = "band"
+prompt = "Flip through the first bands and select the one that looks like TV static."
+near = "#4"
+tolerance = 3
+hint = "It's among the first six bands."
+success = "That's it. Its signal-to-noise ratio is so low that it is better dropped or smoothed."
+retry = "Not that one. Keep looking among the first few bands."
+
+[[steps]]
+title = "Stripes"
+text = """
+Push-broom cameras record each column with its own detector element. If one element is a
+little off, the whole column is off: **stripes**.
+"""
+
+[steps.task]
+kind = "band"
+prompt = "Find the band in the near infrared with vertical stripes."
+near = "#76"
+tolerance = 3
+hint = "Try the bands between 840 and 860 nm. The Quality tab lists it too."
+success = "Found it. Stripes like these can be removed: see the 'Repairing defects' lesson."
+retry = "No stripes there. Look between 840 and 860 nm."
+
+[[steps]]
+title = "A dead column"
+text = "A detector element that has failed completely gives a column that is dark in every band."
+show = { mode = "band", band = 600 }
+
+[steps.task]
+kind = "pixel"
+region = "dead_column"
+prompt = "Click on the dark vertical line crossing the leaf."
+hint = "Zoom in with the mouse wheel; it's on the leaf's left side."
+success = "Column 37 records almost nothing. Its 'spectrum' is just noise."
+retry = "Not quite on the line. Zoom in and try again."
+
+[[steps]]
+title = "Saturation"
+text = """
+Too much light fills a pixel to its maximum, and anything brighter reads the same. Those
+values are **clipped**.
+"""
+
+[steps.task]
+kind = "pixel"
+region = "hot_pixels"
+prompt = "Find the small white square to the lower left of the leaf and click it."
+hint = "It's near x = 20, y = 120. Zoom in."
+success = "These pixels hit the ceiling in every band, so their spectrum is flat and meaningless."
+retry = "Not that spot. Look lower left, close to the image edge."
+
+[[steps]]
+title = "The quality report"
+text = """
+The **Quality** tab measures all of this for every band: signal-to-noise ratio, striping,
+missing and saturated values, and a list of findings with the bands to look at.
+"""
+view = "quality"
+
+[steps.task]
+kind = "choice"
+prompt = "Which of these problems can only be flagged or masked, never truly fixed?"
+options = ["Stripes", "Saturated (clipped) values", "Uneven illumination"]
+answer = 1
+success = "Right. Once a pixel saturates, the true value is lost. Avoid it at capture time."
+retry = "Think about which problem destroys information instead of distorting it."

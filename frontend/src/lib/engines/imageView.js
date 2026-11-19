@@ -25,7 +25,7 @@ export class ImageView extends Emitter {
     this.hoverPx = null;
     this._raf = 0;
     this._bind();
-    this._ro = new ResizeObserver(() => this.redraw());
+    this._ro = new ResizeObserver(() => { if (this._fitPending) this.fit(); this.redraw(); });
     this._ro.observe(wrap);
   }
 
@@ -51,6 +51,9 @@ export class ImageView extends Emitter {
   fit() {
     if (!this.size) return;
     const W = this.wrap.clientWidth, H = this.wrap.clientHeight;
+    // Hidden (another view is showing): fit when it becomes visible instead.
+    this._fitPending = !W || !H;
+    if (this._fitPending) return;
     const [w, h] = this.size;
     const s = Math.min((W - 24) / w, (H - 24) / h);
     this.view.scale = clamp(s, MIN_SCALE, MAX_SCALE);

@@ -49,7 +49,10 @@ class Controller {
   }
 
   // ------------------------------------------------------------------ cube lifecycle
-  async loadCube() {
+  /** (Re)load the cube from the server. With `keep`, a cube of the same size keeps the
+   * zoom, the display settings and the pins / regions (their spectra are re-read). */
+  async loadCube({ keep = false } = {}) {
+    const prev = keep && store.meta ? store.snapshot() : null;
     const meta = await store.load();
     this.thumbs.reset();
     this.layer = null;
@@ -58,12 +61,15 @@ class Controller {
     this.ui.cubeVersion++;
     if (!meta) return;
     document.title = `${meta.name} · spektrify`;
-    this.engines.imageView?.forceFit();
+    if (!(prev && store.restore(prev))) this.engines.imageView?.forceFit();
     await this.refreshLayer();
     this.thumbs.load().then(() => this.ui.thumbsVersion++);
   }
 
   async open(opts) { await api.open(opts); await this.loadCube(); }
+
+  /** Replace the preprocessing pipeline and redisplay, keeping view and pins when possible. */
+  async reprocess(steps) { await api.pipeline(steps); await this.loadCube({ keep: true }); }
 
   async upload(files) {
     files = [...files].sort((a, b) => (b.name.toLowerCase().endsWith('.hdr') ? 1 : 0) - (a.name.toLowerCase().endsWith('.hdr') ? 1 : 0));

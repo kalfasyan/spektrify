@@ -1111,6 +1111,7 @@ dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.5.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typer" },
 ]
 
@@ -1156,6 +1157,7 @@ requires-dist = [
     { name = "scipy", marker = "extra == 'mat'", specifier = ">=1.10" },
     { name = "tifffile", marker = "extra == 'all'", specifier = ">=2023.1" },
     { name = "tifffile", marker = "extra == 'tiff'", specifier = ">=2023.1" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=1.1" },
     { name = "typer", specifier = ">=0.12" },
 ]
 provides-extras = ["all", "hdf5", "mat", "tiff"]

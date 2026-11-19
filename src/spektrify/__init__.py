@@ -5,6 +5,7 @@ From a shell::
     spektrify view cube.h5          # or .npy .npz .mat .hdr (ENVI) .tif
     spektrify view --demo           # synthetic cube with planted artifacts
     spektrify quality cube.h5       # artefact report (``--json``, ``--strict`` for CI)
+    spektrify learn                 # interactive lessons on spectral imaging
 
 From Python / Jupyter::
 
@@ -15,7 +16,9 @@ From Python / Jupyter::
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import Any
 
 from numpy.typing import ArrayLike
@@ -108,9 +111,15 @@ def serve(
     port: int = 8765,
     host: str = "127.0.0.1",
     open_browser: bool = True,
+    learn: bool = False,
+    lesson_dirs: Iterable[str | Path] = (),
 ) -> None:
-    """Serve the viewer on ``cube`` (or an empty viewer) until interrupted. Blocks."""
-    server = ViewerServer(Session(cube), host=host, port=port)
+    """Serve the viewer on ``cube`` (or an empty viewer) until interrupted. Blocks.
+
+    ``learn=True`` opens the lesson panel; ``lesson_dirs`` adds folders of lesson files.
+    """
+    server = ViewerServer(Session(cube, lesson_dirs=lesson_dirs), host=host, port=port)
     what = f"{cube.name}  ({cube.height}×{cube.width}×{cube.n_bands})" if cube else "no cube yet"
-    print(f"spektrify · {what}\n  → {server.url}   (Ctrl+C to quit)")
-    server.serve_forever(open_browser=open_browser)
+    url = server.url + ("#learn" if learn else "")
+    print(f"spektrify · {what}\n  → {url}   (Ctrl+C to quit)")
+    server.serve_forever(open_browser=open_browser, page="#learn" if learn else "")

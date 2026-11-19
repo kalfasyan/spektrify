@@ -1,0 +1,61 @@
+id = "band-math"
+title = "Band math and indices"
+summary = "Ratios and normalised differences turn spectra into maps of one property."
+level = "analysis"
+order = 50
+demo = "scene"
+
+[[steps]]
+title = "Divide one band by another"
+text = """
+Dividing bands cancels anything that scales both of them equally, such as shading or a
+brighter lamp. Here the near infrared (800 nm) is divided by red (670 nm), the two sides of
+the red edge.
+
+The expression is in the **Band math** box on the left: `nm(λ)` picks the band nearest a
+wavelength.
+"""
+show = { mode = "math", mathExpr = "nm(800) / nm(670)" }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the brightest object in this ratio image."
+success = "The leaf: dark in the red and bright in the near infrared gives a large ratio."
+retry = "Look for the area with the highest values."
+
+[[steps]]
+title = "Normalised difference"
+text = """
+A **normalised difference** `(a − b) / (a + b)` does the same job but gives tidy values.
+With near infrared and red it is the best-known vegetation index.
+"""
+show = { mode = "math", mathExpr = "(nm(800) - nm(670)) / (nm(800) + nm(670))" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which range can a normalised difference of two positive bands take?"
+options = ["0 to 1", "−1 to 1", "0 to 255"]
+answer = 1
+success = "Right: −1 when only b reflects, +1 when only a does, 0 when they are equal."
+retry = "Try a = 0, then b = 0, in the formula."
+
+[[steps]]
+title = "Masks from rules"
+text = """
+Comparisons give a 0/1 mask, and multiplying masks combines rules. This one keeps pixels that
+are greener than red **and** fairly bright:
+
+`(nm(520) / nm(650) > 1.3) * (nm(520) > 0.3)`
+
+Edit the expression on the left and press Enter to try your own. Also available: `b[i]`
+(band by index), `avg(λ1, λ2)`, `mean`, `std`, `sqrt`, `log`, `where` and more.
+"""
+show = { mode = "math", mathExpr = "(nm(520) / nm(650) > 1.3) * (nm(520) > 0.3)" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_b"
+prompt = "Click one of the objects this mask selects."
+success = "The lower discs: green-peaked and bright. The leaf is green too, but too dark to pass the second rule."
+retry = "Click one of the white areas of the mask."

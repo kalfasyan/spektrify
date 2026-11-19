@@ -1,0 +1,71 @@
+id = "wavelengths"
+title = "Bands and wavelengths"
+summary = "Read a leaf's spectrum: chlorophyll absorption, the green bump and the red edge."
+level = "basics"
+order = 20
+demo = "scene"
+
+[[steps]]
+title = "Why leaves look green"
+text = """
+Our eyes see roughly 400 to 700 nm. Inside that range, chlorophyll absorbs blue and red light
+and reflects a little more green, which is why leaves look green.
+
+Here is band 550 nm (green).
+"""
+show = { mode = "band", band = 550, specView = "values" }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Pin a pixel on the leaf so its spectrum appears in the plot."
+success = "See the small bump near 550 nm? That's the green the eye sees."
+retry = "That's not the leaf. It's the large shape on the left."
+
+[[steps]]
+title = "Chlorophyll absorbs red"
+text = """
+You can **click inside the spectrum plot** to jump to that band. The thin vertical line in the
+plot marks the band shown in the image.
+"""
+
+[steps.task]
+kind = "band"
+prompt = "Find the band where the leaf is darkest in the red, around where chlorophyll absorbs most."
+near = 670
+tolerance = 25
+hint = "Look for the low point of the leaf's curve just before it climbs steeply."
+success = "Around 670 nm the leaf is almost black: chlorophyll uses that light for photosynthesis."
+retry = "Not there. Look for the lowest point of the leaf's curve between 600 and 700 nm."
+
+[[steps]]
+title = "The red edge"
+text = """
+Just past the red, a healthy leaf's reflectance shoots up. This **red edge** is one of the most
+useful features in plant science: its position and steepness change with stress and
+chlorophyll content.
+"""
+
+[steps.task]
+kind = "band"
+prompt = "Find the band where the leaf's curve climbs the fastest."
+near = 715
+tolerance = 20
+success = "That's the red edge, here centred near 715 nm."
+retry = "Look for the steepest part of the climb between 690 and 750 nm."
+
+[[steps]]
+title = "Check yourself"
+text = "Leaves reflect much more near-infrared light than visible light."
+
+[steps.task]
+kind = "choice"
+prompt = "Why is a healthy leaf so bright in the near infrared?"
+options = [
+  "Chlorophyll glows in the near infrared",
+  "The leaf's internal cell structure scatters near-infrared light back, and nothing in it absorbs that light",
+  "The camera is simply more sensitive there",
+]
+answer = 1
+success = "Exactly. Pigments don't absorb there, so the light bounces around the cell walls and much of it comes back out."
+retry = "Not quite. Think about what absorbs light in a leaf, and what happens when nothing does."

@@ -19,7 +19,8 @@ import numpy as np
 
 from spektrify.compute import region_mask
 from spektrify.compute._util import finite_list
-from spektrify.io import demosaic_methods, load_cube, supported_suffixes
+from spektrify.io import DEMOS, demosaic_methods, load_cube, supported_suffixes
+from spektrify.learn import Lesson, check_answer, labels_of, lesson_json, summary_json
 from spektrify.model import Cube
 from spektrify.preprocess import Pipeline, step_schema
 from spektrify.server.session import Session
@@ -309,6 +310,16 @@ def open_(s: Session, r: Request) -> Json:
     return Json({"ok": True, "seconds": time.perf_counter() - t0})
 
 
+@route("POST", "demo")
+def demo(s: Session, r: Request) -> Json:
+    """Show a built-in synthetic cube by name (``scene`` or ``capture``)."""
+    name = r.body.get("name") or "scene"
+    if name not in DEMOS:
+        raise ApiError(400, f"unknown demo {name!r}; choose from {', '.join(DEMOS)}")
+    s.set_cube(DEMOS[name]())
+    return Json({"ok": True})
+
+
 # --------------------------------------------------------------------------- preprocessing
 
 
@@ -375,3 +386,46 @@ def transpose(s: Session, r: Request) -> Json:
     wl = cube.wavelengths if order[0] == 0 else None
     s.set_cube(Cube(data, wl, cube.name, cube.source, dict(cube.meta)), s.pipeline)
     return Json({"ok": True})
+
+
+# --------------------------------------------------------------------------- lessons
+
+
+@route("GET", "lessons")
+def lessons(s: Session, r: Request) -> Json:
+    """The lesson catalog, plus which built-in demo (if any) is on display."""
+    cube = s.cube
+    return Json(
+        {
+            "lessons": [summary_json(le) for le in s.lessons().values()],
+            "demo": None if cube is None else cube.meta.get("demo"),
+            "labelled": cube is not None and labels_of(cube) is not None,
+        }
+    )
+
+
+def _lesson(s: Session, lesson_id: str) -> Lesson:
+    lesson = s.lessons().get(lesson_id)
+    if lesson is None:
+        raise ApiError(404, f"no lesson {lesson_id!r}")
+    return lesson
+
+
+@route("GET", "lesson")
+def lesson(s: Session, r: Request) -> Json:
+    """One lesson, resolved for the cube on display (band references → indices)."""
+    return Json(lesson_json(_lesson(s, r.get("id")), s.cube))
+
+
+@route("POST", "lesson-check")
+def lesson_check(s: Session, r: Request) -> Json:
+    """Grade an answer. Body ``{id, step, answer: {x, y} | {band} | {choice}}``."""
+    le = _lesson(s, str(r.body.get("id")))
+    i = r.body.get("step")
+    if not isinstance(i, int) or not 0 <= i < len(le.steps) or le.steps[i].task is None:
+        raise ApiError(400, "that step has no task")
+    cube, _ = s.require()
+    try:
+        return Json(check_answer(le.steps[i].task, dict(r.body.get("answer") or {}), cube))
+    except (KeyError, TypeError) as e:
+        raise ApiError(400, f"bad answer: {e}") from e

@@ -9,6 +9,16 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- Learn mode (`spektrify learn`, or the **Learn** button): 12 interactive lessons on spectral
+  imaging, from what a cube is to calibration, band alignment, preprocessing, PCA and anomaly
+  detection. Steps drive the real viewer, ask for a pixel, a band or a multiple-choice answer
+  (graded by the server), and show preprocessing Before / After. Lessons are TOML files
+  (`docs/learn.md`); `--lessons DIR` adds your own and `--check` validates them.
+- A second built-in demo, `capture`: the demo scene as raw camera counts (dark level, lamp
+  spectrum, vignetting, white reference tile, misregistered bands). Both demos carry a label
+  map. `POST /api/demo` switches between them.
+- Applying a preprocessing pipeline keeps the zoom, display settings and pins when the image
+  size doesn't change.
 - Browser-based viewer: band / RGB / PCA / anomaly / similarity / stats / band-math display,
   spectra and line profiles, all-channels grid, 3D slice cube, volume rendering and PCA
   cloud, and a data-quality dashboard.

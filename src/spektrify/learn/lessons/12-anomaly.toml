@@ -1,0 +1,49 @@
+id = "anomaly"
+title = "Finding the unusual"
+summary = "RX and PCA residuals flag pixels unlike the rest of the scene, without knowing what to look for."
+level = "analysis"
+order = 110
+demo = "scene"
+
+[[steps]]
+title = "The RX detector"
+text = """
+**RX** learns what the scene looks like on average (the mean spectrum and how bands vary
+together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.
+Bright means unusual.
+"""
+view = "image"
+show = { mode = "anomaly", anomaly = "rx", anomalyTop = 0 }
+
+[steps.task]
+kind = "pixel"
+region = "target"
+prompt = "Find the small bright spot near the top of the image and click it."
+hint = "Above the leaf's right side. Zoom in."
+success = "That little disc has a narrow peak at 760 nm that no other material shares."
+retry = "Not that one. Look for a small spot near the top, just right of the middle."
+
+[[steps]]
+title = "Keep only the top scores"
+text = "Here only the 0.2% highest-scoring pixels are highlighted."
+show = { mode = "anomaly", anomaly = "rx", anomalyTop = 0.2 }
+
+[steps.task]
+kind = "choice"
+prompt = "RX also flags the saturated white square left of the leaf. Why?"
+options = [
+  "They are targets too",
+  "Sensor defects are unlike the background as well, so they look anomalous",
+  "RX is broken",
+]
+answer = 1
+success = "Right. Repair defects first (or expect them in the results), otherwise they crowd out real targets."
+retry = "RX only knows 'different from the scene', not why."
+
+[[steps]]
+title = "PCA residual"
+text = """
+Another way: keep the top *k* principal components as a model of the scene and look at what
+they **can't** explain. Rare materials end up in the residual.
+"""
+show = { mode = "anomaly", anomaly = "residual", anomalyK = 3, anomalyTop = 0 }

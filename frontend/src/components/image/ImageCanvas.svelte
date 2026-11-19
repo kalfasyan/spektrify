@@ -4,6 +4,7 @@
   import { ImageView } from '../../lib/engines/imageView.js';
   import { fmt } from '../../lib/util.js';
   import Icon from '../Icon.svelte';
+  import { learn } from '../../lib/learn.svelte.js';
 
   const s = store.state;
   const ui = ctl.ui;
@@ -28,7 +29,7 @@
     }
     const detach = ctl.attach('imageView', iv);
     iv.on('hover', (px) => ctl.hover(px));
-    iv.on('pin', (px) => store.addMark('pin', px));
+    iv.on('pin', (px) => { store.addMark('pin', px); learn.pixel(px); });
     iv.on('region', (d) => store.addMark(d.kind, d.geom));
     iv.on('mark-moved', (mk) => store.refreshMark(mk));
     iv.on('mark-moving', (mk) => { clearTimeout(mk._t); mk._t = setTimeout(() => store.refreshMark(mk), 40); });
