@@ -12,24 +12,27 @@
   let draft = $state([]); // [{name, params}]
   let busy = $state(false);
   let adding = $state('');
-  const applied = $derived(JSON.stringify(s.meta?.pipeline ?? []));
-  const dirty = $derived(JSON.stringify(draft) !== applied);
 
   onMount(() => { api.steps().then((r) => (schema = r.steps)).catch(() => {}); });
   // Follow the server's pipeline whenever a cube (re)loads.
   $effect(() => { draft = JSON.parse(applied); });
 
   const specOf = (name) => schema.find((x) => x.name === name);
+  const defaults = (name) => Object.fromEntries((specOf(name)?.params ?? []).map((p) => [p.name, p.default]));
+  function withDefaults(steps) { return steps.map((st) => ({ ...st, params: { ...defaults(st.name), ...st.params } })); }
+  // The applied pipeline with every parameter filled in (a pipeline from the CLI or a lesson
+  // may name only some), so the form has a value for each field.
+  const applied = $derived(JSON.stringify(withDefaults(s.meta?.pipeline ?? [])));
+  const dirty = $derived(JSON.stringify(draft) !== applied);
   function add(name) {
     const spec = specOf(name);
-    if (spec) draft.push({ name, params: Object.fromEntries(spec.params.map((p) => [p.name, p.default])) });
+    if (spec) draft.push({ name, params: defaults(name) });
     adding = '';
   }
   async function apply() {
     busy = true;
     try {
-      await api.pipeline(draft);
-      await ctl.loadCube();
+      await ctl.reprocess(draft);
       ctl.toast(draft.length ? `Applied ${draft.map((d) => d.name).join(' → ')}` : 'Showing the raw cube');
     } catch (e) { ctl.toast(e.message, 'error'); }
     busy = false;

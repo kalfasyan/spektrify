@@ -1,0 +1,57 @@
+id = "alignment"
+title = "Aligning the bands"
+summary = "When bands don't line up, edges get colour fringes and spectra mix neighbouring pixels."
+level = "correction"
+order = 75
+demo = "capture"
+
+[[steps]]
+title = "Colour fringes"
+text = """
+Filter-wheel and snapshot cameras record each band through a slightly different optical path,
+so the bands can be shifted by a pixel or two. In a composite this shows up as **colour
+fringes** along edges.
+
+Zoom into the edge of a disc or the leaf.
+"""
+show = { mode = "rgb", rgb = [830, 640, 545] }
+pipeline = []
+
+[steps.task]
+kind = "choice"
+prompt = "What causes the coloured rims?"
+options = [
+  "The objects moved during capture",
+  "The bands don't line up, so each channel shows the edge in a slightly different place",
+  "The objects really have coloured rims",
+]
+answer = 1
+success = "Right. Here the bands are shifted by up to two pixels."
+retry = "Every object has the rims, always in the same directions. What would do that?"
+
+[[steps]]
+title = "Register the bands"
+text = """
+The **align** step compares every band with a reference band (the middle one by default),
+finds the shift that matches them best, and moves the band back. The shifts it found are kept
+in the cube's metadata.
+
+Toggle **Before / After** and watch the fringes disappear.
+"""
+pipeline = [{ name = "align" }]
+
+[[steps]]
+title = "Why it matters"
+text = "Misaligned bands don't just look bad: a pixel's spectrum then mixes values from different places."
+
+[steps.task]
+kind = "choice"
+prompt = "Why align before computing an index such as (NIR − red) / (NIR + red)?"
+options = [
+  "Otherwise each pixel combines values from neighbouring places, giving false values along edges",
+  "Indices only work on square images",
+  "It makes no difference",
+]
+answer = 0
+success = "Yes. Along every edge the index would compare the object in one band with the background in the other."
+retry = "Think about a pixel right on the edge of the leaf."

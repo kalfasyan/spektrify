@@ -1,0 +1,67 @@
+id = "composites"
+title = "True and false colour"
+summary = "Put any three bands into red, green and blue to see what the eye can't."
+level = "basics"
+order = 30
+demo = "scene"
+
+[[steps]]
+title = "True colour"
+text = """
+A screen has only three colour channels. Put bands near 640 (red), 550 (green) and 465 nm
+(blue) into them and you get roughly what your eye would see: a **true-colour composite**.
+
+The **Display** panel on the left shows which band feeds each channel; you can change them
+there at any time.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465] }
+
+[[steps]]
+title = "False colour"
+text = """
+Nothing forces us to use visible bands. Here near infrared (800 nm) goes into red, red into
+green, and green into blue. This **false-colour composite** is a classic for spotting plants.
+"""
+show = { mode = "rgb", rgb = [800, 650, 550] }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the object that turned bright red."
+success = "The leaf reflects strongly in the near infrared, so it glows red here."
+retry = "Look for the brightest red area."
+
+[[steps]]
+title = "Find what you can't see"
+text = """
+A composite of three *neighbouring* bands is a sharp tool: anything with a smooth spectrum
+comes out grey, and anything with a narrow feature in one of the bands comes out coloured.
+
+These are 760, 735 and 785 nm, all invisible to the eye. Zoom with the mouse wheel.
+"""
+show = { mode = "rgb", rgb = [760, 735, 785] }
+
+[steps.task]
+kind = "pixel"
+region = "target"
+prompt = "Find the tiny red spot and click it."
+hint = "It's above the leaf's right side, near the top of the image. Zoom in."
+success = "Found it. This target has a narrow peak at 760 nm; in true colour it is nearly invisible."
+retry = "Not that one. Look for a small red dot near the top, just right of the middle."
+
+[[steps]]
+title = "Check yourself"
+text = "Think back to the false-colour composite with near infrared shown as red."
+show = { mode = "rgb", rgb = [800, 650, 550] }
+
+[steps.task]
+kind = "choice"
+prompt = "In that composite, what does a bright red area usually mean?"
+options = [
+  "Hot objects",
+  "Material that reflects strongly in the near infrared, such as healthy vegetation",
+  "Surfaces painted red",
+]
+answer = 1
+success = "Right. False colour shows reflectance in the bands you chose, not heat or visible colour."
+retry = "Remember which band was put into the red channel."

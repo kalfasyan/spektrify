@@ -1,6 +1,7 @@
 <script>
   import { ctl, store } from '../lib/controller.svelte.js';
   import Icon from './Icon.svelte';
+  import { learn } from '../lib/learn.svelte.js';
 
   const s = store.state;
   const ui = ctl.ui;
@@ -29,6 +30,7 @@
       </button>
     {/each}
   </nav>
+  <button class="learn-btn" class:active={learn.ui.open} title="Interactive lessons on spectral imaging" onclick={() => learn.setOpen(!learn.ui.open)}><Icon name="learn" />Learn</button>
   <div class="spacer"></div>
   <div class="top-actions">
     <button class="icon-btn" title="Open cube (Ctrl+O)" onclick={() => (ui.modal = 'open')}><Icon name="folder" /></button>

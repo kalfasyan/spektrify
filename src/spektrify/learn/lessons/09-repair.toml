@@ -1,0 +1,50 @@
+id = "repair"
+title = "Repairing defects"
+summary = "Fill in bad pixels and remove stripes, and know what each repair costs."
+level = "correction"
+order = 80
+demo = "scene"
+
+[[steps]]
+title = "Bad pixels"
+text = """
+The **badpixels** step finds pixels, rows and columns that differ wildly from their
+neighbours (dead, hot, or missing) and replaces them with the local median.
+
+Toggle **Before / After** and look at the dark column on the leaf and the white square to its
+lower left.
+"""
+show = { mode = "band", band = 600 }
+pipeline = [{ name = "badpixels" }]
+
+[steps.task]
+kind = "pixel"
+region = "dead_column"
+prompt = "Click where the dead column was (zoom in)."
+hint = "It's on the leaf's left side, at x = 37."
+success = "Its spectrum now follows its neighbours. Repaired pixels are estimates: fine for viewing, worth flagging for analysis."
+retry = "A little off. The column is at x = 37; zoom in and try again."
+
+[[steps]]
+title = "Destriping"
+text = """
+The **destripe** step estimates each column's offset from its neighbours and removes it,
+keeping any structure wider than its window. Here it runs after badpixels on the striped band.
+"""
+show = { mode = "band", band = "#76" }
+pipeline = [
+  { name = "badpixels" },
+  { name = "destripe", params = { axis = "columns" } },
+]
+
+[steps.task]
+kind = "choice"
+prompt = "Destriping keeps structure wider than its window. What can go wrong if the window is too small?"
+options = [
+  "Real narrow objects, such as thin lines, can be flattened as if they were stripes",
+  "Nothing",
+  "The image gets brighter",
+]
+answer = 0
+success = "Right. Every repair is a trade-off: check the result on details you care about."
+retry = "What does the step do to anything narrower than the window?"

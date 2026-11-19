@@ -16,15 +16,16 @@ without touching the rest.
 | Module | Role | Depends on |
 | --- | --- | --- |
 | `model.py` | `Cube`: band-major float32 `(C, H, W)` data, wavelengths or band axis, name, source, metadata. `Cube.from_array()` guesses `hwc` / `chw`. | numpy |
-| `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo scene. `writers.py` saves cubes (`save_cube`) and raw mosaics (`save_raw_mosaic`). | model |
+| `io/` | One reader per format. `base.py` defines `Reader` (`suffixes`, `read(path, *, dataset)` → `RawArray`) and the registry. `load_cube()` picks a reader by suffix, applies layout and demosaicing. `synthetic.py` makes the demo cubes (`DEMOS`: the `scene` and a raw `capture`), each with a label map for the lessons. `writers.py` saves cubes (`save_cube`) and raw mosaics (`save_raw_mosaic`). | model |
 | `io/demosaic.py` | Snapshot-mosaic demosaicing methods by name: `block` (one pixel per macropixel) and `bilinear` (full resolution, co-registered channels). `mosaic()` is the inverse of `block`. | numpy |
 | `preprocess/` | `base.py`: the step registry (`register_step`, `param`, `step_schema`) and `Pipeline` (parse CLI specs, JSON round trip, `apply`). `steps.py`: `clip`, `calibrate`, `crop`, `bands`, `bin`. `corrections.py`: `badpixels`, `flatfield`, `whitebalance`, `destripe`, `align`. `spectral.py`: `smooth`, `snv`, `msc`, `absorbance`. `references.py`: the one loader for external files (dark / white, flat frames, spectra, shifts). `_ops.py`: the array kernels behind the steps as plain NumPy functions, so any of them can be replaced by a faster implementation. Steps never mutate their input. | model, io |
+| `learn/` | Interactive lessons. `lessons/*.toml` are the content; `model.py` validates a file into frozen dataclasses; `catalog.py` loads the bundled lessons plus extra folders; `checks.py` resolves band references for a cube and grades answers (answers never reach the browser). Format: [learn.md](learn.md). | preprocess, model |
 | `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`). `regions.py` rasterises UI shapes to masks. | model |
-| `server/session.py` | The raw cube, the preprocessing pipeline, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
+| `server/session.py` | The raw cube, the preprocessing pipeline, the lesson catalog, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
 | `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
 | `server/http.py` | stdlib `ThreadingHTTPServer` adapter: static files, error mapping, binary headers. Swap it for FastAPI / aiohttp / a desktop shell by calling `dispatch()`. | routes |
 | `__init__.py` | Public Python API: `show()`, `serve()`, `Viewer.update()`, `Viewer.stop()`. | everything |
-| `cli.py` | The `spektrify` command (Typer): `view`, `info`, `quality`, `convert`, `demo`, `steps`. Imports are lazy so `--help` is instant. | everything |
+| `cli.py` | The `spektrify` command (Typer): `view`, `learn`, `info`, `quality`, `convert`, `demo`, `steps`. Imports are lazy so `--help` is instant. | everything |
 | `_json.py` | Strict JSON encoding (NaN → `null`, numpy types) shared by the API and the CLI. | numpy |
 
 Heavy optional libraries (h5py, scipy, tifffile) are imported inside the reader that needs
@@ -112,6 +113,9 @@ Binary responses are raw little-endian arrays with an `X-Meta` JSON header
 | POST | `pipeline` | Body `{steps: [{name, params}]}`; re-processes the raw cube |
 | POST | `upload?name=&layout=` | Raw file body (ENVI: send `.hdr` and data as two uploads) |
 | POST | `transpose` | Body `{order}` to fix a wrong axis guess |
+| POST | `demo` | Body `{name}`: show a built-in demo cube (`scene`, `capture`) |
+| GET | `lessons` / `lesson?id=` | Lesson catalog; one lesson resolved for the current cube |
+| POST | `lesson-check` | Body `{id, step, answer}` → `{correct, message, note}` |
 
 The server binds to `127.0.0.1` by default. It serves the local filesystem to the browser
 (through the open dialog), so don't expose it on a public interface.
@@ -131,7 +135,9 @@ src/
     engines/               framework-free: imageView (WebGL2), view3d (three.js), spectrumPlot,
                            histogram, scrubber, lineProfile, qualityCharts
     gl/imageRenderer.js    float textures, LUTs, clip / NaN / threshold highlighting in GLSL
-  components/              TopBar, StatusBar, image/*, dialogs/*
+    learn.svelte.js        Learn mode: applies lesson steps through the store / controller
+    markdown.js            tiny, HTML-escaping Markdown subset for lesson text
+  components/              TopBar, StatusBar, image/*, dialogs/*, learn/LearnPanel
   views/                   ChannelsView, ThreeView (lazy-loads three.js), QualityView
 ```
 

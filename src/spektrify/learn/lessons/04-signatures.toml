@@ -1,0 +1,64 @@
+id = "signatures"
+title = "Comparing materials"
+summary = "Brightness versus shape, and how spectral angle finds the same material in shade."
+level = "basics"
+order = 40
+demo = "scene"
+
+[[steps]]
+title = "Same material, different brightness"
+text = """
+The four discs are lit from above, so their edges are darker than their centres. The material
+is the same everywhere on a disc; only the amount of light differs.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_a"
+prompt = "Pin a pixel near the centre of one of the two upper discs."
+success = "Got it. Now we need a second pin on the same disc."
+retry = "That's not one of the two upper discs on the right."
+
+[[steps]]
+title = "Now the edge"
+text = "Shading scales a whole spectrum up or down without changing its shape."
+
+[steps.task]
+kind = "pixel"
+region = "pill_a"
+prompt = "Pin a pixel near the edge of the same disc."
+success = "Two curves at different heights for one material. Comparing raw values would call them different."
+retry = "Stay on the same upper disc, close to its edge."
+
+[[steps]]
+title = "Compare shapes"
+text = """
+The **Shape** view of the plot divides each curve by its own mean. Brightness is gone and
+the two pins now lie on top of each other: the material's fingerprint is its shape.
+"""
+show = { specView = "normalized" }
+
+[[steps]]
+title = "Spectral angle"
+text = """
+**Spectral angle** treats each spectrum as an arrow in a space with one axis per band, and
+measures the angle between two arrows. Brightness changes the arrow's length, not its
+direction, so shaded pixels of the same material stay close.
+
+Right-click one of your pins and choose **Find similar pixels**. Dark means a small angle,
+that is, similar.
+"""
+show = { mode = "similarity", simDeg = 5, specView = "values" }
+
+[steps.task]
+kind = "choice"
+prompt = "Why does spectral angle find both upper discs, shaded edges included?"
+options = [
+  "Because they have the same brightness",
+  "Because the angle ignores brightness and compares only the shape of the spectra",
+  "Because they are close to each other in the image",
+]
+answer = 1
+success = "Yes. That makes spectral angle robust to shading and illumination changes."
+retry = "Think about what happens to an arrow when you only make it longer or shorter."

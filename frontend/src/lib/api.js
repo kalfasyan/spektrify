@@ -65,6 +65,12 @@ export const api = {
   steps: () => json('/api/steps'),
   /** Replace the preprocessing pipeline: [{name, params}] */
   pipeline: (steps) => json('/api/pipeline', { steps }),
+  /** Show a built-in synthetic cube: 'scene' or 'capture' (raw counts). */
+  demo: (name) => json('/api/demo', { name }),
+  /** Lessons: the catalog, one lesson resolved for the current cube, and answer checking. */
+  lessons: () => json('/api/lessons', undefined, true),
+  lesson: (id) => json(`/api/lesson?${qs({ id })}`),
+  lessonCheck: (id, step, answer) => json('/api/lesson-check', { id, step, answer }, true),
   async upload(file, layout = 'auto') {
     return (await request(`/api/upload?${qs({ name: file.name, layout })}`, { method: 'POST', body: file })).json();
   },

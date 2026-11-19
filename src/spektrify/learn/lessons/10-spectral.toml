@@ -1,0 +1,79 @@
+id = "spectral"
+title = "Smoothing and normalising spectra"
+summary = "Savitzky–Golay smoothing, derivatives and SNV: the standard pre-treatments before modelling."
+level = "correction"
+order = 90
+demo = "scene"
+
+[[steps]]
+title = "Noisy spectra"
+text = """
+Every measurement has noise, so a single pixel's spectrum is jagged. Here the image shows the
+raw data.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
+pipeline = []
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Pin a pixel on the leaf and look at how jagged its curve is."
+success = "Each band's value wobbles around the true curve. Smoothing helps."
+
+[[steps]]
+title = "Savitzky–Golay smoothing"
+text = """
+**Savitzky–Golay** smoothing fits a small polynomial to a moving window of bands and keeps its
+centre value. Unlike a plain moving average it keeps peaks and edges sharp.
+
+Toggle **Before / After** and watch the leaf's curve.
+"""
+pipeline = [{ name = "smooth", params = { window = 9, order = 2 } }]
+
+[[steps]]
+title = "Derivatives"
+text = """
+The same fit gives the **derivative** for free: how fast the spectrum changes per nanometre.
+Derivatives remove constant offsets and turn slopes into peaks, so the red edge becomes a
+single peak.
+"""
+pipeline = [{ name = "smooth", params = { window = 9, order = 2, deriv = 1 } }]
+
+[steps.task]
+kind = "band"
+prompt = "Find the band where the leaf's derivative peaks."
+near = 715
+tolerance = 20
+success = "The peak of the first derivative marks the red edge position, a common plant-stress indicator."
+retry = "Look for the highest point of the leaf's curve in the plot and click there."
+
+[[steps]]
+title = "Standard normal variate"
+text = """
+**SNV** subtracts each spectrum's mean and divides by its standard deviation. Like the Shape
+view, it removes brightness and shading, but it changes the data itself, ready for modelling.
+"""
+pipeline = [{ name = "snv" }]
+
+[steps.task]
+kind = "pixel"
+region = "pill_a"
+prompt = "Pin the centre and the edge of one upper disc, then toggle Before / After."
+success = "With SNV on, curves of the same material collapse onto each other."
+retry = "Pin pixels on one of the two upper discs."
+
+[[steps]]
+title = "Check yourself"
+text = "Every pre-treatment removes something. Make sure it isn't the thing you want to measure."
+
+[steps.task]
+kind = "choice"
+prompt = "When is SNV a bad idea?"
+options = [
+  "When absolute brightness is what you want to measure",
+  "When spectra are noisy",
+  "Never",
+]
+answer = 0
+success = "Right. SNV throws away overall level on purpose."
+retry = "Think about what SNV removes."

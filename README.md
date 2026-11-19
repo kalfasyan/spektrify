@@ -14,6 +14,7 @@ uv tool install "spektrify[all] @ git+https://github.com/kalfasyan/spektrify"   
 spektrify view cube.h5          # or .npy .npz .mat .tif, ENVI .hdr + data
 spektrify view --demo           # a synthetic scene with planted artefacts
 spektrify view                  # empty viewer: use the open dialog or drag & drop a file
+spektrify learn                 # interactive lessons on spectral imaging (see below)
 ```
 
 ### Example data
@@ -101,6 +102,8 @@ clean = Pipeline.parse(["clip", "bin:2"]).apply(load_cube("raw.h5"))
 | **3D** | Slice cube with cut planes (the x–λ and y–λ faces show keystone, smile and bad columns), GPU volume rendering (MIP or composite), and pixels as a PCA point cloud. Click a point to pin its pixel. |
 | **Quality** | Automatic checks for low SNR, decorrelated bands, column and row striping, dead or hot lines, NaN/Inf and saturation. Every chart links back to the band it is about. |
 
+| **Learn** | Hands-on lessons, one idea per step, on a built-in demo or your own cube: what a cube is, wavelengths, false colour, comparing materials, band math, sensor problems, calibration to reflectance, band alignment, repairing defects, smoothing and SNV, PCA and anomaly detection. Click pixels, find bands, answer quick questions and flip preprocessing Before / After. |
+
 Press `?` in the app for all keyboard shortcuts. The most used ones: `← →` change band,
 `Space` plays through the bands, and `B C P N S M` switch display modes.
 
@@ -121,6 +124,8 @@ The project is built so any layer can be replaced without touching the others:
   implementation. A Rust/PyO3 or GPU version only has to register itself.
 - **API** (`spektrify/server/routes.py`): transport-free handlers. The stdlib HTTP adapter is a
   thin shell around them.
+- **Lessons** (`spektrify/learn`): plain TOML files validated in Python; the UI runs any of
+  them, so adding a lesson needs no code ([docs/learn.md](docs/learn.md)).
 - **UI** (`frontend/`): Svelte for panels and state. The WebGL image renderer and the three.js
   3D engine are framework-free modules.
 

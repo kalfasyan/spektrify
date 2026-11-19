@@ -1,0 +1,89 @@
+id = "calibration"
+title = "From raw counts to reflectance"
+summary = "Dark level, flat field and white reference: turning what the camera records into a property of the material."
+level = "correction"
+order = 70
+demo = "capture"
+
+[[steps]]
+title = "What the camera records"
+text = """
+This is the same scene as the other lessons, but as an uncalibrated camera records it: in
+**raw counts**. Each count mixes the material with the lamp's spectrum, the sensor's
+sensitivity, the lens and the exposure time.
+
+A white reference tile (it reflects about 95% of the light at every wavelength) sits in the
+bottom-right corner.
+"""
+show = { mode = "band", band = 700, specView = "values" }
+
+[steps.task]
+kind = "pixel"
+region = "white_tile"
+prompt = "Click the white reference tile in the bottom-right corner."
+success = "The tile is equally white at every wavelength, yet its curve is a hump. That hump is the lamp times the sensor, not the tile."
+retry = "That's not the tile. It's the bright strip in the bottom-right corner."
+
+[[steps]]
+title = "Subtract the dark level"
+text = """
+Even with the lens capped, a sensor reports some signal: the **dark level** (here 100
+counts). The first correction subtracts it.
+
+Use the **Before / After** switch above to compare. Your pins keep their place, so watch the
+tile's curve drop.
+"""
+pipeline = [{ name = "calibrate", params = { dark = "100" } }]
+
+[[steps]]
+title = "Even out the illumination"
+text = """
+Lenses collect less light towards the corners (**vignetting**) and lamps rarely light a scene
+evenly. A **flat field** divides that pattern out. The best flat field is a picture of a
+uniform target; without one, spektrify fits a smooth surface to the image itself.
+
+Switch to Before and compare the corners with the centre.
+"""
+pipeline = [
+  { name = "calibrate", params = { dark = "100" } },
+  { name = "flatfield" },
+]
+
+[[steps]]
+title = "Divide by the white reference"
+text = """
+Finally, divide every band by the white tile's level in that band:
+
+**reflectance = (raw − dark) / (white − dark)**
+
+The lamp and the sensor cancel out, because they affect the scene and the tile equally. What
+is left is a property of the material.
+"""
+pipeline = [
+  { name = "calibrate", params = { dark = "100" } },
+  { name = "flatfield" },
+  { name = "whitebalance", params = { method = "patch", x0 = 202, y0 = 172, x1 = 246, y1 = 185, target = 0.95 } },
+]
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the leaf and look at its curve now."
+success = "A proper leaf spectrum again: low in the visible, a red edge, a bright near-infrared plateau. The lamp's hump is gone."
+retry = "That's not the leaf. It's the large shape on the left."
+
+[[steps]]
+title = "Check yourself"
+text = "Calibration takes a few extra images at capture time: a dark frame and a white reference."
+
+[steps.task]
+kind = "choice"
+prompt = "Why convert to reflectance before comparing spectra?"
+options = [
+  "It makes files smaller",
+  "It removes the lamp, sensor and exposure, so spectra from different days and cameras can be compared",
+  "It removes noise",
+]
+answer = 1
+success = "Exactly. Raw counts describe your setup; reflectance describes the material."
+retry = "Think about what the dark and white references cancel."

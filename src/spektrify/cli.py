@@ -125,6 +125,57 @@ def view(
     serve(cube, port=port, host=host, open_browser=browser)
 
 
+class DemoName(str, Enum):
+    scene = "scene"
+    capture = "capture"
+
+
+@app.command()
+def learn(
+    path: OptionalCubePath = None,
+    demo: Annotated[
+        DemoName,
+        typer.Option(help="Built-in cube when no file is given: scene, or capture (raw counts)."),
+    ] = DemoName.scene,
+    lessons: Annotated[
+        list[Path] | None,
+        typer.Option("--lessons", "-l", help="Folder (or file) of extra lessons, repeatable."),
+    ] = None,
+    check: Annotated[
+        bool, typer.Option("--check", help="Only validate the lesson files and exit.")
+    ] = False,
+    dataset: Dataset = None,
+    layout: LayoutOpt = Layout.auto,
+    port: Annotated[int, typer.Option(help="Port to listen on (0 = any free port).")] = 8765,
+    host: Annotated[str, typer.Option(help="Bind address.")] = "127.0.0.1",
+    browser: Annotated[bool, typer.Option(help="Open a browser tab.")] = True,
+) -> None:
+    """Learn spectral imaging step by step: interactive lessons on a demo cube or your own.
+
+    Lessons are TOML files; write your own and load them with --lessons (see docs/learn.md).
+    """
+    from spektrify.learn import check_lessons, load_lessons
+
+    dirs = lessons or []
+    if check:
+        errors = check_lessons(dirs)
+        for e in errors:
+            typer.echo(e, err=True)
+        if errors:
+            raise typer.Exit(1)
+        typer.echo(f"{len(load_lessons(dirs))} lessons OK")
+        return
+    from spektrify import serve
+    from spektrify.io import DEMOS
+
+    try:
+        load_lessons(dirs)  # fail here, not in the browser
+    except (OSError, ValueError) as e:
+        raise typer.BadParameter(str(e), param_hint="--lessons") from e
+    cube = _load(path, dataset, layout, None, "block", None) if path else DEMOS[demo.value]()
+    serve(cube, port=port, host=host, open_browser=browser, learn=True, lesson_dirs=dirs)
+
+
 @app.command()
 def info(
     path: CubePath,

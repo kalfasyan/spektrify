@@ -83,6 +83,28 @@ class Store extends Emitter {
     return meta;
   }
 
+  /** What a reload should keep: cube size, display settings and marks (geometry only). */
+  snapshot() {
+    const s = this.state, m = this.meta;
+    return {
+      dims: [m.height, m.width, m.bands],
+      view: Object.fromEntries(KEEP_KEYS.map((k) => [k, $state.snapshot(s[k])])),
+      marks: s.marks.map(({ id, kind, geom, visible, color, name }) => ({ id, kind, geom: $state.snapshot(geom), visible, color, name })),
+      refMark: s.refMark,
+      seq: this._markSeq,
+    };
+  }
+
+  /** Re-apply a snapshot() after a reload; false (nothing restored) if the size changed. */
+  restore(snap) {
+    const m = this.meta;
+    if (snap.dims.join() !== [m.height, m.width, m.bands].join()) return false;
+    this._markSeq = snap.seq;
+    this.set({ ...snap.view, marks: snap.marks.map((mk) => ({ ...mk })), refMark: snap.refMark });
+    for (const mk of snap.marks) this.refreshMark(mk);
+    return true;
+  }
+
   /** Human label for a band: "#12 · 652.3 nm" or "#12". */
   bandLabel(i, short = false) {
     const m = this.meta;
@@ -257,6 +279,9 @@ class Store extends Emitter {
     return null;
   }
 }
+
+// Display settings that survive re-processing the same cube (see snapshot / restore).
+const KEEP_KEYS = ['mode', 'band', 'rgb', 'pcaOffset', 'pcaAsRgb', 'anomaly', 'anomalyK', 'summary', 'mathExpr', 'simRef', 'simDeg', 'anomalyTop'];
 
 /** Wrap big read-only payloads in a class instance so Svelte doesn't deep-proxy them. */
 class Payload {}

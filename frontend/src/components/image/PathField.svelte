@@ -5,7 +5,9 @@
   import { api } from '../../lib/api.js';
   import { fmtBytes } from '../../lib/util.js';
 
-  let { value = $bindable(''), placeholder = '' } = $props();
+  // No fallback value: a pipeline that leaves the parameter out (e.g. from a lesson or the CLI)
+  // binds `undefined`, which Svelte rejects for props with a default.
+  let { value = $bindable(), placeholder = '' } = $props();
   let open = $state(false);
   let listing = $state(null); // {dir, parent, entries}
 

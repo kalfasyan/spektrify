@@ -2,6 +2,7 @@
   import { ctl, store } from '../../../lib/controller.svelte.js';
   const s = store.state;
   let expr = $state(s.mathExpr);
+  $effect(() => { expr = s.mathExpr; }); // follow changes made elsewhere (e.g. a lesson step)
 
   let examples = $derived.by(() => {
     const m = s.meta, ax = m.axis;

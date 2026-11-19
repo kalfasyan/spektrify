@@ -1,0 +1,83 @@
+id = "cube"
+title = "What is a spectral cube?"
+summary = "A stack of pictures, one per wavelength, where every pixel holds a whole spectrum."
+level = "basics"
+order = 10
+demo = "scene"
+
+[[steps]]
+title = "A stack of pictures"
+text = """
+A normal photo stores three numbers per pixel: red, green and blue. A **spectral cube** stores
+many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
+450 nm (blue) to 950 nm (near infrared).
+
+Flip through the bands with the slider under the image, the **← →** keys, or the strip of
+thumbnails on the right.
+"""
+show = { mode = "band", band = 550 }
+
+[steps.task]
+kind = "band"
+prompt = "Go to a band in the near infrared, above 800 nm."
+near = 875
+tolerance = 75
+hint = "Drag the slider under the image to the right, or click a thumbnail near the bottom of the strip."
+success = "In the near infrared the leaf turns bright: plants reflect a lot of light there that our eyes can't see."
+retry = "Not yet: that band is below 800 nm. Keep going to the right."
+
+[[steps]]
+title = "Every pixel is a spectrum"
+text = """
+Look at the cube the other way: pick one pixel and read its value in every band. That curve
+is the pixel's **spectrum**, and it says what the material is made of far better than its
+colour does.
+
+The image now shows a colour composite so you can tell the objects apart.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click anywhere on the leaf."
+success = "The curve in the plot below is the leaf's spectrum. Notice the steep jump around 700 nm: that is the 'red edge' of plants."
+retry = "That's not the leaf. It's the large shape on the left."
+
+[[steps]]
+title = "Different materials, different curves"
+text = """
+Every material has its own spectral fingerprint. Pins stay on the image and their spectra stay
+in the plot, so you can compare them.
+"""
+
+[steps.task]
+kind = "pixel"
+region = "pill_b"
+prompt = "Now click one of the two lower discs on the right."
+hint = "The lower discs are the greenish ones."
+success = "Two pins, two curves. This disc peaks in the green and has a bump near 880 nm, a pattern the leaf doesn't share."
+retry = "Close, but that's not one of the two lower discs."
+
+[[steps]]
+title = "The cube in 3D"
+text = """
+Here is the whole cube as a solid block. The top face is one band; the sides show how every
+pixel along the edges changes across wavelengths.
+
+Drag to rotate, scroll to zoom, and use the sliders on the left to cut into the cube.
+"""
+view = "3d"
+
+[[steps]]
+title = "Check yourself"
+text = "This demo is 192 × 256 pixels with 96 bands."
+view = "image"
+
+[steps.task]
+kind = "choice"
+prompt = "How many numbers does the cube hold?"
+options = ["96", "49,152", "About 4.7 million"]
+answer = 2
+success = "Right: 192 × 256 × 96 = 4,718,592 numbers. Real cubes are often a hundred times larger, which is why fast tools matter."
+retry = "Count every pixel in every band: rows × columns × bands."

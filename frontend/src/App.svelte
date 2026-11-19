@@ -12,6 +12,8 @@
   import HelpDialog from './components/dialogs/HelpDialog.svelte';
   import PopupMenu from './components/dialogs/PopupMenu.svelte';
   import Toast from './components/dialogs/Toast.svelte';
+  import LearnPanel from './components/learn/LearnPanel.svelte';
+  import { learn } from './lib/learn.svelte.js';
   import { handleKey } from './lib/shortcuts.js';
 
   const s = store.state;
@@ -20,7 +22,11 @@
   $effect(() => { if (s.view === '3d') seen3d = true; });
 
   onMount(() => {
-    ctl.loadCube().then(() => { if (!store.meta) ui.modal = 'open'; });
+    const learning = location.hash === '#learn'; // `spektrify learn` opens this URL
+    ctl.loadCube().then(() => {
+      if (learning) learn.setOpen(true);
+      else if (!store.meta) ui.modal = 'open';
+    });
     // Live updates from Python (`Viewer.update(...)` in a notebook).
     const poll = setInterval(async () => {
       if (document.hidden) return;
@@ -48,6 +54,8 @@
 
 <div id="app" class:dragging={ui.dragging}>
   <TopBar />
+  <div class="workarea">
+  {#if learn.ui.open}<LearnPanel />{/if}
   <main id="main">
     <section class="view" class:active={s.view === 'image'} id="view-image"><ImageWorkspace /></section>
     {#if s.view === 'grid' && ui.ready}
@@ -60,6 +68,7 @@
       <section class="view active" id="view-quality"><QualityView /></section>
     {/if}
   </main>
+  </div>
   <StatusBar />
 </div>
 
