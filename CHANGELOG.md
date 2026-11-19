@@ -19,6 +19,15 @@ First release (to be tagged `v0.1.0`).
 - Preprocessing pipeline with registered, composable steps: `clip` (spektro's per-band
   percentile clipper), `calibrate` (dark / white reference), `crop`, `bands`, `bin`. Usable
   from Python (`Pipeline`), the CLI (`--step`) and the viewer's Preprocess panel.
+- More preprocessing steps for lab / close-range imaging: `badpixels` (hot / dead pixels,
+  dead rows and columns, NaN), `flatfield` (from a frame or estimated), `whitebalance`
+  (gray patch, reference spectrum or gray-world), `destripe`, `align` (per-band registration by
+  phase correlation, or shifts from a file), `smooth` (Savitzky-Golay, optional derivative),
+  `snv`, `msc` and `absorbance`. `calibrate` gained `clamp` and `eps`.
+- External files for calibration steps (dark / white references, flat-field frames, reference
+  spectra, alignment shifts) are loaded by one shared loader (`spektrify.preprocess.references`)
+  from `.npy`, `.csv` / `.txt` or any cube format; in Python an array can be passed directly.
+  The Preprocess panel shows a Browse button for these parameters.
 - Command line built with Typer: `spektrify view | info | quality | convert | demo | steps`,
   with `--json` output and `quality --strict` (exit code 1 on issues) for scripts and CI.
 - `spektrify demo` writes an example cube with planted artefacts to .h5 / .npz, or with

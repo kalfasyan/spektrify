@@ -66,6 +66,9 @@ src = ["src", "tests"]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "RUF", "PTH", "PIE", "RET", "C4"]
 ignore = ["RUF001", "RUF002", "RUF003"]  # λ, σ, × and friends are intentional
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["spektrify.preprocess.base.param", "spektrify.preprocess.param"]
+
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["PTH"]
 

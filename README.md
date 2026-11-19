@@ -43,9 +43,31 @@ spektrify view cube.hdr -s calibrate:dark=dark.hdr,white=white.hdr -s bin:2
 spektrify steps                                     # list steps and their parameters
 ```
 
-Steps run in order on the loaded cube: `clip` (per-band percentile cap, as in spektro),
-`calibrate` (dark / white reference to reflectance), `crop`, `bands` and `bin`. The viewer's
-**Preprocess** panel edits the same pipeline live.
+Steps run in order on the loaded cube. The viewer's **Preprocess** panel edits the same
+pipeline live (steps that need a file get a Browse button).
+
+| Step | What it does |
+| --- | --- |
+| `calibrate` | Reflectance from dark and white references (`dark=`, `white=`: number, spectrum or cube file) |
+| `flatfield` | Divide out uneven illumination, from a frame (`frame=`) or a smooth surface estimated from the data |
+| `whitebalance` | Equalise bands with a gray patch (`x0,y0,x1,y1`), a reference spectrum or gray-world |
+| `badpixels` | Repair hot / dead pixels, dead rows and columns, NaN |
+| `destripe` | Remove column / row striping (push-broom) |
+| `align` | Register bands to a reference band (phase correlation), or apply `shifts=` from a file |
+| `smooth` | Savitzky-Golay smoothing along the spectrum; `deriv=1` or `2` for derivatives |
+| `snv`, `msc`, `absorbance` | Per-pixel normalisation, scatter correction, −log10(R) |
+| `clip`, `crop`, `bands`, `bin` | Per-band percentile cap (as in spektro), crop, band range, pixel binning |
+
+A typical lab order is `badpixels → calibrate → flatfield → align → destripe → smooth / snv`:
+
+```bash
+spektrify view cube.h5 -s badpixels -s calibrate:dark=dark.h5,white=white.h5 \
+    -s flatfield:frame=flat.tif -s align:max_shift=4 -s snv
+```
+
+In Python, call a step directly to pass arrays: `Calibrate(dark=dark_arr, white=white_arr)(cube)`.
+Accepted reference files: `.npy`, `.csv` / `.txt` and every cube format; sizes are checked and
+mismatches give a clear error.
 
 ### Jobs from the shell
 

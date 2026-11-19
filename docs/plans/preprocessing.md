@@ -1,6 +1,6 @@
 # Plan: more preprocessing methods
 
-Status: implementing. Scope: lab / close-range multi- and hyperspectral imaging (no Earth observation).
+Status: implemented (see the PR). Scope: lab / close-range multi- and hyperspectral imaging (no Earth observation).
 
 ## Where we start
 

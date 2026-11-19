@@ -4,7 +4,9 @@
 >>> cube = Pipeline.parse(["calibrate:dark=dark.npy,white=white.npy", "bin:2"]).apply(cube)
 """
 
-from spektrify.preprocess import steps as _steps  # noqa: F401  (registers the built-ins)
+from spektrify.preprocess import corrections as _corrections  # noqa: F401  (register)
+from spektrify.preprocess import spectral as _spectral  # noqa: F401
+from spektrify.preprocess import steps as _steps  # noqa: F401
 from spektrify.preprocess.base import (
     Pipeline,
     Step,

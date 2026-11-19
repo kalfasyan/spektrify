@@ -100,3 +100,17 @@ def test_preprocessing_routes(call, session: Session, demo: Cube) -> None:
     with pytest.raises(ApiError) as e:
         call(session, "pipeline", "POST", {"steps": [{"name": "nope"}]})
     assert e.value.status == 400
+
+
+def test_browse_lists_reference_files_on_request(call, session: Session, tmp_path) -> None:
+    (tmp_path / "white.csv").write_text("1,2,3")
+    (tmp_path / "notes.md").write_text("x")
+    plain = call(session, "browse", dir=str(tmp_path)).obj["entries"]
+    refs = call(session, "browse", dir=str(tmp_path), refs=1).obj["entries"]
+    assert [e["name"] for e in plain] == [] and [e["name"] for e in refs] == ["white.csv"]
+
+
+def test_steps_route_marks_path_parameters(call, session: Session) -> None:
+    steps = {s["name"]: s for s in call(session, "steps").obj["steps"]}
+    kinds = {p["name"]: p["kind"] for p in steps["flatfield"]["params"]}
+    assert kinds["frame"] == "path" and kinds["degree"] == "int"

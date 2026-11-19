@@ -5,6 +5,7 @@
   import { ctl, store } from '../../lib/controller.svelte.js';
   import { api } from '../../lib/api.js';
   import Icon from '../Icon.svelte';
+  import PathField from './PathField.svelte';
 
   const s = store.state;
   let schema = $state([]);
@@ -44,10 +45,12 @@
         <button class="icon-btn small" title="Remove step" onclick={() => draft.splice(i, 1)}><Icon name="close" /></button>
       </div>
       {#each spec?.params ?? [] as p}
-        <label class="pp-param" title={p.help}>
+        <label class="pp-param" class:stacked={p.kind === 'path'} title={p.help}>
           <span>{p.name}</span>
           {#if p.type === 'bool'}
             <input type="checkbox" bind:checked={st.params[p.name]} />
+          {:else if p.kind === 'path'}
+            <PathField bind:value={st.params[p.name]} placeholder="number or file path" />
           {:else if p.type === 'int' || p.type === 'float'}
             <input type="number" step={p.type === 'int' ? 1 : 'any'} bind:value={st.params[p.name]} />
           {:else}
@@ -72,5 +75,6 @@
 <style>
   .pp-step { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; }
   .pp-param { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; }
+  .pp-param.stacked { grid-template-columns: 1fr; gap: 2px; }
   .pp-param input[type=checkbox] { justify-self: start; }
 </style>

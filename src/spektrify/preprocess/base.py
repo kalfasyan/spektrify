@@ -9,6 +9,7 @@ the viewer's Preprocess panel, which builds its form from :func:`step_schema`.
 from __future__ import annotations
 
 import dataclasses
+import types
 import typing
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
@@ -38,14 +39,25 @@ def register_step(name: str, help: str) -> Callable[[T], T]:  # noqa: A002
     return deco
 
 
-def param(default: Any, help: str) -> Any:  # noqa: A002
-    """A step parameter with a help text (shown in the CLI and the viewer)."""
-    return field(default=default, metadata={"help": help})
+def param(default: Any, help: str, *, path: bool = False) -> Any:  # noqa: A002
+    """A step parameter with a help text (shown in the CLI and the viewer).
+
+    ``path=True`` marks a parameter that names an external file; the viewer offers a file
+    browser for it. (In Python such a parameter may also be given an array directly.)
+    """
+    return field(default=default, metadata={"help": help, "path": path})
+
+
+def _base_type(t: Any) -> type:
+    """``str | ndarray`` (a file path, or an array in Python) is a ``str`` parameter."""
+    if typing.get_origin(t) in (typing.Union, types.UnionType):
+        return str if str in typing.get_args(t) else typing.get_args(t)[0]
+    return t
 
 
 def _params(cls: Any) -> list[tuple[dataclasses.Field[Any], type]]:
     hints = typing.get_type_hints(cls)
-    return [(f, hints[f.name]) for f in dataclasses.fields(cls)]
+    return [(f, _base_type(hints[f.name])) for f in dataclasses.fields(cls)]
 
 
 def step_schema() -> list[dict[str, Any]]:
@@ -60,6 +72,7 @@ def step_schema() -> list[dict[str, Any]]:
                     "type": t.__name__,
                     "default": f.default,
                     "help": f.metadata["help"],
+                    "kind": "path" if f.metadata.get("path") else t.__name__,
                 }
                 for f, t in _params(cls)
             ],
@@ -99,8 +112,14 @@ def make_step(name: str, params: Mapping[str, Any] | None = None) -> Step:
 def describe(step: Any) -> str:
     """``bin(factor=2)``: the step name and its parameters."""
     name = next(n for n, c in _STEPS.items() if isinstance(step, c))
-    args = [f"{f.name}={getattr(step, f.name)!r}" for f in dataclasses.fields(step)]
+    args = [f"{f.name}={_short(getattr(step, f.name))}" for f in dataclasses.fields(step)]
     return f"{name}({', '.join(args)})"
+
+
+def _short(value: Any) -> str:
+    if hasattr(value, "shape"):  # an array passed in Python: don't print its content
+        return f"<array {'x'.join(map(str, value.shape))}>"
+    return repr(value)
 
 
 @dataclass(frozen=True)

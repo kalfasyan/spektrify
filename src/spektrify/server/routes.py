@@ -265,7 +265,9 @@ def browse(s: Session, r: Request) -> Json:
     base = Path(raw).expanduser() if raw else s.default_dir()
     if not base.is_dir():
         base = base.parent
-    suffixes = supported_suffixes()
+    suffixes = set(supported_suffixes())
+    if r.get("refs", ""):  # picking a calibration file: spectra and shift tables are text too
+        suffixes |= {".csv", ".txt"}
     entries = []
     try:
         for p in sorted(base.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
