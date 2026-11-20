@@ -1,0 +1,51 @@
+id = "sharpen"
+title = "Sharpening"
+summary = "Unsharp masking adds back the detail a blur removes, and boosts the noise with it."
+level = "intermediate"
+unit = "Filters"
+order = 40
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 3: sharpening, unsharp masking and highboost filtering.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: linear filtering (sharpening).",
+]
+
+[[steps]]
+title = "Detail is what a blur removes"
+text = """
+Subtract a blurred copy from the image and what is left is the **detail**: edges and fine
+texture. `nm(800) - gauss(nm(800), 2)` shows it. It is zero on flat areas.
+"""
+show = { mode = "math", mathExpr = "nm(800) - gauss(nm(800), 2)", cmap = "diverging" }
+
+[[steps]]
+title = "Unsharp masking"
+text = """
+Add the detail back, amplified, and edges look crisper:
+`nm(800) + 1.5 * (nm(800) - gauss(nm(800), 2))`. The odd name comes from the darkroom,
+where a blurred ('unsharp') negative was used as a mask.
+
+Zoom into a disc: each edge now has a dark band on its dark side and a bright band on its
+bright side. These **overshoots** are what makes an edge look sharper, and what makes
+over-sharpened photos look haloed.
+"""
+show = { mode = "math", mathExpr = "nm(800) + 1.5 * (nm(800) - gauss(nm(800), 2))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Does sharpening recover detail that the optics blurred away?"
+options = [
+  "Yes, it restores the true image",
+  "No. It boosts the differences that are still there; detail that was lost stays lost",
+]
+answer = 1
+success = "Right. Undoing a known blur is deconvolution (restoration), and even that fails where noise dominates."
+retry = "Sharpening only amplifies what the blurred copy didn't contain."
+
+[[steps]]
+title = "Sharpening boosts noise"
+text = """
+The same operation on the noisy band 4 makes it worse: noise *is* fine detail.
+In practice, sharpen only after denoising, or for display only.
+"""
+show = { mode = "math", mathExpr = "b[4] + 1.5 * (b[4] - gauss(b[4], 2))", cmap = "gray" }

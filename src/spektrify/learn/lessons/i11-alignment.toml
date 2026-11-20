@@ -1,9 +1,14 @@
 id = "alignment"
 title = "Aligning the bands"
 summary = "When bands don't line up, edges get colour fringes and spectra mix neighbouring pixels."
-level = "correction"
-order = 75
+level = "intermediate"
+unit = "From raw data to clean data"
+order = 110
 demo = "capture"
+reading = [
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 9: translational alignment (including phase correlation).",
+  "B. Zitová & J. Flusser, 'Image registration methods: a survey', *Image and Vision Computing* 21(11), 2003.",
+]
 
 [[steps]]
 title = "Colour fringes"

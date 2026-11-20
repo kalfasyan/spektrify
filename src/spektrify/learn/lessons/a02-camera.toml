@@ -1,0 +1,97 @@
+id = "camera"
+title = "Cameras and image formation"
+summary = "The pinhole model, intrinsics and distortion, what a pixel value really measures, and how spectral cameras scan a cube."
+level = "advanced"
+unit = "Features and geometry"
+order = 20
+demo = "capture"
+reading = [
+  "Hartley & Zisserman, *Multiple View Geometry* (2nd ed.), ch. 6: camera models.",
+  "Ma, Soatto, Košecká & Sastry, *An Invitation to 3-D Vision*, ch. 3: image formation.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: image formation (geometry, photometry, the digital camera).",
+  "Z. Zhang, 'A flexible new technique for camera calibration', *IEEE TPAMI* 22(11), 2000.",
+]
+
+[[steps]]
+title = "The pinhole camera"
+text = """
+The simplest camera model is a pinhole. A point at (X, Y, Z) in front of the camera lands
+on the image at **x = f·X / Z, y = f·Y / Z**, where f is the focal length. Dividing by depth
+Z is **perspective**: far things look smaller and parallel lines meet at vanishing points.
+
+The **intrinsic** parameters (focal length in pixels, the image centre, pixel shape) go in a
+3 × 3 matrix K. The **extrinsic** ones, a rotation R and translation t, say where the
+camera is. Together: **x ≃ K [R | t] X**, the projection matrix.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "An object moves from 1 m to 2 m away from the camera. What happens to its image?"
+options = [
+  "Its width halves and its area drops to a quarter",
+  "Its width and its area both halve",
+  "It stays the same size",
+]
+answer = 0
+success = "Right: width and height both halve (x = f·X/Z), so the area drops to a quarter. Fewer pixels per object also means more noise in its average spectrum."
+retry = "x = f·X/Z: what happens to x when Z doubles, and to the area?"
+
+[[steps]]
+title = "Lenses and calibration"
+text = """
+Real lenses bend straight lines near the image border (**radial distortion**: barrel or
+pincushion). **Calibration** estimates K and the distortion from photos of a known pattern,
+typically a checkerboard in several poses (Zhang's method). Measuring sizes or combining
+cameras without calibration gives errors that grow towards the image corners.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You measure the length of parts anywhere in the image. What must you do first?"
+options = [
+  "Calibrate the camera and correct the lens distortion",
+  "Increase the exposure",
+  "Convert to reflectance",
+]
+answer = 0
+success = "Right. Reflectance calibration fixes values; geometric calibration fixes positions."
+retry = "The question is about positions and lengths, not values."
+
+[[steps]]
+title = "What a pixel value measures"
+text = """
+A pixel value is roughly **exposure × gain × ∫ illumination(λ) · reflectance(λ) ·
+sensitivity(λ) dλ** over the band, plus dark signal and noise. Only reflectance belongs to
+the material; everything else belongs to the setup. That is exactly what the dark and
+white references in the calibration lesson cancel.
+
+This is the raw capture demo: the white tile's hump is the lamp times the sensor.
+"""
+show = { mode = "band", band = 700, specView = "values" }
+
+[[steps]]
+title = "How spectral cameras build a cube"
+text = """
+A sensor is 2-D but a cube is 3-D, so spectral cameras trade something:
+
+- **Push-broom** (line scan): one image line at a time, spread into all wavelengths. The
+  object or camera must move. Each detector column sees one image column, so a bad element
+  makes a **stripe**; optics add *smile* and *keystone* (bands slightly bent or scaled).
+- **Filter wheel / tunable filter**: one band at a time. Motion between bands, or slightly
+  different optics per filter, **misregisters** the bands.
+- **Snapshot mosaic**: a pattern of tiny filters on the pixels, like an RGB camera's Bayer
+  pattern but with more bands. One shot, but each band is sampled at different positions and
+  must be **demosaiced**.
+
+This capture shows the misregistration of the last kind: colour fringes at every edge.
+"""
+show = { mode = "rgb", rgb = [830, 640, 545] }
+pipeline = []
+
+[steps.task]
+kind = "choice"
+prompt = "Your cubes have vertical stripes that stay in the same columns in every scan. Which camera type is most likely?"
+options = ["Push-broom", "Filter wheel", "Snapshot mosaic"]
+answer = 0
+success = "Right. In a push-broom camera each image column comes from the same detector element in every line."
+retry = "Which design records each image column with one fixed detector element?"

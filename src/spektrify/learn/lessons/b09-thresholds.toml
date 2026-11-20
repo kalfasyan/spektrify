@@ -1,0 +1,73 @@
+id = "thresholds"
+title = "Thresholds and Otsu's method"
+summary = "Turn an image into a yes/no mask, and let the histogram choose the threshold for you."
+level = "basics"
+unit = "Pixel operations"
+order = 90
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 10: thresholding, including Otsu's method.",
+  "N. Otsu, 'A threshold selection method from gray-level histograms', *IEEE Trans. SMC* 9(1), 1979.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: binary image processing.",
+]
+
+[[steps]]
+title = "A mask from one rule"
+text = """
+**Thresholding** is the simplest segmentation: every pixel above a value becomes 1 (white),
+every other pixel 0 (black). The result is a **mask**.
+
+Here: `nm(800) > 0.4`, the pixels that are bright in the near infrared.
+"""
+show = { mode = "math", mathExpr = "nm(800) > 0.4", cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_a"
+prompt = "The goal was a mask of the leaf. Click an object the mask kept that is not the leaf."
+success = "The upper discs are bright in the near infrared too. One band and one brightness can't tell materials apart."
+retry = "Look for white areas that are not the leaf."
+
+[[steps]]
+title = "Threshold an index instead"
+text = """
+A better feature makes the threshold easy. The vegetation index from the band math lesson,
+`(nm(800) - nm(670)) / (nm(800) + nm(670))`, is close to 0.9 on the leaf and close to 0
+everywhere else. Its histogram has two well-separated peaks.
+
+**Otsu's method** picks the threshold automatically: it tries every value and keeps the one
+that makes the two groups as tight as possible (equivalently, as far apart as possible).
+`otsu(x)` returns that value.
+"""
+show = { mode = "math", mathExpr = "(nm(800) - nm(670)) / (nm(800) + nm(670)) > otsu((nm(800) - nm(670)) / (nm(800) + nm(670)))", cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the object the mask selects."
+success = "Only the leaf. Most of the work was done by choosing a good feature; the threshold was then easy."
+retry = "Click one of the white areas."
+
+[[steps]]
+title = "What Otsu assumes"
+text = """
+Otsu's method assumes **two groups**. Feed it a band with several materials and it still
+draws one line. On red light (`nm(670)`) it splits 'darkest material' from 'everything
+else', which happens to isolate the leaf but would fail with a second dark material.
+
+When the histogram has more than two peaks, or one group is tiny, use several thresholds,
+a better feature or a classifier.
+"""
+show = { mode = "math", mathExpr = "nm(670) > otsu(nm(670))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "A threshold chosen by hand on Monday fails on Friday, when the lamp is dimmer. What fixes the cause?"
+options = [
+  "Calibrating to reflectance, so values no longer depend on the lamp",
+  "Choosing a different colour map",
+  "Lowering the threshold every time",
+]
+answer = 0
+success = "Right. A threshold on calibrated reflectance (or on a ratio, which cancels brightness) means the same thing every day. Otsu adapts too, but it can't tell a dim lamp from a darker sample."
+retry = "Fix the measurement, not the threshold: what makes values independent of the light?"

@@ -2,8 +2,13 @@ id = "wavelengths"
 title = "Bands and wavelengths"
 summary = "Read a leaf's spectrum: chlorophyll absorption, the green bump and the red edge."
 level = "basics"
-order = 20
+unit = "Images and spectra"
+order = 30
 demo = "scene"
+reading = [
+  "D. M. Gates et al., 'Spectral properties of plants', *Applied Optics* 4(1), 1965.",
+  "Forsyth & Ponce, *Computer Vision: A Modern Approach* (2nd ed.), ch. 3: colour, light and surface reflectance.",
+]
 
 [[steps]]
 title = "Why leaves look green"

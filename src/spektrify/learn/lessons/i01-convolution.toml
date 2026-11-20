@@ -1,0 +1,84 @@
+id = "convolution"
+title = "Neighbourhoods and convolution"
+summary = "Replace each pixel by a weighted average of its neighbours: the kernel, box and Gaussian blur, and why convolution is the workhorse of vision."
+level = "intermediate"
+unit = "Filters"
+order = 10
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 3: fundamentals of spatial filtering, smoothing filters.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: linear filtering, separable filtering.",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on linear filters and blur.",
+]
+
+[[steps]]
+title = "A very noisy band"
+text = """
+This band (471 nm, band 4) is buried in noise: every pixel is off by a random amount,
+independently of its neighbours. But neighbouring pixels usually show the *same* material.
+So averaging a pixel with its neighbours keeps the signal and averages the noise away.
+"""
+show = { mode = "band", band = "#4", cmap = "gray" }
+
+[[steps]]
+title = "The box filter"
+text = """
+`box(b[4], 2)` replaces each pixel by the mean of the 5 × 5 square around it. The table of
+weights (here 25 equal weights of 1/25) is called the **kernel**. Sliding the kernel over
+the image and taking the weighted sum at every position is **convolution**.
+
+At the image border part of the square falls outside. Something has to fill it in: zeros
+(which darken the border), the nearest pixel, or a mirror image. spektrify mirrors.
+"""
+show = { mode = "math", mathExpr = "box(b[4], 2)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Averaging 25 pixels with independent noise divides the noise's standard deviation by…"
+options = ["25", "5", "2"]
+answer = 1
+success = "Right: by √25 = 5. Noise averages down with the square root of the number of samples, which is why halving noise costs four times the pixels."
+retry = "Independent noise averages down with the square root of the number of samples."
+
+[[steps]]
+title = "The Gaussian filter"
+text = """
+The box treats a pixel at the corner of the square like the centre. A **Gaussian kernel**
+gives weights that fall off smoothly with distance; σ (in pixels) sets the scale:
+`gauss(b[4], 1.5)`.
+
+The Gaussian is the default blur in vision. It treats all directions alike, it creates no
+blocky artefacts, and blurring twice is the same as blurring once with a larger σ.
+"""
+show = { mode = "math", mathExpr = "gauss(b[4], 1.5)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "You blur with σ = 3, then again with σ = 4. Which single blur gives the same result?"
+options = ["σ = 7", "σ = 5", "σ = 12"]
+answer = 1
+success = "Right: variances add, 3² + 4² = 5². Chaining Gaussians is how image pyramids and scale spaces are built."
+retry = "It's the variances (σ²) that add, not σ."
+
+[[steps]]
+title = "Why convolution is everywhere"
+text = """
+Convolution has two properties that make it the workhorse of image processing:
+
+- **Linear**: filtering a sum of images equals the sum of the filtered images.
+- **Shift-invariant**: the same kernel is applied everywhere, so an object is treated alike
+  wherever it appears.
+
+Any operation with both properties is a convolution. Gaussian and box kernels are also
+**separable**: a 2-D pass equals a horizontal 1-D pass followed by a vertical one, which
+costs 2k instead of k² operations per pixel. The convolutional networks at the end of the
+course are stacks of exactly this operation, with kernels learned from data.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A separable 15 × 15 kernel. Roughly how many multiplications per pixel does it need when done as two 1-D passes?"
+options = ["225", "30", "15"]
+answer = 1
+success = "Right: 15 + 15 = 30 instead of 225. That factor matters on large images and cubes."
+retry = "Each 1-D pass needs 15 multiplications per pixel."

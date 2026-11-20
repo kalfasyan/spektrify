@@ -1,0 +1,107 @@
+id = "evaluation"
+title = "Evaluating a model honestly"
+summary = "Confusion matrices, precision and recall, IoU, and the data splits that keep you from fooling yourself, including spatial leakage."
+level = "advanced"
+unit = "Learning from data"
+order = 90
+demo = "scene"
+reading = [
+  "Bishop, *Pattern Recognition and Machine Learning*, ch. 1.3: model selection and cross-validation.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 6: object detection (precision, recall, IoU, average precision).",
+  "D. R. Roberts et al., 'Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure', *Ecography* 40(8), 2017.",
+]
+
+[[steps]]
+title = "Accuracy can lie"
+text = """
+Treat this mask, `nm(800) > 0.4`, as a model that predicts 'leaf'. Compared with the true
+leaf, every pixel falls in one of four boxes, the **confusion matrix**:
+
+- **true positive** (leaf, predicted leaf), **false positive** (not leaf, predicted leaf),
+- **false negative** (leaf, missed), **true negative** (not leaf, not predicted).
+
+The background covers about 70% of this image and the leaf about 22%.
+"""
+show = { mode = "math", mathExpr = "nm(800) > 0.4", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "A 'model' that predicts 'not leaf' everywhere. What is its accuracy here?"
+options = ["0%", "About 22%", "About 78%"]
+answer = 2
+success = "Right: 78%, and it finds no leaf at all. With unbalanced classes, report per-class measures, not just accuracy."
+retry = "Accuracy counts every pixel it gets right. How much of the image is not leaf?"
+
+[[steps]]
+title = "Precision, recall and IoU"
+text = """
+- **Precision** = TP / (TP + FP): of what I predicted, how much was right?
+- **Recall** = TP / (TP + FN): of what was there, how much did I find?
+- **IoU** (intersection over union) = TP / (TP + FP + FN): the overlap of prediction and
+  truth, the standard score for segmentation and detection.
+
+For this mask: precision 0.85 (it also takes the upper discs and the saturated square),
+recall 0.96 (it misses parts of the darker vein), IoU 0.83. A vegetation-index mask
+(index > 0.5) scores above 0.99 on all three.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You lower the threshold so the mask grows. What usually happens?"
+options = [
+  "Recall rises and precision falls",
+  "Both rise",
+  "Precision rises and recall falls",
+]
+answer = 0
+success = "Right. A threshold trades one against the other; a precision–recall curve shows every trade-off, and average precision summarises it."
+retry = "A bigger mask finds more of the leaf, and more of everything else."
+
+[[steps]]
+title = "Honest splits"
+text = """
+Measure on data the model has never seen: train on the **training set**, tune choices on a
+**validation set**, and report the **test set** once at the end. Every decision you make
+by looking at test results leaks it into training.
+
+In images there is a trap. Neighbouring pixels are nearly identical, so if you split
+*pixels* at random, every test pixel has a twin in training and the score is far too
+optimistic. This **spatial leakage** is one of the most common errors in hyperspectral
+papers.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You have 30 cubes of 30 different fruits. How do you split?"
+options = [
+  "By cube: whole fruits go to training or to testing, never both",
+  "Randomly by pixel",
+  "Train and test on all the data",
+]
+answer = 0
+success = "Right. Split by whatever unit you'll meet as 'new' in practice: object, image, day, field or batch."
+retry = "In practice the model will see a new fruit, not new pixels of a fruit it knows."
+
+[[steps]]
+title = "Beyond one number"
+text = """
+A single score hides where a model fails. Senior practice:
+
+- Look at the **errors** themselves: are they at edges, in shadow, on one material?
+- **Stratify** by condition: per day, lamp, sensor, operator.
+- Give an **uncertainty** (cross-validation spread, bootstrap intervals). A 1% difference
+  on 50 test images may be noise.
+- Compare against a **simple baseline**, such as an index with a threshold.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Model B beats model A by 0.5% IoU on one test split of 40 images. What do you conclude?"
+options = [
+  "Nothing yet: check the variation across splits or bootstrap samples first",
+  "B is better; ship it",
+  "A is better",
+]
+answer = 0
+success = "Right. Without an uncertainty estimate, a small difference is not evidence."
+retry = "Would the difference survive a different choice of 40 test images?"

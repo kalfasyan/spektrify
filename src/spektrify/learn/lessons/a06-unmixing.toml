@@ -1,0 +1,69 @@
+id = "unmixing"
+title = "Mixed pixels and unmixing"
+summary = "A pixel often sees more than one material. The linear mixing model, endmembers and abundances."
+level = "advanced"
+unit = "Statistics without labels"
+order = 60
+demo = "scene"
+reading = [
+  "N. Keshava & J. F. Mustard, 'Spectral unmixing', *IEEE Signal Processing Magazine* 19(1), 2002.",
+  "J. M. Bioucas-Dias et al., 'Hyperspectral unmixing overview: geometrical, statistical, and sparse regression-based approaches', *IEEE JSTARS* 5(2), 2012.",
+]
+
+[[steps]]
+title = "Mixed pixels"
+text = """
+A pixel collects light from a small area. Where that area covers two materials, at every
+object border and wherever the camera is coarse compared to the objects, the spectrum is a
+**mixture**.
+
+This simulates a coarser camera by averaging 9 × 9 pixels before computing the vegetation
+index. The leaf's border becomes a soft ramp: those pixels are part leaf, part background.
+"""
+show = { mode = "math", mathExpr = "(box(nm(800), 4) - box(nm(670), 4)) / (box(nm(800), 4) + box(nm(670), 4))", cmap = "viridis" }
+
+[[steps]]
+title = "The linear mixing model"
+text = """
+If each material covers its own patch of the pixel, the pixel's spectrum is the
+area-weighted sum of the pure spectra:
+
+**x = a₁·e₁ + a₂·e₂ + … + noise**, with every **aᵢ ≥ 0** and **Σ aᵢ = 1**.
+
+The pure spectra eᵢ are **endmembers**; the fractions aᵢ are **abundances**. With two
+endmembers and one band you can solve it by hand. At 800 nm the leaf reflects about 0.5 and
+the background about 0.2, so the leaf fraction is `(x − 0.2) / (0.5 − 0.2)`, shown here
+(clipped to 0..1) on the coarse image.
+"""
+show = { mode = "math", mathExpr = "clip((box(nm(800), 4) - 0.2) / (0.5 - 0.2), 0, 1)", cmap = "viridis" }
+
+[steps.task]
+kind = "choice"
+prompt = "The upper discs also come out at 1 ('pure leaf') in this map. Why?"
+options = [
+  "One band can't tell leaf from disc: both are bright at 800 nm. Using all bands separates them",
+  "The discs contain chlorophyll",
+  "The clip function is wrong",
+]
+answer = 0
+success = "Right. With many bands you solve a least-squares problem for all abundances at once; with the constraints above it is 'fully constrained' unmixing."
+retry = "The formula only knows the leaf and the background, and only one band."
+
+[[steps]]
+title = "Finding endmembers"
+text = """
+In band space, mixtures of k endmembers fill a **simplex** (a triangle for 3, a tetrahedron
+for 4) whose corners are the pure spectra. Endmember-finding algorithms (PPI, N-FINDR, VCA)
+look for the most extreme pixels, usually after PCA to reduce noise.
+
+The linear model fails when light bounces between materials before reaching the camera:
+intimate mixtures such as powders, or leaves in a canopy. Those need nonlinear models.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "With C bands and the sum-to-one constraint, at most how many endmembers can be unmixed?"
+options = ["C + 1", "2", "Unlimited"]
+answer = 0
+success = "Right: C equations plus the sum-to-one constraint. In practice noise and similar endmembers lower that limit a lot."
+retry = "Count the equations: one per band, plus one for the sum."

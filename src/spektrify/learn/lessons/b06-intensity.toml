@@ -1,0 +1,93 @@
+id = "intensity"
+title = "Contrast and intensity transforms"
+summary = "Negatives, logarithms and gamma: change every pixel by the same rule to reveal what's hidden in the dark or the bright."
+level = "basics"
+unit = "Pixel operations"
+order = 60
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 3: intensity transformation functions (negatives, log, power-law, piecewise-linear).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: point operators.",
+]
+
+[[steps]]
+title = "One rule for every pixel"
+text = """
+The simplest image operation looks at each pixel on its own: **output = T(input)**, the same
+function T everywhere. The neighbours play no part. These are called **point operations**.
+
+The **negative** `1 - nm(670)` flips dark and bright. In red light the leaf is very dark
+(chlorophyll absorbs it), so in the negative it becomes bright.
+"""
+show = { mode = "math", mathExpr = "1 - nm(670)", cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the large object that turned bright."
+success = "The leaf. Negatives help when the detail you care about sits in dark areas, as in X-ray films."
+retry = "Look for the large bright shape on the left."
+
+[[steps]]
+title = "The logarithm"
+text = """
+In plain red (670 nm) the leaf is almost black and looks flat. The **log transform**
+`log(nm(670))` stretches dark values apart and squeezes bright ones together, so detail in
+the dark parts becomes visible: look for the leaf's central vein.
+
+Logs are also how we handle values that span many orders of magnitude, such as the Fourier
+spectra later in the course.
+"""
+show = { mode = "math", mathExpr = "log(nm(670))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which values does a log transform spread apart?"
+options = ["The dark (small) values", "The bright (large) values", "All values equally"]
+answer = 0
+success = "Right. The log curve is steep near zero and flat for large values."
+retry = "Think of log(1), log(10) and log(100): equal steps for ever larger gaps."
+
+[[steps]]
+title = "Gamma"
+text = """
+A **power law** `x ** γ` (on values scaled to 0..1) is the adjustable version: γ below 1
+brightens the dark tones, γ above 1 darkens them. Here γ = 0.4:
+`stretch(nm(670)) ** 0.4`.
+
+Gamma is everywhere: screens and image files store values with a gamma of about 2.2 because
+our eyes are more sensitive to differences in dark tones. The **Gamma** slider in the
+Stretch panel on the left applies the same idea to the display only.
+"""
+show = { mode = "math", mathExpr = "stretch(nm(670)) ** 0.4", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "You want to see details in the shadows. Which gamma do you choose?"
+options = ["0.5", "1", "2"]
+answer = 0
+success = "Yes. With γ < 1 the curve rises steeply at the dark end, giving shadows more of the grey range."
+retry = "Try a pixel value of 0.1: compare 0.1 ** 0.5 with 0.1 ** 2."
+
+[[steps]]
+title = "Why some transforms change nothing"
+text = """
+This image is `2 * nm(670) + 1`. It looks exactly like plain 670 nm. Why?
+
+The viewer already applies a **linear stretch** for display: it maps a low percentile to
+black and a high one to white (see the Stretch panel). Any linear transform `a·x + b`
+(with a > 0) is undone by that stretch. Only **nonlinear** transforms, such as log and gamma,
+change what you see.
+"""
+show = { mode = "math", mathExpr = "2 * nm(670) + 1", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Do display stretches and gamma change your data?"
+options = [
+  "No. They only change how values are mapped to the screen",
+  "Yes, they rewrite the pixel values",
+]
+answer = 0
+success = "Right. Keep display adjustments and measurements apart: compute on the data, stretch only for viewing."
+retry = "The Stretch panel affects the screen, not the cube."

@@ -1,0 +1,104 @@
+id = "composites"
+title = "Colour and composites"
+summary = "How eyes and cameras reduce a spectrum to three numbers, what that loses, and how false colour shows what the eye can't."
+level = "basics"
+unit = "Images and spectra"
+order = 40
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 6: colour fundamentals, colour models, pseudocolour.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: colour, CIE XYZ, metamers.",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapter on colour perception.",
+]
+
+[[steps]]
+title = "True colour"
+text = """
+Your eye has three kinds of colour receptors (cones), sensitive to broad, overlapping ranges
+that peak near 420, 530 and 560 nm. So the eye reduces a whole spectrum to just **three
+numbers**, and a screen recreates colour with three primaries: red, green and blue.
+
+Put bands near 640 (red), 550 (green) and 465 nm (blue) into the screen's channels and you
+get roughly what your eye would see: a **true-colour composite**. It is only approximate:
+exact colour weights the whole spectrum with standard curves (the CIE colour-matching
+functions) instead of picking three narrow bands.
+
+The **Display** panel on the left shows which band feeds each channel; you can change them
+there at any time.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465] }
+
+[[steps]]
+title = "False colour"
+text = """
+Nothing forces us to use visible bands. Here near infrared (800 nm) goes into red, red into
+green, and green into blue. This **false-colour composite** is a classic for spotting plants.
+"""
+show = { mode = "rgb", rgb = [800, 650, 550] }
+
+[steps.task]
+kind = "pixel"
+region = "leaf"
+prompt = "Click the object that turned bright red."
+success = "The leaf reflects strongly in the near infrared, so it glows red here."
+retry = "Look for the brightest red area."
+
+[[steps]]
+title = "Find what you can't see"
+text = """
+A composite of three *neighbouring* bands is a sharp tool: anything with a smooth spectrum
+comes out grey, and anything with a narrow feature in one of the bands comes out coloured.
+
+These are 760, 735 and 785 nm, all invisible to the eye. Zoom with the mouse wheel.
+"""
+show = { mode = "rgb", rgb = [760, 735, 785] }
+
+[steps.task]
+kind = "pixel"
+region = "target"
+prompt = "Find the tiny red spot and click it."
+hint = "It's above the leaf's right side, near the top of the image. Zoom in."
+success = "Found it. This target has a narrow peak at 760 nm; in true colour it is nearly invisible."
+retry = "Not that one. Look for a small red dot near the top, just right of the middle."
+
+[[steps]]
+title = "Three numbers are not enough"
+text = """
+Because the eye keeps only three numbers, two **different spectra** can give exactly the same
+three numbers and look identical. Such pairs are called **metamers**. A paint that matches
+under shop lighting but not in daylight is a metamer at work, and so is a fake that looks
+right to an RGB camera.
+
+A spectral camera keeps the whole curve, so metamers are easy to tell apart. This is one of
+the main reasons to use one.
+"""
+show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
+
+[steps.task]
+kind = "choice"
+prompt = "Two powders look the same to an RGB camera. What can a spectral camera add?"
+options = [
+  "Nothing: same colour means same spectrum",
+  "Their full spectra, which may differ even though their RGB values match",
+  "Only a sharper image",
+]
+answer = 1
+success = "Right. Same colour does not mean same spectrum; checking for counterfeits and contamination relies on this."
+retry = "Think about how many numbers the RGB camera keeps, and how many the spectrum has."
+
+[[steps]]
+title = "Check yourself"
+text = "Think back to the false-colour composite with near infrared shown as red."
+show = { mode = "rgb", rgb = [800, 650, 550] }
+
+[steps.task]
+kind = "choice"
+prompt = "In that composite, what does a bright red area usually mean?"
+options = [
+  "Hot objects",
+  "Material that reflects strongly in the near infrared, such as healthy vegetation",
+  "Surfaces painted red",
+]
+answer = 1
+success = "Right. False colour shows reflectance in the bands you chose, not heat or visible colour."
+retry = "Remember which band was put into the red channel."

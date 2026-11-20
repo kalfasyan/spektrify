@@ -1,9 +1,14 @@
 id = "band-math"
 title = "Band math and indices"
 summary = "Ratios and normalised differences turn spectra into maps of one property."
-level = "analysis"
-order = 50
+level = "basics"
+unit = "Pixel operations"
+order = 80
 demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 2: arithmetic and logical operations on images.",
+  "C. J. Tucker, 'Red and photographic infrared linear combinations for monitoring vegetation', *Remote Sensing of Environment* 8(2), 1979.",
+]
 
 [[steps]]
 title = "Divide one band by another"

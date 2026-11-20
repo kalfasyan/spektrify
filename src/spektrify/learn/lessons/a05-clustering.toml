@@ -1,0 +1,83 @@
+id = "clustering"
+title = "Clustering into segments"
+summary = "k-means groups pixels by spectrum without any labels. See what it finds, what it splits and merges, and why clusters are not classes."
+level = "advanced"
+unit = "Statistics without labels"
+order = 50
+demo = "scene"
+reading = [
+  "Bishop, *Pattern Recognition and Machine Learning*, ch. 9.1–9.2: k-means and Gaussian mixtures.",
+  "Prince, *Computer Vision: Models, Learning, and Inference*, ch. 7: modelling complex data densities (mixtures of Gaussians).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 7: segmentation (k-means, mean shift, graph-based methods).",
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 10: segmentation by clustering and superpixels.",
+]
+
+[[steps]]
+title = "Grouping without labels"
+text = """
+**k-means** groups pixels into k clusters by spectrum:
+
+1. pick k starting spectra (spread out: k-means++),
+2. give each pixel to the nearest one,
+3. move each centre to the mean of its pixels, and repeat 2–3 until nothing changes.
+
+It minimises the total squared distance of pixels to their centres. Here, `kmeans(6)`:
+each colour is one cluster, numbered from darkest to brightest.
+"""
+show = { mode = "math", mathExpr = "kmeans(6)", cmap = "turbo" }
+
+[steps.task]
+kind = "choice"
+prompt = "The background is one material, yet it is split into two clusters. Why?"
+options = [
+  "Its brightness varies across the image (uneven lighting, vignetting), and Euclidean distance counts brightness differences",
+  "k-means is random",
+  "The background has two materials",
+]
+answer = 0
+success = "Right. k-means finds whatever differences are largest, wanted or not."
+retry = "Compare the two background clusters: is one simply brighter than the other?"
+
+[[steps]]
+title = "Too few clusters"
+text = """
+With `kmeans(4)` something has to give. Look at the lower discs: their bright centres join
+the upper discs' cluster, and their shaded rims join the background's. One material is cut
+in two, and each half is merged with a different material, because on raw values
+brightness differences are as large as material differences.
+"""
+show = { mode = "math", mathExpr = "kmeans(4)", cmap = "turbo" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_b"
+prompt = "Click one of the objects that k-means split into two clusters."
+hint = "Look for a disc with a ring of a different colour."
+success = "The lower discs: centre and rim are the same material, but k-means only sees distance. There is no single right k, and the distance you use matters as much."
+retry = "Look for a disc whose rim has a different colour from its centre."
+
+[[steps]]
+title = "Clusters are not classes"
+text = """
+A cluster number has no meaning until someone names it, and the numbering can change from
+run to run. k-means also assumes round clusters of similar size, and finds a local optimum
+that depends on the start.
+
+Its relatives fix some of this: **Gaussian mixtures** give each pixel a probability per
+cluster, **mean shift** finds the number of clusters itself, and **superpixels** (SLIC)
+cluster on spectrum *and* position to get compact image regions. Clustering is best for
+exploring a scene and proposing regions; telling materials apart reliably needs labels,
+which is the next unit.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You want clusters by spectral shape, not brightness. What do you change?"
+options = [
+  "Normalise each spectrum first (for example SNV) or use spectral angle as the distance",
+  "Use more clusters",
+  "Use fewer bands",
+]
+answer = 0
+success = "Right. The features and the distance decide what 'similar' means; the algorithm only follows."
+retry = "Recall the 'Comparing materials' lesson."

@@ -1,0 +1,77 @@
+id = "histograms"
+title = "Histograms"
+summary = "Count how many pixels have each value: the histogram shows materials, problems and the best contrast at a glance."
+level = "basics"
+unit = "Pixel operations"
+order = 70
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 3: histogram processing, equalisation, local histogram processing.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: histogram equalisation.",
+]
+
+[[steps]]
+title = "Counting values"
+text = """
+A **histogram** counts how many pixels fall into each range of values. It throws away *where*
+the pixels are and keeps only *how often* each value occurs.
+
+The Stretch panel on the left shows the histogram of the current image. In red light
+(670 nm), each material sits at its own brightness, so it makes its own peak: the dark leaf,
+the background, the brighter discs.
+"""
+show = { mode = "band", band = 670, cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which material makes the tallest peak?"
+options = ["The leaf", "The background", "The tiny target"]
+answer = 1
+success = "Right. The background covers about 70% of the image; the leaf about 22%. Peak height is area, not importance."
+retry = "Peak height counts pixels. Which material covers the most of the image?"
+
+[[steps]]
+title = "Why percentiles?"
+text = """
+In the Stretch panel, press **min–max**: the image turns almost black. A handful of
+saturated pixels (the white square left of the leaf) are far brighter than everything else,
+and they set the top of the range.
+
+The default **2–98%** stretch maps the 2nd percentile to black and the 98th to white, so a
+few extreme pixels can't take over. Press it again to go back.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "16 saturated pixels out of 49,152 ruined the min–max stretch. Why don't they ruin the 2–98% one?"
+options = [
+  "Percentiles ignore the most extreme 2% at each end, and 16 pixels are far fewer than that",
+  "The 2–98% stretch removes saturated pixels from the data",
+]
+answer = 0
+success = "Exactly. Percentiles are robust statistics: a few outliers barely move them."
+retry = "What fraction of the image are 16 pixels?"
+
+[[steps]]
+title = "Histogram equalisation"
+text = """
+**Equalisation** maps each value to the fraction of pixels darker than it:
+`equalize(nm(670))`. Afterwards every grey level is used about equally often, so contrast
+goes where most pixels are.
+
+It is great for looking, and adaptive versions (CLAHE) do it per region. But the mapping
+depends on the image content and is nonlinear, so equalised values are no longer
+reflectance: never measure on them.
+"""
+show = { mode = "math", mathExpr = "equalize(nm(670))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "You equalise two images of the same leaf taken on different days. Can you compare their pixel values?"
+options = [
+  "Yes, equalisation makes them comparable",
+  "No. Each image got its own mapping, which depends on everything else in it",
+]
+answer = 1
+success = "Right. Add one bright object to the scene and every other value shifts."
+retry = "The mapping is built from each image's own histogram."

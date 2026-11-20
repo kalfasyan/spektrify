@@ -1,9 +1,14 @@
 id = "anomaly"
 title = "Finding the unusual"
 summary = "RX and PCA residuals flag pixels unlike the rest of the scene, without knowing what to look for."
-level = "analysis"
-order = 110
+level = "advanced"
+unit = "Statistics without labels"
+order = 70
 demo = "scene"
+reading = [
+  "I. S. Reed & X. Yu, 'Adaptive multiple-band CFAR detection of an optical pattern with unknown spectral distribution', *IEEE Trans. ASSP* 38(10), 1990.",
+  "D. Manolakis & G. Shaw, 'Detection algorithms for hyperspectral imaging applications', *IEEE Signal Processing Magazine* 19(1), 2002.",
+]
 
 [[steps]]
 title = "The RX detector"
@@ -11,6 +16,10 @@ text = """
 **RX** learns what the scene looks like on average (the mean spectrum and how bands vary
 together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.
 Bright means unusual.
+
+Global RX models the whole scene as one bell-shaped (Gaussian) cloud. Real scenes hold
+several materials, so local versions (statistics from a window around each pixel) or
+per-cluster versions usually work better.
 """
 view = "image"
 show = { mode = "anomaly", anomaly = "rx", anomalyTop = 0 }

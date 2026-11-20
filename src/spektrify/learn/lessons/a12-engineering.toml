@@ -1,0 +1,123 @@
+id = "engineering"
+title = "Thinking like a senior engineer"
+summary = "Capstone: real scenarios on debugging order, baselines, failure analysis, throughput budgets and drift in production."
+level = "advanced"
+unit = "Learning from data"
+order = 120
+demo = "capture"
+reading = [
+  "Goodfellow, Bengio & Courville, *Deep Learning*, ch. 11: practical methodology.",
+  "D. Sculley et al., 'Hidden technical debt in machine learning systems', *NeurIPS*, 2015.",
+  "A. Karpathy, 'A recipe for training neural networks', 2019 (blog post).",
+]
+
+[[steps]]
+title = "Start from the data"
+text = """
+A sorting system has worked for months. After the lamp was replaced, accuracy dropped. The
+model, code and samples haven't changed.
+
+Experienced engineers debug in the order the data flows: **light → sensor → calibration →
+preprocessing → features → model**, and check each stage with a picture or a number before
+touching the next. This cube is raw capture data: the lamp's spectrum is in every count.
+"""
+show = { mode = "band", band = 700, specView = "values" }
+pipeline = []
+
+[steps.task]
+kind = "choice"
+prompt = "What do you check first?"
+options = [
+  "Whether calibration still uses current dark and white references, by comparing the white tile's spectrum before and after the change",
+  "Retrain the model with more layers",
+  "Lower the decision threshold",
+]
+answer = 0
+success = "Right. A new lamp changes the illumination spectrum; stale white references turn that into a shift in every 'reflectance'."
+retry = "What changed? Follow the light."
+
+[[steps]]
+title = "Baselines first"
+text = """
+Before a deep network, try the simplest method that could work: a vegetation index with a
+threshold, spectral angle to a reference, logistic regression on a few bands. It takes an
+hour, it tells you how hard the problem really is, and it is a sanity check for everything
+that follows. Many production systems never need more.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Your deep model scores 0.91 IoU; a threshold on an index scores 0.89. What does this tell you?"
+options = [
+  "The extra complexity buys little; consider whether it's worth its cost, data needs and failure modes",
+  "The deep model is clearly the right choice",
+  "The index must be wrong",
+]
+answer = 0
+success = "Right. Without the baseline, 0.91 would have looked impressive."
+retry = "How much does the complex model actually add?"
+
+[[steps]]
+title = "Read the failures"
+text = """
+The model's errors cluster along object edges, in every image, always on the same side
+of the objects. Patterns in the errors point to causes far better than the overall score.
+This capture has a known issue of exactly that kind: zoom into an edge.
+"""
+show = { mode = "rgb", rgb = [830, 640, 545] }
+
+[steps.task]
+kind = "choice"
+prompt = "What is the most likely cause?"
+options = [
+  "Band misregistration: edge pixels mix object and background across bands",
+  "Too few training epochs",
+  "The wrong colour map",
+]
+answer = 0
+success = "Right. Fix it upstream (the align step), not by training the model to live with it."
+retry = "Same side, every image, only at edges: which preprocessing lesson does that recall?"
+
+[[steps]]
+title = "Budgets"
+text = """
+A line must handle 100 items per second. Each item is a 256 × 256 cube with 96 bands in
+16-bit integers: 256 × 256 × 96 × 2 bytes ≈ 12.6 MB per cube.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "About 1.26 GB per second is too much for your link. Which change cuts the data the most while keeping what the model needs?"
+options = [
+  "Select or bin the bands the task actually needs (for example from PCA or feature importance), and crop to the item",
+  "Use a bigger GPU",
+  "Save as JPEG",
+]
+answer = 0
+success = "Right. Ten well-chosen bands are a tenfold saving. Lossy image compression would distort the spectra."
+retry = "Reduce the data at the source, without destroying the spectra."
+
+[[steps]]
+title = "Ship and watch"
+text = """
+In production the world drifts: lamps age, sensors warm up, suppliers change materials.
+Monitor the **inputs** (the white reference's spectrum, mean spectra, the fraction of
+saturated pixels) as well as the outputs, and alert when they move. Version data, code and
+models together, so any result can be reproduced.
+
+That's the course. You now have the toolkit: pixels and spectra, filters and frequencies,
+shapes, geometry, statistics, learning, and the judgement to put them together.
+"""
+view = "quality"
+
+[steps.task]
+kind = "choice"
+prompt = "Which signal warns you earliest that the lamp is ageing?"
+options = [
+  "A slow change in the white reference's raw spectrum",
+  "A drop in model accuracy reported by customers",
+  "A change in file size",
+]
+answer = 0
+success = "Right. Watch the inputs, and you see problems before the outputs fail."
+retry = "Which measurement sees the lamp directly?"

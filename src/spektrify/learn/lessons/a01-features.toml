@@ -1,0 +1,131 @@
+id = "features"
+title = "Corners and local features"
+summary = "Which points can be found again in another image? The structure tensor, Harris corners, scale, descriptors and robust matching with RANSAC."
+level = "advanced"
+unit = "Features and geometry"
+order = 10
+demo = "scene"
+reading = [
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 7: points and patches (detectors, descriptors, matching) and ch. 8: feature-based alignment, RANSAC.",
+  "C. Harris & M. Stephens, 'A combined corner and edge detector', *Alvey Vision Conference*, 1988.",
+  "D. G. Lowe, 'Distinctive image features from scale-invariant keypoints', *IJCV* 60(2), 2004.",
+  "M. A. Fischler & R. C. Bolles, 'Random sample consensus', *Comm. ACM* 24(6), 1981.",
+  "Hartley & Zisserman, *Multiple View Geometry* (2nd ed.), ch. 4: robust estimation.",
+]
+
+[[steps]]
+title = "What makes a point easy to find again?"
+text = """
+To stitch images, track motion or align bands we need points that can be found again in
+another image. Take a small window and imagine shifting it:
+
+- On a **flat** area nothing changes in any direction: the point is ambiguous.
+- On an **edge**, shifting *along* the edge changes nothing: you only know where you are
+  across it (the **aperture problem**).
+- At a **corner** every shift changes the window: the point is pinned down.
+"""
+show = { mode = "math", mathExpr = "grad(nm(670))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which point can be located exactly in a second image?"
+options = ["A point in the middle of the background", "A point on the smooth rim of a disc", "The corner of a square"]
+answer = 2
+success = "Right. Only a corner constrains both directions."
+retry = "Where does shifting the window in *any* direction change what you see?"
+
+[[steps]]
+title = "The Harris detector"
+text = """
+Harris and Stephens turned this into a formula. Around each pixel, collect the gradients in
+the **structure tensor** (the averages of dx², dy² and dx·dy). Its two eigenvalues say how
+much the window changes in its most and least changing directions:
+
+- both small: flat; one large: edge; both large: **corner**.
+
+The Harris response `det − k·trace²` is positive only when both are large. Detection keeps
+the pixels whose response is above a threshold (here 5% of the strongest):
+`harris(minimum(nm(800), 0.6), 1.5) > 0.05`. The `minimum` caps the saturated square so it
+can't drown out everything else. White pixels are detections; zoom in to see where they sit.
+"""
+show = { mode = "math", mathExpr = "harris(minimum(nm(800), 0.6), 1.5) > 0.05", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Besides the small square, two corners are found on the leaf. Where are they?"
+options = [
+  "Where the dead column cuts the leaf's outline, at its top and bottom",
+  "All along the leaf's outline",
+  "In the middle of the leaf",
+]
+answer = 0
+success = "Right: those are T-junctions, where two edges meet. The smooth outlines of the leaf and discs are edges, not corners."
+retry = "Zoom in on the white specks: where do two different edges meet?"
+
+[[steps]]
+title = "Scale"
+text = """
+Whether something is a corner depends on scale. With σ = 8, larger structures respond: the
+bright upper discs light up whole, because at that scale a disc is a small blob that changes
+in every direction.
+`harris(minimum(nm(800), 0.6), 8) > 0.05`
+
+Robust detectors therefore search across **scale space** (the image blurred with ever larger
+Gaussians) and keep points that are extreme in position *and* scale. SIFT does this with
+differences of Gaussians, the band-pass images from the pyramid lesson.
+"""
+show = { mode = "math", mathExpr = "harris(minimum(nm(800), 0.6), 8) > 0.05", cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_a"
+prompt = "Click one of the objects that responds at this coarse scale."
+success = "The upper discs. A detector that knows the scale of each point can also cut out a matching patch size in another image taken closer or further away."
+retry = "Look for the new white areas on the right."
+
+[[steps]]
+title = "Descriptors and matching"
+text = """
+A detected point needs a **descriptor**: a vector describing the patch around it, so that
+the same point in two images gives nearly the same vector. SIFT uses histograms of gradient
+directions in a 4 × 4 grid around the point (128 numbers), rotated to the patch's dominant
+direction. ORB uses fast binary comparisons; learned descriptors (SuperPoint and others)
+are trained on data.
+
+Matching takes each descriptor's nearest neighbour in the other image. **Lowe's ratio test**
+keeps a match only if the best is clearly better than the second best.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Why reject a match whose best and second-best candidates are almost equally close?"
+options = [
+  "It's ambiguous, as on repeated patterns, and likely to be wrong",
+  "It is too accurate",
+  "Descriptors can only match once",
+]
+answer = 0
+success = "Right. On a brick wall every brick looks alike; the ratio test drops such guesses."
+retry = "What does it mean if two different points look equally like the one you're matching?"
+
+[[steps]]
+title = "RANSAC: fit despite wrong matches"
+text = """
+Even after the ratio test some matches are wrong (**outliers**), and a least-squares fit is
+ruined by a few of them. **RANSAC** repeats: pick the *minimum* number of matches that
+define the model (2 for a shift with rotation and scale, 4 for a homography), fit it, count
+how many other matches agree. Keep the model with the most agreement, then refit on those
+inliers.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Why does RANSAC sample the minimum number of matches?"
+options = [
+  "The smaller the sample, the more likely it is to contain no outlier at all",
+  "It is the most accurate fit",
+  "To save memory",
+]
+answer = 0
+success = "Right. With 50% outliers a sample of 4 is clean 1 time in 16; a sample of 10, 1 time in 1,024."
+retry = "Each extra match in the sample is another chance to pick an outlier."

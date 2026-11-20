@@ -1,9 +1,13 @@
 id = "repair"
 title = "Repairing defects"
 summary = "Fill in bad pixels and remove stripes, and know what each repair costs."
-level = "correction"
-order = 80
+level = "intermediate"
+unit = "From raw data to clean data"
+order = 120
 demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 5: order-statistic filters and periodic noise reduction.",
+]
 
 [[steps]]
 title = "Bad pixels"

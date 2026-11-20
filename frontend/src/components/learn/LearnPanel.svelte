@@ -9,7 +9,7 @@
 
   const L = learn.ui;
   const s = store.state;
-  const LEVELS = [['basics', 'Basics'], ['correction', 'Cleaning up data'], ['analysis', 'Analysis']];
+  const LEVELS = [['basics', 'Basics'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']];
   const DEMO_NAMES = { scene: 'demo scene', capture: 'raw capture demo' };
   const TASK_ICONS = { pixel: 'inspect', band: 'band', choice: 'help' };
 
@@ -37,13 +37,14 @@
 
   <div class="learn-body">
     {#if !lesson}
-      <p class="intro">Short, hands-on lessons on spectral imaging. Each step changes the viewer next to it; click, scrub and compare as you go.</p>
+      <p class="intro">A hands-on course in computer vision, taught on spectral images: from pixels to filters, geometry and learning. Each step changes the viewer next to it; click, scrub and compare as you go.</p>
       {#each LEVELS as [level, label]}
         {@const items = L.lessons.filter((x) => x.level === level)}
         {#if items.length}
-          <div class="section-title">{label}</div>
+          <div class="section-title">{label}<span class="hint">{items.filter((x) => L.progress[x.id]?.done).length} / {items.length} done</span></div>
           <ol class="lesson-list">
-            {#each items as item}
+            {#each items as item, i}
+              {#if item.unit && item.unit !== items[i - 1]?.unit}<li class="unit-title">{item.unit}</li>{/if}
               <li>
                 <button class="lesson-card" disabled={L.busy} onclick={() => learn.start(item.id)}>
                   <span class="lc-title">{item.title}{#if L.progress[item.id]?.done}<span class="done" title="Completed">✓</span>{/if}</span>
@@ -61,6 +62,12 @@
         <div class="big">✓</div>
         <h2>{lesson.title}</h2>
         <p>Lesson complete.</p>
+        {#if lesson.reading?.length}
+          <div class="reading">
+            <div class="section-title">Further reading</div>
+            <ul>{#each lesson.reading as ref}<li class="md">{@html markdown(ref)}</li>{/each}</ul>
+          </div>
+        {/if}
         <div class="row col">
           {#if nextLesson}<button class="btn primary" onclick={() => learn.leave().then(() => learn.start(nextLesson.id))}>Next: {nextLesson.title}</button>{/if}
           <button class="btn" onclick={() => learn.go(0)}>Start again</button>

@@ -1,0 +1,77 @@
+id = "regions"
+title = "Regions and shape"
+summary = "From a mask to objects: connected components, their size, and numbers that describe their shape."
+level = "intermediate"
+unit = "Shapes and regions"
+order = 80
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 2 (connectivity) and ch. 12: feature extraction (boundary and region descriptors, moments).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: distance transforms, connected components.",
+]
+
+[[steps]]
+title = "Which pixels belong together?"
+text = """
+A mask says *which* pixels are 'on', not *how many objects* there are. **Connected
+components** gives each group of touching pixels its own number. Two pixels touch if they
+are neighbours: with **8-connectivity** (used here) diagonal neighbours count, with
+4-connectivity only side neighbours do.
+
+`components(nm(550) > 0.35)` numbers the bright objects in green light, largest first.
+"""
+show = { mode = "math", mathExpr = "components(nm(550) > 0.35)", cmap = "turbo" }
+
+[steps.task]
+kind = "choice"
+prompt = "How many separate objects does it number? (Neighbouring numbers can look alike in colour.)"
+options = ["4", "5", "1"]
+answer = 1
+success = "Five: the four discs and the saturated square. Labelling counts what the mask contains, defects included."
+retry = "Count every separate blob, including tiny ones. Zoom in left of the leaf."
+
+[[steps]]
+title = "Measure each region"
+text = """
+Once labelled, each region can be measured. `area(m)` gives every pixel the size of its
+region, in pixels.
+"""
+show = { mode = "math", mathExpr = "area(nm(550) > 0.35)", cmap = "viridis" }
+
+[steps.task]
+kind = "pixel"
+region = "hot_pixels"
+prompt = "Click the smallest region."
+hint = "It's tiny and left of the leaf. Zoom in."
+success = "16 pixels, against about 900 for each disc. Size is the simplest way to tell objects from defects."
+retry = "That one is large. Look for a tiny region left of the leaf."
+
+[[steps]]
+title = "Filter by size"
+text = """
+A rule on the measurement removes it: `area(m) > 100` keeps only regions larger than 100
+pixels. Unlike morphological opening, this doesn't change the shape of what it keeps.
+"""
+show = { mode = "math", mathExpr = "area(nm(550) > 0.35) > 100", cmap = "gray" }
+
+[[steps]]
+title = "Describing shape"
+text = """
+Many numbers summarise a region's shape:
+
+- **Area, perimeter, centroid, bounding box**.
+- **Circularity** 4π·area / perimeter²: 1 for a circle, lower for elongated or ragged shapes.
+- **Moments**: averages of x, y, x², xy… over the region. They give orientation and
+  elongation, and Hu's combinations stay the same when the shape moves, rotates or scales.
+
+These **hand-crafted features** were the input to classic pattern recognition, and they are
+still the quickest way to sort parts, grains or cells by shape.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Which shape has the highest circularity?"
+options = ["A square", "A disc", "A long thin rectangle"]
+answer = 1
+success = "Right: exactly 1 for a disc, about 0.785 (π/4) for a square, and close to 0 for a thin rectangle."
+retry = "The disc encloses the most area for its perimeter."

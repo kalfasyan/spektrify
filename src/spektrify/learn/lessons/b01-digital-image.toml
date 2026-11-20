@@ -1,0 +1,101 @@
+id = "digital-image"
+title = "What is a digital image?"
+summary = "Sampling and quantisation: how a camera turns light into a grid of numbers, and what each step loses."
+level = "basics"
+unit = "Images and spectra"
+order = 10
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 2: image sensing, sampling and quantisation, pixel neighbourhoods.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: the digital camera.",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on imaging and the pixel grid.",
+]
+
+[[steps]]
+title = "Light becomes numbers"
+text = """
+A camera does two things to the light that reaches it:
+
+- **Sampling**: it measures the light only at a grid of points, the **pixels**.
+- **Quantisation**: it rounds each measurement to one of a fixed number of levels.
+
+So a digital image is a table of numbers. This one is a single wavelength (550 nm) shown in
+grey: dark means little light, bright means a lot. Hover over the image and the status bar
+shows each pixel's position and value.
+"""
+show = { mode = "band", band = 550, cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "An 8-bit pixel can take how many different values?"
+options = ["8", "256", "255", "65,536"]
+answer = 1
+success = "Right: 2⁸ = 256 values, 0 to 255. Scientific cameras often use 12 bits (4,096 levels) or 16 bits (65,536)."
+retry = "Each extra bit doubles the number of values. Start from 2 values for 1 bit."
+
+[[steps]]
+title = "Too few grey levels"
+text = """
+Here the same band keeps only **4 levels**, as if the camera had 2 bits:
+`quantize(stretch(nm(550)), 4)`.
+
+Smooth changes in brightness turn into flat steps with sharp borders that aren't in the
+scene: **false contours**. More bits keep subtle differences apart, which matters when you
+measure small changes in a spectrum.
+"""
+show = { mode = "math", mathExpr = "quantize(stretch(nm(550)), 4)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Two materials differ by 0.2% in brightness. What do you need to tell them apart?"
+options = [
+  "A higher bit depth, so the difference falls into different levels",
+  "A bigger image",
+  "A colour map",
+]
+answer = 0
+success = "Yes. With 8 bits one level is about 0.4% of the range, too coarse; 12 bits gives 0.025%. Noise must also be below that difference."
+retry = "The difference is in the values, not in space or display."
+
+[[steps]]
+title = "Too few pixels"
+text = """
+Now the image keeps only every 8th pixel in each direction and blows it back up:
+`subsample(nm(550), 8)`.
+
+Edges become staircases and anything smaller than the pixel spacing can vanish or change
+shape. The tiny target near the top of the image is about 6 pixels across.
+"""
+show = { mode = "math", mathExpr = "subsample(nm(550), 8)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Can you still be sure the target is round?"
+options = [
+  "Yes, sampling never changes shapes",
+  "No. Details smaller than the spacing between samples are lost or distorted",
+]
+answer = 1
+success = "Right. The lesson 'Sampling, aliasing and pyramids' shows that coarse sampling can even invent patterns."
+retry = "Look at how the target and the disc edges changed."
+
+[[steps]]
+title = "Rows, columns and neighbours"
+text = """
+Pixels are addressed by column **x** (left to right) and row **y** (top to bottom), starting
+at the top-left corner. In code an image is usually an array indexed `[y, x]`, row first,
+which is a classic source of bugs.
+
+A pixel has 4 neighbours that share a side, and 8 if you count the corners. Many operations
+later in the course, such as filters and region labelling, are defined on these
+neighbourhoods.
+"""
+show = { mode = "band", band = 550, cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "hot_pixels"
+prompt = "Find the small white square near x = 20, y = 120 and click it."
+hint = "It is just left of the leaf's lower half. Zoom in with the mouse wheel and watch the coordinates in the status bar."
+success = "That 4 × 4 square of saturated pixels starts at x = 20, y = 120. As an array, it is data[120:124, 20:24]."
+retry = "Not there. Watch the coordinates in the status bar while you move the mouse."

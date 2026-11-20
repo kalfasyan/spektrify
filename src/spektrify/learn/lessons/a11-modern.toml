@@ -1,0 +1,111 @@
+id = "modern"
+title = "Modern architectures"
+summary = "Residual networks, U-Net for per-pixel labels, detectors, transformers and pretraining, and what changes when the input is a spectral cube."
+level = "advanced"
+unit = "Learning from data"
+order = 110
+reading = [
+  "K. He et al., 'Deep residual learning for image recognition', *CVPR*, 2016.",
+  "O. Ronneberger, P. Fischer & T. Brox, 'U-Net: convolutional networks for biomedical image segmentation', *MICCAI*, 2015.",
+  "A. Dosovitskiy et al., 'An image is worth 16x16 words: transformers for image recognition at scale', *ICLR*, 2021.",
+  "K. He et al., 'Masked autoencoders are scalable vision learners', *CVPR*, 2022.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 5 (more complex models) and ch. 6 (recognition: detection, segmentation).",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on transformers and representation learning.",
+]
+
+[[steps]]
+title = "Going deep: residual connections"
+text = """
+Very deep plain networks are hard to train: the gradient signal fades as it passes back
+through many layers. **Residual networks** (ResNets) let each block learn a correction to
+its input, **y = x + F(x)**. The identity path carries signal and gradients straight
+through, so networks with a hundred layers or more train well. Normalisation layers
+(batch norm, layer norm) keep activations in a healthy range.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "What does a residual block do if the best thing is to change nothing?"
+options = [
+  "It learns F(x) ≈ 0 and passes the input through",
+  "It cannot do that",
+  "It doubles the input",
+]
+answer = 0
+success = "Right. 'Do nothing' is easy to learn, so adding layers rarely hurts."
+retry = "Look at y = x + F(x)."
+
+[[steps]]
+title = "Per-pixel outputs: U-Net"
+text = """
+Classification gives one label per image; **segmentation** gives one per pixel. A **U-Net**
+shrinks the image in an encoder (growing context, losing detail), expands it again in a
+decoder, and adds **skip connections** that hand the fine detail from each encoder level to
+the matching decoder level. It remains a standard for medical, industrial and spectral
+segmentation.
+
+**Object detectors** predict boxes and classes instead: two-stage (Faster R-CNN), one-stage
+(YOLO family) or set-based with transformers (DETR).
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "What would a U-Net lose without its skip connections?"
+options = [
+  "Precise boundaries: the decoder would have to rebuild fine detail from a coarse map",
+  "The ability to classify",
+  "Nothing",
+]
+answer = 0
+success = "Right. The skips pass back the detail that the encoder's pooling threw away."
+retry = "What does the encoder discard as it shrinks the image?"
+
+[[steps]]
+title = "Attention and transformers"
+text = """
+A **vision transformer** cuts the image into patches (often 16 × 16 pixels), turns each into
+a vector (a **token**) and lets every token **attend** to every other: each token's output
+is a weighted mix of all tokens, with weights computed from how related they are. That
+gives global context from the first layer, where a CNN needs many layers to see far.
+
+The price: transformers build in fewer assumptions about images, so they need more data or
+pretraining, and attention's cost grows with the square of the number of tokens.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "With few labelled images and no pretrained model, which tends to do better?"
+options = [
+  "A CNN, whose built-in assumptions (local, shift-invariant filters) make up for the missing data",
+  "A transformer trained from scratch",
+]
+answer = 0
+success = "Right. Built-in assumptions (inductive biases) are worth most when data are scarce."
+retry = "Which model has to learn more from the data alone?"
+
+[[steps]]
+title = "Pretraining and transfer, for cubes"
+text = """
+Today most models start from **pretrained** weights: learned on huge datasets, often
+without labels (**self-supervised**: predict masked patches, or match two views of the same
+image), then **fine-tuned** on your task with far fewer labels.
+
+For spectral cubes this needs care:
+
+- RGB-pretrained models expect 3 channels: reduce bands (PCA), replace the first layer, or
+  use spectral pretraining.
+- **Augmentation** must respect physics. Flips, rotations and crops are fine; hue and colour
+  jitter change spectral signatures, so model brightness or illumination changes instead.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Which augmentation is safe for a model that classifies materials by spectrum?"
+options = [
+  "Random flips and rotations",
+  "Random hue shifts",
+  "Swapping band order",
+]
+answer = 0
+success = "Right. Geometry changes keep the spectrum; hue shifts and band swaps change the very signal the model must learn."
+retry = "Which change leaves every pixel's spectrum untouched?"
