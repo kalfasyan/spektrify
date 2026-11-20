@@ -15,8 +15,9 @@ from typing import Any
 
 from spektrify.preprocess import Pipeline
 
-LEVELS = ("basics", "correction", "analysis")
-"""Lesson groups, in the order the catalog lists them."""
+LEVELS = ("basics", "intermediate", "advanced")
+"""Lesson levels, in the order the catalog lists them. Within a level, ``unit`` names a
+group of related lessons (a subheading in the list)."""
 
 VIEWS = ("image", "grid", "3d", "quality")
 MODES = ("band", "rgb", "pca", "anomaly", "similarity", "summary", "math")
@@ -82,8 +83,10 @@ class Lesson:
     summary: str
     steps: tuple[Step, ...]
     level: str = "basics"
+    unit: str = ""  # subheading within the level, e.g. "Filters"
     order: int = 100
     demo: str | None = None  # built-in cube the lesson is written for (None = any cube)
+    reading: tuple[str, ...] = ()  # references shown when the lesson ends (Markdown)
     source: str = ""
 
     @property
@@ -97,20 +100,29 @@ class Lesson:
 def parse_lesson(data: Mapping[str, Any], *, default_id: str, source: str = "") -> Lesson:
     """Validate a parsed lesson file. Raises :class:`LessonError` naming the bad field."""
     where = source or default_id
-    _known(data, {"id", "title", "summary", "level", "order", "demo", "steps"}, where)
+    _known(
+        data,
+        {"id", "title", "summary", "level", "unit", "order", "demo", "reading", "steps"},
+        where,
+    )
     steps = data.get("steps")
     if not isinstance(steps, list) or not steps:
         raise LessonError(f"{where}: needs at least one [[steps]] table")
     level = _get(data, "level", str, where, "basics")
     if level not in LEVELS:
         raise LessonError(f"{where}: level must be one of {', '.join(LEVELS)}")
+    reading = _get(data, "reading", list, where, [])
+    if not all(isinstance(r, str) for r in reading):
+        raise LessonError(f"{where}.reading: must be a list of strings")
     return Lesson(
         id=_get(data, "id", str, where, default_id),
         title=_get(data, "title", str, where),
         summary=_get(data, "summary", str, where, ""),
         level=level,
+        unit=_get(data, "unit", str, where, ""),
         order=_get(data, "order", int, where, 100),
         demo=_get(data, "demo", str, where, None),
+        reading=tuple(reading),
         steps=tuple(_step(s, f"{where}: steps[{i}]") for i, s in enumerate(steps)),
         source=source,
     )

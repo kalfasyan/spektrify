@@ -1,0 +1,96 @@
+id = "classification"
+title = "Supervised classification"
+summary = "Learn from labelled examples: features, nearest-centroid and linear classifiers, decision boundaries, overfitting, and what priors do to rare classes."
+level = "advanced"
+unit = "Learning from data"
+order = 80
+demo = "scene"
+reading = [
+  "Bishop, *Pattern Recognition and Machine Learning*, ch. 1 (curve fitting, overfitting, decision theory), ch. 3.2 (bias–variance) and ch. 4 (linear models for classification).",
+  "Prince, *Computer Vision: Models, Learning, and Inference*, ch. 6 (learning and inference) and ch. 9 (classification models).",
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 13: image pattern classification.",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on learning and generalisation.",
+]
+
+[[steps]]
+title = "Learning from examples"
+text = """
+In **supervised** learning you have examples whose answer is known, pairs (x, y), and want a
+function that predicts y for new x. In pixel classification x is a pixel's features (its
+spectrum, an index, local texture) and y its material.
+
+The simplest classifier stores one **reference spectrum per class** and gives each pixel the
+class of the closest one. With spectral angle as the distance this is the classic
+**Spectral Angle Mapper**. Pin a pixel on one of the lower discs, then right-click the pin
+and choose **Find similar pixels**: the map shows each pixel's angle to it.
+"""
+show = { mode = "similarity", simDeg = 5, specView = "values" }
+
+[steps.task]
+kind = "pixel"
+region = "pill_b"
+prompt = "Pin a pixel on one of the lower discs, then use Find similar pixels."
+success = "Both lower discs light up, shaded edges included. Thresholding the angle turns this into a one-class classifier."
+retry = "Pin one of the two lower discs on the right."
+
+[[steps]]
+title = "Decision boundaries"
+text = """
+Every classifier splits feature space into regions, one per class; the borders are
+**decision boundaries**. A threshold on spectral angle draws a cone around the reference.
+Nearest centroid with Euclidean distance draws straight boundaries halfway between centres.
+
+**Linear classifiers** (logistic regression, linear SVM, LDA) learn a weighted sum of the
+features, **w·x + b**, and its sign gives the class. When classes aren't separable by a
+straight boundary, nonlinear models (kernels, decision trees, neural networks) bend it.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Two classes, nearest centroid, Euclidean distance. What is the boundary?"
+options = [
+  "The plane halfway between the two centres, perpendicular to the line joining them",
+  "A circle around one centre",
+  "There is none",
+]
+answer = 0
+success = "Right: the perpendicular bisector. That's why nearest centroid is a linear classifier."
+retry = "Which points are exactly as far from one centre as from the other?"
+
+[[steps]]
+title = "Overfitting"
+text = """
+A flexible model can fit the training examples perfectly by **memorising** them, noise
+included, and then fail on new data. That is **overfitting**: training error keeps falling
+while error on unseen data rises. The opposite, a model too simple to capture the pattern,
+is **underfitting**. The **bias–variance trade-off** names the two sides.
+
+Spectral data invites overfitting: 96 bands, strongly correlated, often with only a few
+dozen labelled samples. Remedies: more (and more varied) data, fewer features (band
+selection, PCA), **regularisation** (penalising large weights) and honest validation, the
+next lesson.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A model has 100% accuracy on its training pixels and 60% on a new image. What is the most likely problem?"
+options = ["Overfitting", "Underfitting", "The new image is too large"]
+answer = 0
+success = "Right. A big gap between training and test performance is the signature of overfitting."
+retry = "Perfect on what it has seen, poor on what it hasn't."
+
+[[steps]]
+title = "Rare classes and priors"
+text = """
+Many classifiers produce a **probability**. Bayes' rule says how evidence and prior belief
+combine: **P(class | x) ∝ P(x | class) · P(class)**. The prior P(class) matters enormously
+when one class is rare, such as defects on a production line.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "1 item in 1,000 is defective. A detector catches 99% of defects and falsely flags 1% of good items. When it flags an item, how likely is it really defective?"
+options = ["About 99%", "About 50%", "About 9%"]
+answer = 2
+success = "Right. Per 1,000 items: about 1 true alarm and about 10 false ones, so roughly 1 in 11. Rare classes need very low false-positive rates, or a second check."
+retry = "Count per 1,000 items: how many true alarms, how many false ones?"

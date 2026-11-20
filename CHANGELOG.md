@@ -9,6 +9,16 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- Learn mode is a computer-vision course: 34 lessons in three levels (basics,
+  intermediate, advanced), grouped into units, from digital images and histograms through
+  filters, Fourier, morphology and calibration to features, multi-view geometry, clustering,
+  unmixing, classification, evaluation, CNNs and transformers. Lessons take `unit` and
+  `reading` (shown when a lesson ends); levels are now `basics | intermediate | advanced`.
+- Band math can call image functions (`gauss`, `median`, `grad`, `fft`, `lowpass`,
+  `erode`, `opening`, `components`, `area`, `otsu`, `equalize`, `harris`, `kmeans(k)` and
+  more; see `docs/learn.md`), from the new pure-NumPy module `compute/imageops.py`, plus
+  `x`, `y`, `sin` and `cos` for test patterns.
+- The demo leaf has a chlorophyll absorption dip near 675 nm, as real leaves do.
 - Learn mode (`spektrify learn`, or the **Learn** button): 12 interactive lessons on spectral
   imaging, from what a cube is to calibration, band alignment, preprocessing, PCA and anomaly
   detection. Steps drive the real viewer, ask for a pixel, a band or a multiple-choice answer

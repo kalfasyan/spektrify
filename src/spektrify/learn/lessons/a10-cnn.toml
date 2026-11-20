@@ -1,0 +1,105 @@
+id = "cnn"
+title = "Convolutional networks"
+summary = "Build a network layer from parts you already know (filter, nonlinearity, pooling), then see how the filters are learned and how cubes go in."
+level = "advanced"
+unit = "Learning from data"
+order = 100
+demo = "scene"
+reading = [
+  "Goodfellow, Bengio & Courville, *Deep Learning*, ch. 6 (feedforward networks, back-propagation), ch. 8 (optimisation) and ch. 9 (convolutional networks).",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on neural networks, back-propagation and convolutional networks.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 5: deep learning.",
+  "Y. LeCun et al., 'Gradient-based learning applied to document recognition', *Proc. IEEE* 86(11), 1998.",
+]
+
+[[steps]]
+title = "One layer, from known parts"
+text = """
+A convolutional layer does three things you've already seen:
+
+1. **convolve** with a small kernel (here a smoothed horizontal derivative),
+2. apply a **nonlinearity**, usually ReLU = max(0, x), which keeps positive responses,
+3. optionally **pool**: keep the maximum of each small window, then subsample.
+
+`maximum(dx(gauss(nm(800), 1)), 0)` is one such **feature map**: it responds only where the
+image gets brighter to the right, the left edges of bright objects.
+"""
+show = { mode = "math", mathExpr = "maximum(dx(gauss(nm(800), 1)), 0)", cmap = "magma" }
+
+[steps.task]
+kind = "choice"
+prompt = "Why is the nonlinearity essential?"
+options = [
+  "Without it, any stack of convolutions is just one convolution, so depth would add nothing",
+  "It makes the network faster",
+  "It removes noise",
+]
+answer = 0
+success = "Right. Convolutions compose into a single convolution; the nonlinearity between them is what lets layers build complex features."
+retry = "Recall from the convolution lesson: what are two blurs in a row?"
+
+[[steps]]
+title = "Pooling and depth"
+text = """
+**Max pooling**, a dilation followed by subsampling, keeps 'is the feature somewhere around
+here?' and drops its exact position: `subsample(dilate(maximum(dx(gauss(nm(800), 1)), 0), 2), 4)`.
+
+Stack layers and each unit sees a larger patch of the input, its **receptive field**.
+Visualisations of trained networks show early layers responding to edges and blobs, middle
+layers to textures and parts, and late layers to whole objects.
+"""
+show = { mode = "math", mathExpr = "subsample(dilate(maximum(dx(gauss(nm(800), 1)), 0), 2), 4)", cmap = "magma" }
+
+[steps.task]
+kind = "choice"
+prompt = "Two 3 × 3 convolutions in a row (no pooling). How large is the receptive field?"
+options = ["3 × 3", "5 × 5", "9 × 9"]
+answer = 1
+success = "Right: each layer adds 2 pixels. Pooling and strides make it grow much faster."
+retry = "The second layer sees 3 × 3 outputs of the first, each of which saw 3 × 3 pixels."
+
+[[steps]]
+title = "Learning the filters"
+text = """
+We designed the derivative filter by hand. A network instead starts with random kernels and
+**learns** them. A **loss** measures how wrong its predictions are on training examples;
+**back-propagation** (the chain rule, applied layer by layer) gives the gradient of the loss
+with respect to every weight; **gradient descent** nudges each weight against its gradient.
+Repeated over many mini-batches (stochastic gradient descent), the kernels become whatever
+features best solve the task.
+
+Training needs a lot of labelled data, and the network learns whatever shortcut the data
+allow: if all healthy samples were imaged on Monday, it may learn 'Monday'.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "What does a convolutional layer learn during training?"
+options = [
+  "The weights of its kernels (and a bias per kernel)",
+  "The size of the image",
+  "The labels",
+]
+answer = 0
+success = "Right. The architecture (kernel sizes, layer count) is chosen by you; the weights are learned."
+retry = "What did we choose by hand in the first step that a network would choose itself?"
+
+[[steps]]
+title = "Cubes as input"
+text = """
+A normal 2-D convolution already mixes all input channels: each kernel has
+**bands × height × width** weights. So a first layer on a 96-band cube is large. Options:
+
+- **2-D** convolutions with all bands as channels (spatial patterns, spectra mixed at once),
+- **1-D** convolutions along the spectrum, per pixel (spectral shape only, small models),
+- **3-D** convolutions over bands and space together (spectral-spatial features, costly),
+- reduce bands first with PCA or band selection.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A 3 × 3 convolution from 96 bands to 32 feature maps. How many weights, ignoring biases?"
+options = ["288", "27,648", "9"]
+answer = 1
+success = "Right: 3 × 3 × 96 × 32 = 27,648. With only a few labelled cubes, that's a lot to learn, which is why band reduction or pretraining help."
+retry = "Each of the 32 kernels has 3 × 3 × 96 weights."

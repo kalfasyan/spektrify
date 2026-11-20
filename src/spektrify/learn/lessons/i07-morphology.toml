@@ -1,0 +1,92 @@
+id = "morphology"
+title = "Morphology"
+summary = "Erosion, dilation, opening and closing: shrink, grow and clean up masks with a small shape."
+level = "intermediate"
+unit = "Shapes and regions"
+order = 70
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 9: morphological image processing (erosion, dilation, opening, closing, greyscale morphology).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: morphology.",
+]
+
+[[steps]]
+title = "A mask with flaws"
+text = """
+Thresholds rarely give clean masks. This one, `nm(800) > 0.3`, finds the bright objects in
+the near infrared, but the dead column cuts the leaf in two and the saturated square adds a
+speck that isn't an object.
+
+**Morphology** repairs masks by probing them with a small shape, the **structuring
+element**. Here it is a square of side 2r + 1.
+"""
+show = { mode = "math", mathExpr = "nm(800) > 0.3", cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "dead_column"
+prompt = "Click where the leaf's mask is cut in two."
+hint = "A thin black line through the left half of the leaf. Zoom in."
+success = "The dead column. We'll close that gap."
+retry = "Look for a thin vertical black line through the leaf."
+
+[[steps]]
+title = "Erosion and dilation"
+text = """
+**Erosion** keeps a pixel only if the whole square around it is inside the mask: shapes
+shrink by r and anything smaller than the square disappears. `erode(m, 2)` here:
+the saturated speck is gone, and the gap in the leaf got wider.
+
+**Dilation** is the opposite: a pixel joins the mask if the square touches it. Shapes grow
+and small gaps fill. Try `dilate(nm(800) > 0.3, 2)` in the band-math box.
+"""
+show = { mode = "math", mathExpr = "erode(nm(800) > 0.3, 2)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "On a greyscale image, erosion with a square is the same as…"
+options = [
+  "Taking the minimum over the square",
+  "Taking the mean over the square",
+  "Taking the maximum over the square",
+]
+answer = 0
+success = "Right, and dilation is the maximum. That's why morphology works on grey images too, and why max pooling in neural networks is a dilation followed by subsampling."
+retry = "A pixel survives erosion only if all its neighbours are 'on'. On grey values, what operation does that?"
+
+[[steps]]
+title = "Closing fills gaps"
+text = """
+Erosion and dilation change sizes. Combine them and sizes come back:
+
+- **Closing** = dilate, then erode: fills gaps and holes smaller than the square.
+- **Opening** = erode, then dilate: removes specks smaller than the square.
+
+`closing(m, 1)` heals the one-pixel cut through the leaf and leaves the outlines almost
+unchanged.
+"""
+show = { mode = "math", mathExpr = "closing(nm(800) > 0.3, 1)", cmap = "gray" }
+
+[[steps]]
+title = "Opening removes specks"
+text = """
+Now open the closed mask with a 7 × 7 square: `opening(closing(m, 1), 3)`. The 4 × 4
+saturated speck is too small to contain the square, so it goes. Everything bigger survives
+with its shape intact.
+
+The size of the structuring element is the decision that matters: it says how big
+something must be to count as an object.
+"""
+show = { mode = "math", mathExpr = "opening(closing(nm(800) > 0.3, 1), 3)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Your mask has salt (white specks) and pepper (black holes). In which order do you clean it?"
+options = [
+  "Opening for the white specks and closing for the black holes; the order matters and should be checked on your data",
+  "Erosion only",
+  "Dilation only",
+]
+answer = 0
+success = "Right. Each removes one kind of flaw; which to run first depends on which flaw would otherwise grow."
+retry = "One operation removes small white things, the other small black things."

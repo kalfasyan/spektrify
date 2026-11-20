@@ -37,7 +37,9 @@ class _Scene:
     def _paint(self) -> np.ndarray:
         wl, xx, yy, g = self.wl, self.xx, self.yy, self.gauss
         background = 0.18 + 0.05 * (wl - 450) / 500
-        leaf = 0.05 + 0.08 * g(550, 30) + 0.45 / (1 + np.exp(-(wl - 715) / 12))
+        # Green bump, chlorophyll absorption around 675 nm, red edge near 715 nm, NIR plateau.
+        leaf = 0.05 + 0.08 * g(550, 35) - 0.035 * g(675, 18)
+        leaf = leaf + 0.45 / (1 + np.exp(-(wl - 715) / 12))
         pill_a = 0.70 - 0.25 * g(600, 60)
         pill_b = 0.35 + 0.30 * g(520, 40) + 0.15 * g(880, 50)
         anomaly = 0.30 + 0.35 * g(760, 8)

@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from spektrify.compute import imageops
 from spektrify.compute._util import finite_list as _clean
 from spektrify.compute.bandmath import safe_eval
 from spektrify.model import Cube
@@ -39,6 +40,7 @@ class NumpyAnalyzer:
         self.cube = cube
         self._lock = threading.RLock()
         self._pca_cache: dict[int, dict[str, Any]] = {}
+        self._cluster_cache: dict[int, F32] = {}
 
     # ------------------------------------------------------------------ sampling
 
@@ -468,6 +470,23 @@ class NumpyAnalyzer:
             t = np.nanmean(v, axis=(2, 4)).astype(np.float32) if s > 1 else v[:, :, 0, :, 0].copy()
         return np.ascontiguousarray(t), {"bands": c, "height": th, "width": tw, "step": s}
 
+    # ------------------------------------------------------------------ clustering
+
+    def clusters(self, k: int = 4) -> F32:
+        """k-means cluster map ``(H, W)``: pixels numbered 1..k by spectrum, darkest cluster
+        first. Fitted on a sample of pixels, then every pixel goes to its nearest centre."""
+        k = int(min(max(int(k), 2), 12))
+        with self._lock:
+            if k not in self._cluster_cache:
+                samples = self.samples[:: max(1, len(self.samples) // 20_000)]
+                centres = imageops.kmeans(samples, k)
+                flat = self._flat_filled().T
+                out = (imageops.nearest(flat, centres) + 1).astype(np.float32)
+                out = out.reshape(self.cube.height, self.cube.width)
+                out[~self.finite_mask] = np.nan
+                self._cluster_cache[k] = out
+            return self._cluster_cache[k]
+
     # ------------------------------------------------------------------ band math
 
     def band_math(self, expr: str) -> F32:
@@ -475,7 +494,11 @@ class NumpyAnalyzer:
 
         Names: ``b[i]`` (band by index), ``nm(λ)`` (band nearest to wavelength λ),
         ``mean``/``std`` (per-pixel across bands), numpy functions ``sqrt log exp abs
-        clip minimum maximum where``, and arithmetic / comparison operators.
+        clip minimum maximum where``, the image functions of
+        :mod:`spektrify.compute.imageops` (``gauss(nm(670), 2)``, ``grad``, ``otsu`` …),
+        ``kmeans(k)`` (cluster map of the whole cube), ``x`` / ``y`` (pixel column / row, for
+        test patterns such as ``cos(((x - 128)**2 + (y - 96)**2) / 150)``), ``sin`` ``cos``
+        and arithmetic / comparison operators.
         Example: ``(nm(800) - nm(670)) / (nm(800) + nm(670))``.
         """
         cube = self.cube
@@ -514,6 +537,12 @@ class NumpyAnalyzer:
             "maximum": np.maximum,
             "where": np.where,
             "pi": np.pi,
+            "sin": np.sin,
+            "cos": np.cos,
+            "x": np.arange(cube.width, dtype=np.float32)[None, :],
+            "y": np.arange(cube.height, dtype=np.float32)[:, None],
+            "kmeans": self.clusters,
+            **imageops.BANDMATH_FUNCTIONS,
         }
         with np.errstate(all="ignore"):
             out = safe_eval(expr, env)

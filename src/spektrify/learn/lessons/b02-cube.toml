@@ -2,8 +2,14 @@ id = "cube"
 title = "What is a spectral cube?"
 summary = "A stack of pictures, one per wavelength, where every pixel holds a whole spectrum."
 level = "basics"
-order = 10
+unit = "Images and spectra"
+order = 20
 demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 1 (the electromagnetic spectrum) and ch. 6 (multispectral images as vectors).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: the digital camera and colour.",
+  "G. Lu & B. Fei, 'Medical hyperspectral imaging: a review', *J. Biomedical Optics* 19(1), 2014 (a readable introduction to cubes outside remote sensing).",
+]
 
 [[steps]]
 title = "A stack of pictures"

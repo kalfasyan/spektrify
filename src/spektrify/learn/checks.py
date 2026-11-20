@@ -50,7 +50,9 @@ def lesson_json(lesson: Lesson, cube: Cube | None) -> dict[str, Any]:
         "title": lesson.title,
         "summary": lesson.summary,
         "level": lesson.level,
+        "unit": lesson.unit,
         "demo": lesson.demo,
+        "reading": list(lesson.reading),
         "uses_pipeline": lesson.uses_pipeline,
         "steps": [
             _step_json(s, cube, view, p)
@@ -91,6 +93,7 @@ def summary_json(lesson: Lesson) -> dict[str, Any]:
         "title": lesson.title,
         "summary": lesson.summary,
         "level": lesson.level,
+        "unit": lesson.unit,
         "demo": lesson.demo,
         "steps": len(lesson.steps),
     }

@@ -1,0 +1,106 @@
+id = "geometry"
+title = "Geometry of several views"
+summary = "Homogeneous coordinates, homographies, epipolar geometry, triangulation and bundle adjustment: how vision recovers 3-D structure."
+level = "advanced"
+unit = "Features and geometry"
+order = 30
+reading = [
+  "Hartley & Zisserman, *Multiple View Geometry* (2nd ed.), ch. 2 (projective geometry of the plane), ch. 4 (estimating homographies, DLT, normalisation), ch. 9–12 (epipolar geometry, the fundamental matrix, triangulation) and ch. 18 (bundle adjustment).",
+  "Ma, Soatto, Košecká & Sastry, *An Invitation to 3-D Vision*, ch. 5: reconstruction from two calibrated views (the essential matrix).",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 8 (image alignment and stitching) and ch. 11 (structure from motion and SLAM).",
+  "Prince, *Computer Vision: Models, Learning, and Inference*, ch. 14–16: the pinhole camera, transformation models, multiple cameras.",
+]
+
+[[steps]]
+title = "Homogeneous coordinates"
+text = """
+Write an image point (x, y) as **(x, y, 1)**, and treat (kx, ky, k) as the same point for
+any k ≠ 0. This small trick makes every transformation of the plane a 3 × 3 matrix, from
+simple to general:
+
+- **translation** (2 numbers), **rigid** (+ rotation, 3), **similarity** (+ scale, 4),
+- **affine** (parallel lines stay parallel, 6),
+- **projective** or **homography** (straight lines stay straight, 8).
+
+Points with a last coordinate of 0 are 'at infinity': where parallel lines meet.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A homography has 8 degrees of freedom and each point match gives 2 equations. How many matches does it need at least?"
+options = ["2", "4", "8"]
+answer = 1
+success = "Right: 4 matches, no three on a line. The direct linear transform (DLT) solves for it; normalise the coordinates first for a stable result."
+retry = "Divide the degrees of freedom by the equations each match gives."
+
+[[steps]]
+title = "When one homography is enough"
+text = """
+Two images are related by a single homography in two cases: the scene is a **plane**
+(a document, a sample tray, a wall), or the camera only **rotated** about its centre
+(panoramas). Then you can warp one image onto the other exactly.
+
+The align step in spektrify estimates only a shift per band, which is enough for a fixed
+camera; a tilted or moving sample needs a full homography, and a 3-D scene seen from
+different positions can't be aligned by any single warp.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Which pair of photos can be aligned exactly with one homography?"
+options = [
+  "Two shots of a poster taken from different angles",
+  "Two shots of a room taken from different positions",
+  "Two shots of a tree taken while walking past it",
+]
+answer = 0
+success = "Right: the poster is a plane. In the room and the tree, near and far things shift by different amounts (parallax)."
+retry = "Which scene is flat?"
+
+[[steps]]
+title = "Epipolar geometry"
+text = """
+With two views of a 3-D scene, a point in image 1 could be anywhere along a ray. Seen from
+camera 2 that ray is a line, the **epipolar line**, so the match must lie on it. The
+**fundamental matrix** F captures this: matching points satisfy **x′ᵀ F x = 0**. With
+calibrated cameras the same role is played by the **essential matrix** E = [t]ₓ R, which
+contains the relative rotation and the direction of translation.
+
+F is estimated from 8 or more matches (the eight-point algorithm, inside RANSAC).
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Why does epipolar geometry make stereo matching much easier?"
+options = [
+  "The search for each match shrinks from the whole image to one line",
+  "It removes the need for features",
+  "It makes the images identical",
+]
+answer = 0
+success = "Right. After rectification the epipolar lines are image rows, so stereo matching becomes a 1-D search along each row."
+retry = "Where can the matching point be, once you know F?"
+
+[[steps]]
+title = "Triangulation and bundle adjustment"
+text = """
+Once the cameras are known, a matched point is the intersection of two rays:
+**triangulation**. A wider baseline (distance between cameras) gives more precise depth.
+
+**Structure from motion** chains it all: features → matches → RANSAC on F or E → camera poses
+→ triangulated points. **Bundle adjustment** then refines every camera and every point
+together to minimise the **reprojection error**: the distance, in pixels, between where each
+3-D point projects and where it was observed.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Why minimise reprojection error, rather than an algebraic error such as x′ᵀ F x?"
+options = [
+  "It is measured in pixels, where the measurement noise lives, so the fit is statistically meaningful",
+  "It is faster to compute",
+  "It needs no initial guess",
+]
+answer = 0
+success = "Right. It is the maximum-likelihood estimate under Gaussian pixel noise. It needs a good starting point, which the algebraic methods provide."
+retry = "Which error has a physical unit tied to the measurements?"

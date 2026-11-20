@@ -2,8 +2,13 @@ id = "signatures"
 title = "Comparing materials"
 summary = "Brightness versus shape, and how spectral angle finds the same material in shade."
 level = "basics"
-order = 40
+unit = "Images and spectra"
+order = 50
 demo = "scene"
+reading = [
+  "F. A. Kruse et al., 'The spectral image processing system (SIPS)', *Remote Sensing of Environment* 44, 1993 (introduces the spectral angle mapper).",
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 6: colour (vector) segmentation and distances.",
+]
 
 [[steps]]
 title = "Same material, different brightness"

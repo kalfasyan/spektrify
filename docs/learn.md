@@ -1,7 +1,22 @@
 # Learn mode and writing lessons
 
-`spektrify learn` opens the viewer with a lesson panel on the left. Each lesson is a short
-sequence of steps; every step explains one idea and drives the real viewer next to it (switching
+`spektrify learn` opens the viewer with a lesson panel on the left. The bundled lessons form a
+course in computer vision taught on spectral images, in three levels:
+
+- **Basics**: digital images, cubes and wavelengths, colour and metamers, intensity
+  transforms, histograms, band math, thresholds, comparing materials.
+- **Intermediate**: convolution, noise and median filters, edges, sharpening, the Fourier
+  domain, sampling and pyramids, morphology, regions, and cleaning raw data (sensor
+  problems, calibration, band alignment, repairs, spectral pre-treatments).
+- **Advanced**: local features, cameras, multi-view geometry, PCA, clustering, unmixing,
+  anomaly detection, classification, evaluation, convolutional networks, modern
+  architectures and a capstone on engineering practice.
+
+Each lesson ends with further reading (Gonzalez & Woods, Szeliski, Torralba, Isola & Freeman,
+Prince, Hartley & Zisserman, Ma et al., Bishop, Goodfellow et al. and the original papers).
+The plan behind it is in [plans/learn-curriculum.md](plans/learn-curriculum.md).
+
+Each lesson is a short sequence of steps; every step explains one idea and drives the real viewer next to it (switching
 the view, the bands on screen, a preprocessing pipeline) and can ask the learner to do something:
 click a pixel, find a band or answer a question. The server checks the answer and the panel
 gives instant feedback.
@@ -47,9 +62,13 @@ One lesson is one [TOML](https://toml.io) file. Bundled lessons live in
 id = "red-edge"                 # optional; default is the file name without .toml
 title = "The red edge"
 summary = "One line shown in the lesson list."
-level = "basics"                # basics | correction | analysis (the list's groups)
-order = 25                      # position within the group
+level = "basics"                # basics | intermediate | advanced (the list's groups)
+unit = "Images and spectra"     # optional: subheading within the level
+order = 25                      # position within the level (units follow the order)
 demo = "scene"                  # optional: the built-in cube this lesson is written for
+reading = [                     # optional: shown when the lesson ends (Markdown)
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 6.",
+]
 
 [[steps]]
 title = "Pin the leaf"
@@ -79,13 +98,32 @@ retry = "Not the leaf. Try again."
 | `anomaly`, `anomalyK`, `anomalyTop` | `rx`, `residual` or `gradient`; components for `residual`; % of top scores highlighted |
 | `simDeg` | spectral-angle threshold in degrees |
 | `summary` | `mean`, `std`, `max`, `argmax`, `invalid` |
-| `mathExpr` | band-math expression, e.g. `(nm(800) - nm(670)) / (nm(800) + nm(670))` |
+| `mathExpr` | band-math expression, e.g. `(nm(800) - nm(670)) / (nm(800) + nm(670))` (functions below) |
 | `specView`, `specMean`, `specStd`, `specLog` | spectrum plot: `values`, `normalized`, `derivative`, `ratio`, `zscore`; overlays |
 | `cmap` | colour map name |
 
 A **band reference** is a number (a wavelength in the cube's units, nearest band), `"#12"` (a
 band index) or `"40%"` (a position along the band axis). On a cube without wavelengths, a
 number maps 400 to 1000 nm onto the band axis.
+
+### Image functions in band math
+
+Band math (in lessons and in the viewer's band-math box) can call these on any image, such
+as `nm(670)` or `b[4]`. They live in `spektrify/compute/imageops.py` (plain NumPy).
+
+| Group | Functions |
+| --- | --- |
+| Point operations | `stretch(x, lo=2, hi=98)`, `quantize(x, levels)`, `equalize(x)`, `otsu(x)` (a threshold value), `subsample(x, f)` |
+| Filters | `box(x, r)`, `gauss(x, sigma)`, `median(x, r)` (r ≤ 3) |
+| Derivatives | `dx(x)`, `dy(x)` (Sobel), `grad(x)`, `laplace(x)` |
+| Frequency | `fft(x)` (log magnitude, centred), `lowpass(x, cutoff)`, `highpass(x, cutoff)` (cutoff as a fraction of the highest frequency) |
+| Morphology | `erode(x, r)`, `dilate(x, r)`, `opening(x, r)`, `closing(x, r)` (square of side 2r + 1) |
+| Regions | `components(mask)` (1 = largest, 8-connected), `area(mask)` |
+| Features | `harris(x, sigma=1.5)` (scaled so the strongest corner is 1) |
+| Whole cube | `kmeans(k)`: cluster map of every pixel's spectrum, 1..k from darkest |
+| Test patterns | `x`, `y` (pixel column and row), `sin`, `cos`, e.g. the zone plate `cos(((x - 128)**2 + (y - 96)**2) / 150)` |
+
+A test runs every bundled lesson's expression on its demo, so a typo fails CI.
 
 ### `pipeline`: preprocessing with Before / After
 
@@ -133,7 +171,7 @@ The API:
 
 | Method | Endpoint | Returns |
 | --- | --- | --- |
-| GET | `lessons` | `{lessons: [{id, title, summary, level, demo, steps}], demo, labelled}` |
+| GET | `lessons` | `{lessons: [{id, title, summary, level, unit, demo, steps}], demo, labelled}` |
 | GET | `lesson?id=` | The lesson resolved for the current cube (band indices, effective view and pipeline per step, tasks without answers) |
 | POST | `lesson-check` | Body `{id, step, answer: {x, y} \| {band} \| {choice}}` → `{correct, message, note}` |
 | POST | `demo` | Body `{name: "scene" \| "capture"}`: show a built-in cube |

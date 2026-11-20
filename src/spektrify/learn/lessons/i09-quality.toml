@@ -1,9 +1,14 @@
 id = "quality"
 title = "Spotting sensor problems"
 summary = "Noisy bands, stripes, dead columns and saturation: what they look like and why."
-level = "correction"
-order = 60
+level = "intermediate"
+unit = "From raw data to clean data"
+order = 90
 demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 5: noise models.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: sensor noise and the camera pipeline.",
+]
 
 [[steps]]
 title = "A noisy band"

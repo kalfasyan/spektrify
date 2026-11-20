@@ -1,9 +1,14 @@
 id = "calibration"
 title = "From raw counts to reflectance"
 summary = "Dark level, flat field and white reference: turning what the camera records into a property of the material."
-level = "correction"
-order = 70
+level = "intermediate"
+unit = "From raw data to clean data"
+order = 100
 demo = "capture"
+reading = [
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2 (photometric image formation) and ch. 10 (photometric calibration).",
+  "Forsyth & Ponce, *Computer Vision: A Modern Approach* (2nd ed.), ch. 2: light and shading.",
+]
 
 [[steps]]
 title = "What the camera records"

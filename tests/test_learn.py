@@ -53,6 +53,30 @@ def test_bundled_lesson_targets_exist_in_its_demo(lesson_id: str) -> None:
             Pipeline.from_json(step.pipeline).apply(cube)
 
 
+@pytest.mark.parametrize("lesson_id", list(load_lessons()))
+def test_bundled_lesson_band_math_runs_on_its_demo(lesson_id: str) -> None:
+    """A typo in a lesson's band-math expression fails here, not in front of a learner."""
+    from spektrify.compute.numpy_backend import NumpyAnalyzer
+
+    lesson = load_lessons()[lesson_id]
+    an = NumpyAnalyzer(DEMOS[lesson.demo or "scene"]())
+    for step in lesson.steps:
+        expr = step.show.get("mathExpr")
+        if expr:
+            out = an.band_math(expr)
+            assert np.isfinite(out).any(), (lesson_id, step.title, expr)
+
+
+def test_catalog_is_ordered_by_level_and_lessons_cite_sources() -> None:
+    from spektrify.learn.model import LEVELS
+
+    lessons = list(load_lessons().values())
+    levels = [LEVELS.index(le.level) for le in lessons]
+    assert levels == sorted(levels)
+    assert {le.level for le in lessons} == set(LEVELS)
+    assert all(le.unit and le.reading for le in lessons)
+
+
 def _one_step(**step) -> dict:
     return {"title": "T", "steps": [{"title": "S", **step}]}
 
@@ -74,6 +98,12 @@ def test_parse_errors_name_the_field() -> None:
         parse_lesson({"title": "T", "steps": [{"title": "S", "task": bad_choice}]}, default_id="x")
     with pytest.raises(LessonError, match="unknown field"):
         parse_lesson({**MINIMAL, "colour": "red"}, default_id="x")
+    with pytest.raises(LessonError, match="reading"):
+        parse_lesson({**MINIMAL, "reading": [1]}, default_id="x")
+    with pytest.raises(LessonError, match="level"):
+        parse_lesson({**MINIMAL, "level": "correction"}, default_id="x")
+    lesson = parse_lesson({**MINIMAL, "unit": "Filters", "reading": ["A book"]}, default_id="x")
+    assert (lesson.unit, lesson.reading) == ("Filters", ("A book",))
     with pytest.raises(LessonError, match="title"):
         parse_lesson({"title": 3, "steps": MINIMAL["steps"]}, default_id="x")
 
@@ -135,7 +165,7 @@ def test_lesson_json_resolves_bands_hides_answers_and_carries_pipelines() -> Non
     assert pipes[0] == [] and len(pipes[1]) == 1 and pipes[-1] == pipes[-2]
     pca = lesson_json(lessons["pca"], cube)["steps"]
     assert all(s["pipeline"] is None for s in pca)
-    assert [s["view"] for s in pca] == ["image", "image", "3d"]
+    assert [s["view"] for s in pca] == ["image", "image", "image", "3d"]
 
 
 def test_demo_labels_match_geometry() -> None:

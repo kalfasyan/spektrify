@@ -1,9 +1,14 @@
 id = "spectral"
 title = "Smoothing and normalising spectra"
 summary = "Savitzky–Golay smoothing, derivatives and SNV: the standard pre-treatments before modelling."
-level = "correction"
-order = 90
+level = "intermediate"
+unit = "From raw data to clean data"
+order = 130
 demo = "scene"
+reading = [
+  "A. Savitzky & M. J. E. Golay, 'Smoothing and differentiation of data by simplified least squares procedures', *Analytical Chemistry* 36(8), 1964.",
+  "R. J. Barnes, M. S. Dhanoa & S. J. Lister, 'Standard normal variate transformation and de-trending of near-infrared diffuse reflectance spectra', *Applied Spectroscopy* 43(5), 1989.",
+]
 
 [[steps]]
 title = "Noisy spectra"
@@ -24,7 +29,8 @@ success = "Each band's value wobbles around the true curve. Smoothing helps."
 title = "Savitzky–Golay smoothing"
 text = """
 **Savitzky–Golay** smoothing fits a small polynomial to a moving window of bands and keeps its
-centre value. Unlike a plain moving average it keeps peaks and edges sharp.
+centre value. Compared with a plain moving average of the same width, it keeps the height
+and width of narrow peaks much better.
 
 Toggle **Before / After** and watch the leaf's curve.
 """

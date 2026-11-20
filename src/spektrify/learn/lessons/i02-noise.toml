@@ -1,0 +1,85 @@
+id = "noise"
+title = "Noise and denoising"
+summary = "Gaussian noise versus impulse noise, and why the median filter beats the mean on dead and hot pixels."
+level = "intermediate"
+unit = "Filters"
+order = 20
+demo = "scene"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 5: noise models, restoration by spatial filtering, order-statistic filters.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 3: non-linear filtering (median, bilateral).",
+]
+
+[[steps]]
+title = "Two kinds of noise"
+text = """
+Noise comes in two broad kinds:
+
+- **Gaussian-like noise**: every pixel is a little off. It comes from the electronics (read
+  noise) and from light itself arriving in discrete photons (**shot noise**, whose variance
+  grows with the signal).
+- **Impulse noise**: a few pixels are completely wrong: dead, hot or dropped in
+  transmission ('salt and pepper').
+
+This band (670 nm) shows impulse defects: a dead column through the leaf and a saturated
+square to its left.
+"""
+show = { mode = "band", band = 670, cmap = "gray" }
+
+[steps.task]
+kind = "pixel"
+region = "dead_column"
+prompt = "Click on the dead column."
+hint = "It runs top to bottom through the left half of the leaf, at x = 37. Zoom in."
+success = "One column of almost zero values. The mean filter will smear it; let's see."
+retry = "Zoom in on the left half of the leaf and look for the thin vertical line."
+
+[[steps]]
+title = "Averaging smears outliers"
+text = """
+A Gaussian blur, `gauss(nm(670), 1.5)`, doesn't remove the defects. It spreads them: the dead
+column becomes a wider grey band and the saturated square a bright blob. One wildly wrong
+value pulls the average of every window that contains it.
+"""
+show = { mode = "math", mathExpr = "gauss(nm(670), 1.5)", cmap = "gray" }
+
+[[steps]]
+title = "The median ignores outliers"
+text = """
+The **median filter** sorts the values in the window and keeps the middle one. A few extreme
+values can't move the middle of a sorted list, so `median(nm(670), 1)` (3 × 3 window) simply
+removes the dead column. The leaf edges stay sharp too.
+
+But look at the saturated square: it survives. It is 4 × 4 pixels, so most windows over it
+are more than half saturated.
+"""
+show = { mode = "math", mathExpr = "median(nm(670), 1)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which median window removes the 4 × 4 square, whose 16 pixels must be fewer than half the window?"
+options = ["3 × 3 (9 pixels)", "5 × 5 (25 pixels)", "7 × 7 (49 pixels)"]
+answer = 2
+success = "Right: 16 is less than half of 49. A median removes specks smaller than about half its window, and also any real detail that small."
+retry = "Half of the window must be more than 16 pixels."
+
+[[steps]]
+title = "Pick the filter for the noise"
+text = """
+`median(nm(670), 3)` removes the square, at the price of rounding small details. On
+Gaussian-like noise the trade-off reverses: a Gaussian blur of the same size reduces it more
+than a median does, because it uses every value instead of only the middle one.
+
+Edge-preserving filters such as the **bilateral filter** and **non-local means** average only
+over similar-looking pixels; learned denoisers go further. All of them guess at the true
+image, so check that they don't remove what you want to measure.
+"""
+show = { mode = "math", mathExpr = "median(nm(670), 3)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "A band with fine, even 'TV static' everywhere. Which filter suits it best?"
+options = ["Median", "Gaussian", "Neither can help"]
+answer = 1
+success = "Right. For Gaussian-like noise, a weighted average is the efficient choice; the median wins on outliers."
+retry = "Static everywhere is Gaussian-like, not impulse noise."
