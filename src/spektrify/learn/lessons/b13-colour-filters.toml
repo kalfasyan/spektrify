@@ -1,0 +1,146 @@
+id = "colour-filters"
+title = "Colour filter arrays and demosaicing"
+summary = "How one colour-blind sensor takes colour photos: the Bayer pattern, filling in the missing colours, and the false colour and moiré it can cause."
+level = "basics"
+unit = "How images are captured"
+order = 54
+demo = "photo"
+reading = [
+  "B. E. Bayer, 'Color imaging array', US patent 3,971,065 (1976).",
+  "B. K. Gunturk, J. Glotzbach, Y. Altunbasak, R. W. Schafer and R. M. Mersereau, 'Demosaicking: color filter array interpolation', *IEEE Signal Processing Magazine* 22(1), 2005.",
+  "H. S. Malvar, L.-W. He and R. Cutler, 'High-quality linear interpolation for demosaicing of Bayer-patterned color images', *ICASSP* 2004.",
+  "P.-J. Lapray, X. Wang, J.-B. Thomas and P. Gouton, 'Multispectral filter arrays: recent advances and practical implementation', *Sensors* 14(11), 2014.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: colour cameras and the Bayer pattern.",
+]
+
+[[steps]]
+title = "A real photo"
+text = """
+This lesson uses a real colour photograph: NASA's 1997 portrait of astronaut Eileen
+Collins, a public-domain image that many image-processing courses use (it ships with the
+scikit-image library). It has three bands, blue, green and red. Their wavelengths here
+(460, 535 and 600 nm) only mark where each colour filter is most sensitive; the real
+filters are about 100 nm wide.
+
+The values have been converted back to **linear light** (the sRGB encoding of the file
+undone), so they are proportional to what a sensor would collect.
+
+The previous lesson ended with a problem: the sensor is colour-blind. How do you get
+three colours out of it?
+"""
+show = { mode = "rgb", rgb = [600, 535, 460] }
+
+[steps.task]
+kind = "choice"
+prompt = "Which of these does NOT give a colour image from colour-blind silicon?"
+options = [
+  "A higher-resolution sensor",
+  "A prism that splits the light onto three sensors",
+  "Three shots through a red, a green and a blue filter",
+  "A tiny colour filter on top of every pixel",
+]
+answer = 0
+success = "Right. The other three all work: three sensors (costly, bulky), a filter wheel (needs a still scene) or a mosaic of filters (one shot, one sensor). Almost every camera uses the last."
+retry = "More pixels still can't tell wavelengths apart."
+
+[[steps]]
+title = "The Bayer pattern"
+text = """
+Bryce Bayer at Kodak patented the most common filter mosaic in 1976. It repeats a 2 × 2
+tile: **red, green / green, blue** (RGGB). Half the pixels are green because, for human
+vision, green carries most of the detail in brightness.
+
+So the sensor never records a full colour image. It records one **raw frame** in which
+each pixel holds just one colour: `bayer(nm(600), nm(535), nm(460))`. Zoom in on the red
+suit or the flag: neighbouring pixels alternate between bright and dark, because they sit
+under different filters. In grey areas, where all three colours are similar, the pattern
+almost vanishes.
+"""
+show = { mode = "math", mathExpr = "bayer(nm(600), nm(535), nm(460))", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "What fraction of the pixels of a Bayer sensor measure red light?"
+options = ["One quarter", "One third", "One half", "All of them, a little"]
+answer = 0
+success = "Right: one red, two green and one blue in every 2 × 2 tile. At three quarters of the pixels, red must be guessed."
+retry = "Count the filters in the 2 × 2 tile."
+
+[[steps]]
+title = "Demosaicing fills the gaps"
+text = """
+**Demosaicing** estimates the two missing colours at every pixel. The simplest method,
+**bilinear** interpolation, averages the nearest pixels that did measure that colour: two
+or four neighbours.
+
+Here is the red channel rebuilt that way, minus the true red:
+`debayer(bayer(…), 0) - nm(600)`. Grey (zero) means no error. Smooth areas come back
+almost perfectly: about two thirds of the pixels are within 0.01 of the truth. The errors
+sit on **edges and fine detail**, where averaging neighbours mixes two different things.
+"""
+show = { mode = "math", mathExpr = "debayer(bayer(nm(600), nm(535), nm(460)), 0) - nm(600)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which channel would you expect bilinear demosaicing to rebuild best?"
+options = [
+  "Green, because it has twice as many samples",
+  "Red, because it is the longest wavelength",
+  "Blue, because it has the least light",
+]
+answer = 0
+success = "Right. On this photo the green error is about half the red one (RMS 0.027 against 0.049). Better methods use the sharp green channel to guide red and blue, since edges usually sit at the same place in all three."
+retry = "Which colour fills half the pixels?"
+
+[[steps]]
+title = "False colour and moiré"
+text = """
+To see the worst case, use a **grey** test pattern, a zone plate whose rings get finer
+away from the centre: `cos(((x - 128)**2 + (y - 128)**2) / 150)`. In a grey scene red and
+blue are equal everywhere, so after demosaicing **red minus blue should be zero**.
+
+It isn't: `debayer(bayer(z), 0) - debayer(bayer(z), 2)`. Near the centre the difference
+is tiny. It grows as the rings get finer, and where they approach the spacing of the red
+and blue pixels (every second pixel) the camera invents strong colour fringes and ghost
+rings that aren't in the scene: **false colour** and **moiré**. It is the aliasing of *Sampling, aliasing and pyramids*, happening inside the
+sensor.
+
+Real cameras fight it with an **optical low-pass filter** (a slight blur in front of the
+sensor) and smarter demosaicing.
+"""
+show = { mode = "math", mathExpr = "debayer(bayer(cos(((x - 128)**2 + (y - 128)**2) / 150)), 0) - debayer(bayer(cos(((x - 128)**2 + (y - 128)**2) / 150)), 2)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "A camera photographs a fine black-and-white striped shirt and shows rainbow bands on it. What is happening?"
+options = [
+  "The stripes are finer than the colour filters' sampling, so demosaicing aliases them into false colour",
+  "The shirt reflects infrared",
+  "The sensor has too few bits",
+]
+answer = 0
+success = "Right. A blur filter before the sensor or a higher-resolution sensor prevents it; good demosaicing reduces it."
+retry = "Black and white stripes have no colour. Where could colour come from?"
+
+[[steps]]
+title = "Other mosaics, and spectral ones"
+text = """
+Bayer is not the only design:
+
+- Other colour layouts add clear (white) pixels for low light, or use a less regular tile
+  (such as Fujifilm's 6 × 6 X-Trans) so that moiré is less likely.
+- **Stacked** sensors (Foveon) use the fact that silicon absorbs blue near its surface and
+  red deeper down, measuring three colours at every pixel.
+- **Multispectral filter arrays** extend Bayer to many narrow bands: a 4 × 4 tile gives 16
+  bands, a 5 × 5 tile 25. One exposure captures a whole spectral cube, but each band is
+  sampled at only 1 pixel in 16 or 25, so demosaicing is harder and the per-band
+  resolution lower. The next lesson shows one.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A 5 × 5 multispectral mosaic sensor has 2048 × 1088 pixels. About how many pixels measure each band?"
+options = ["About 89,000", "About 2.2 million", "About 445,000", "About 25"]
+answer = 0
+success = "Right: 2048 × 1088 / 25 ≈ 89,000, roughly a 410 × 218 image per band. Snapshot spectral cameras trade spatial resolution for speed."
+retry = "Each band gets one pixel in every 5 × 5 tile."

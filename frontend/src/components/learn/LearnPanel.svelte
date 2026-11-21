@@ -10,7 +10,7 @@
   const L = learn.ui;
   const s = store.state;
   const LEVELS = [['basics', 'Basics'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']];
-  const DEMO_NAMES = { scene: 'demo scene', capture: 'raw capture demo' };
+  const DEMO_NAMES = { scene: 'demo scene', capture: 'raw capture demo', photo: 'photo demo' };
   const TASK_ICONS = { pixel: 'inspect', band: 'band', choice: 'help' };
 
   let lesson = $derived(L.lesson);

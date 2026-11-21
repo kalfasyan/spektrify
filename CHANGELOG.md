@@ -9,6 +9,17 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- Learn mode gains an early unit, **How images are captured** (5 lessons in Basics): light
+  and what a pixel measures (photons, silicon, QE, counts), exposure, noise and dynamic range,
+  lenses, focus and blur (f-number, defocus, diffraction, aberrations, vignetting), colour
+  filter arrays and demosaicing (Bayer, false colour, moiré, spectral mosaics), and how
+  spectral cameras capture a cube (whisk-broom, push-broom, filter / tunable, snapshot). The
+  advanced *Cameras and image formation* lesson now covers the push-broom camera model
+  instead of repeating them.
+- Band math can simulate capture: `expose`, `defocus`, `bayer`, `debayer`, `mosaic(t)`,
+  `demosaic` and `scan` (module `compute/capture.py`).
+- A third demo, `photo`: a real public-domain photo (NASA, via scikit-image) as a 3-band
+  cube in linear light (`spektrify learn --demo photo`).
 - Learn mode is a computer-vision course: 34 lessons in three levels (basics,
   intermediate, advanced), grouped into units, from digital images and histograms through
   filters, Fourier, morphology and calibration to features, multi-view geometry, clustering,

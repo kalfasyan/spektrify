@@ -1,0 +1,192 @@
+id = "imagers"
+title = "How spectral cameras capture a cube"
+summary = "Whisk-broom, push-broom, filter and snapshot imagers: what each records per exposure, what it must scan, and the artefacts that betray it."
+level = "basics"
+unit = "How images are captured"
+order = 55
+demo = "scene"
+reading = [
+  "N. Hagen and M. W. Kudenov, 'Review of snapshot spectral imaging technologies', *Optical Engineering* 52(9), 2013.",
+  "P. Mouroulis, R. O. Green and T. G. Chrien, 'Design of pushbroom imaging spectrometers for optimum recovery of spectroscopic and spatial information', *Applied Optics* 39(13), 2000.",
+  "N. Gat, 'Imaging spectroscopy using tunable filters: a review', *Proc. SPIE* 4056, 2000.",
+  "R. Gupta and R. I. Hartley, 'Linear pushbroom cameras', *IEEE TPAMI* 19(9), 1997.",
+  "P.-J. Lapray, X. Wang, J.-B. Thomas and P. Gouton, 'Multispectral filter arrays: recent advances and practical implementation', *Sensors* 14(11), 2014.",
+]
+
+[[steps]]
+title = "Three dimensions, two-dimensional sensors"
+text = """
+A spectral cube has three axes: x, y and wavelength. A sensor has only two (or, for a
+single detector, none). So every spectral camera **scans** one or more axes over time, or
+squeezes all three onto the sensor and gives up some resolution:
+
+- **Whisk-broom** (point scan): one spectrum at a time; scan x and y.
+- **Push-broom** (line scan): one image line with all its spectra; scan along y.
+- **Filter or tunable** (wavelength scan): one full image per band; scan λ.
+- **Snapshot**: the whole cube in one exposure, at reduced resolution.
+
+Each choice leaves its own fingerprints in the data, and knowing them is how you diagnose
+a cube you didn't capture yourself.
+"""
+show = { mode = "band", band = 800, cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which design needs the scene to stay still while the camera works through the wavelengths?"
+options = ["Filter or tunable (wavelength scan)", "Push-broom", "Snapshot"]
+answer = 0
+success = "Right. A filter camera takes the bands one after another, so anything that moves between them ends up in different places in different bands."
+retry = "Which design records the bands at different moments?"
+
+[[steps]]
+title = "Push-broom: one line at a time"
+text = """
+A **push-broom** imager looks at the scene through a narrow **slit**. A prism or grating
+spreads the light from the slit into its wavelengths, onto a 2-D sensor: one sensor axis is
+position along the slit, the other is wavelength. Each exposure records **one line of the
+cube, with a full spectrum for every pixel in it**. The object (on a conveyor belt or a
+moving stage) or the camera moves, and line after line builds the image.
+
+The motion must match the line rate. Here the object moves 1.5 image rows per captured
+line instead of 1: `scan(nm(800), 1.5)`. Everything is squashed along the scan direction,
+the discs became ellipses, and the scan ran out of object before the image was full
+(the coloured area at the bottom has no data).
+"""
+show = { mode = "math", mathExpr = "scan(nm(800), 1.5)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "In your push-broom cubes, round objects look stretched along the scan direction. What is wrong?"
+options = [
+  "The object moves too slowly for the line rate",
+  "The object moves too fast for the line rate",
+  "The slit is too wide",
+]
+answer = 0
+success = "Right: each line advances less than one pixel's worth of object, so more lines cover it. Match conveyor speed × line period to the pixel size on the object."
+retry = "Here (too fast) objects got shorter. What does the opposite do?"
+
+[[steps]]
+title = "Push-broom fingerprints"
+text = """
+Push-broom data has typical artefacts:
+
+- **Jitter**: vibration shifts each line sideways a little: `scan(nm(800), 1, 2)`. Vertical
+  edges turn ragged, while each line on its own stays sharp.
+- **Stripes**: each position along the slit is always seen by the same column of detector
+  elements, so one bad element makes a stripe through the whole image, like the dead
+  column in the demo scene.
+- **Smile and keystone**: the optics bend the image of the slit slightly, so a band's
+  wavelength shifts a little along the slit (smile), and a pixel's position shifts a little
+  between bands (keystone).
+
+In return, every pixel's spectrum is captured at the same instant through the same optics,
+which makes push-broom the standard for conveyor belts (food, recycling, pharmaceuticals)
+and laboratory scanners.
+"""
+show = { mode = "math", mathExpr = "scan(nm(800), 1, 2)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Your cubes have stripes along the scan direction that stay in the same columns in every scan. Which camera type is most likely?"
+options = ["Push-broom", "Filter wheel", "Snapshot mosaic"]
+answer = 0
+success = "Right. In a push-broom camera each image column comes from the same detector elements in every line."
+retry = "Which design records each image column with one fixed set of detector elements?"
+
+[[steps]]
+title = "Whisk-broom: one point at a time"
+text = """
+A **whisk-broom** imager measures one spectrum at a time and sweeps a mirror across the
+scene, line by line. Classic airborne instruments such as NASA's AVIRIS work this way, and
+so do lab instruments that move a sample under a point spectrometer.
+
+One detector measures every pixel, so the calibration is uniform and there are no
+column stripes. The price is time: the instrument can spend only a tiny fraction of each
+line's time on each pixel, so it collects less light per pixel or scans slowly. Moving
+mirrors also add their own geometric distortions.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A whisk-broom and a push-broom imager both record lines of 500 pixels at the same line rate. Compared with the push-broom, how long can the whisk-broom look at each pixel?"
+options = ["About 500 times shorter", "The same time", "About 500 times longer"]
+answer = 0
+success = "Right. The push-broom sees all 500 pixels of a line at once for the whole line time; the whisk-broom must share that time among them, which costs signal-to-noise ratio (√500 ≈ 22 times, if shot noise dominates)."
+retry = "The whisk-broom visits the 500 pixels of a line one after another within the same line time."
+
+[[steps]]
+title = "Filter wheels and tunable filters"
+text = """
+A **wavelength-scanning** imager takes a full-resolution image through one filter, then the
+next. The filter can be a **wheel** of fixed filters, or an electronically **tunable**
+filter: a liquid-crystal tunable filter (LCTF) or an acousto-optic one (AOTF), which can
+jump to any band in its range.
+
+It is simple and flexible (you choose the bands), and each band uses the whole sensor. But
+the bands are taken at **different times**: anything that moves, or a filter that shifts the
+image slightly, **misregisters** the bands. The raw capture demo has this problem, and
+*Aligning the bands* fixes it.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You need 10 chosen bands of a still sample at the full resolution of the sensor. What fits best?"
+options = ["A filter wheel or tunable filter", "A snapshot mosaic camera", "A whisk-broom scanner"]
+answer = 0
+success = "Right: a still scene removes the main drawback, and each band keeps every pixel."
+retry = "Which design gives full resolution in each band, and doesn't mind the scene being still?"
+
+[[steps]]
+title = "Snapshot: the whole cube at once"
+text = """
+A **snapshot mosaic** camera puts a pattern of narrow filters over the pixels, like a Bayer
+sensor with more bands. This is the raw frame of a 4 × 4 mosaic looking at the demo scene:
+`mosaic(4)`. Each 4 × 4 tile samples 16 bands from 450 to 950 nm, the first row of each tile
+the bluest four, the last row the four furthest in the infrared.
+
+Look at the leaf: it is striped across. Its upper rows of pixels sit under visible filters
+(dark leaf) and its lower rows under NIR filters (bright leaf). The discs, whose spectra change
+less, show a weaker pattern. Other snapshot designs exist too (coded
+apertures with computational reconstruction, arrays of small lenses), all trading
+resolution or computation for speed.
+"""
+show = { mode = "math", mathExpr = "mosaic(4)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "What does a snapshot mosaic camera give up for capturing a cube in one exposure?"
+options = [
+  "Spatial resolution per band (and some separation between bands)",
+  "Nothing: it is better in every way",
+  "The ability to image moving objects",
+]
+answer = 0
+success = "Right. It is the camera for moving scenes and video, at the cost of resolution and of crosstalk between neighbouring filters."
+retry = "How many pixels of each 4 × 4 tile see any one band?"
+
+[[steps]]
+title = "Rebuilding one band"
+text = """
+Demosaicing a spectral mosaic works like Bayer demosaicing, but each band has only one
+sample per tile. Here is band 14 of 16 (about 880 nm) interpolated from its pixels:
+`demosaic(mosaic(4), 4, 13)` (bands are numbered from 0).
+
+Edges are blocky and small details coarse. And the demo's dead column, one pixel wide,
+became a dark band several pixels wide: this band's few samples on it are wrong, and
+interpolation spreads them. (The bands whose filters miss that column don't see it at
+all.) Compare with the full-resolution band `nm(880)` to see what was lost.
+"""
+show = { mode = "math", mathExpr = "demosaic(mosaic(4), 4, 13)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "Choose a camera for sorting objects on a fast conveyor belt by their full spectra."
+options = [
+  "Push-broom: the belt itself provides the scan",
+  "Filter wheel: the bands are flexible",
+  "Whisk-broom: the calibration is uniform",
+]
+answer = 0
+success = "Right. A moving belt is the ideal push-broom setup; a filter wheel would misregister the bands, and a whisk-broom would be too slow."
+retry = "Which design uses steady motion to build the image instead of fighting it?"

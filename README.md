@@ -102,7 +102,7 @@ clean = Pipeline.parse(["clip", "bin:2"]).apply(load_cube("raw.h5"))
 | **3D** | Slice cube with cut planes (the x–λ and y–λ faces show keystone, smile and bad columns), GPU volume rendering (MIP or composite), and pixels as a PCA point cloud. Click a point to pin its pixel. |
 | **Quality** | Automatic checks for low SNR, decorrelated bands, column and row striping, dead or hot lines, NaN/Inf and saturation. Every chart links back to the band it is about. |
 
-| **Learn** | A hands-on computer-vision course in 34 lessons, taught on spectral images, from basics (pixels, colour, histograms, thresholds) through intermediate (convolution, edges, Fourier, morphology, calibration) to advanced (features, geometry, clustering, unmixing, classification, evaluation, CNNs, transformers). Each step drives the real viewer; click pixels, find bands, answer quick questions, flip preprocessing Before / After, and follow the reading list from the classic textbooks. |
+| **Learn** | A hands-on computer-vision course in 39 lessons, taught on spectral images, from basics (pixels, colour, how cameras and spectral imagers capture images, histograms, thresholds) through intermediate (convolution, edges, Fourier, morphology, calibration) to advanced (features, geometry, clustering, unmixing, classification, evaluation, CNNs, transformers). Each step drives the real viewer; click pixels, find bands, answer quick questions, flip preprocessing Before / After, and follow the reading list from the classic textbooks. |
 
 Press `?` in the app for all keyboard shortcuts. The most used ones: `← →` change band,
 `Space` plays through the bands, and `B C P N S M` switch display modes.

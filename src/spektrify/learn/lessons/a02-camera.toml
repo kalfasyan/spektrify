@@ -1,15 +1,15 @@
 id = "camera"
 title = "Cameras and image formation"
-summary = "The pinhole model, intrinsics and distortion, what a pixel value really measures, and how spectral cameras scan a cube."
+summary = "The pinhole model, intrinsics and distortion, calibration, and why scanning cameras need a different geometric model."
 level = "advanced"
 unit = "Features and geometry"
 order = 20
-demo = "capture"
 reading = [
   "Hartley & Zisserman, *Multiple View Geometry* (2nd ed.), ch. 6: camera models.",
   "Ma, Soatto, Košecká & Sastry, *An Invitation to 3-D Vision*, ch. 3: image formation.",
   "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: image formation (geometry, photometry, the digital camera).",
   "Z. Zhang, 'A flexible new technique for camera calibration', *IEEE TPAMI* 22(11), 2000.",
+  "R. Gupta and R. I. Hartley, 'Linear pushbroom cameras', *IEEE TPAMI* 19(9), 1997.",
 ]
 
 [[steps]]
@@ -40,9 +40,10 @@ retry = "x = f·X/Z: what happens to x when Z doubles, and to the area?"
 title = "Lenses and calibration"
 text = """
 Real lenses bend straight lines near the image border (**radial distortion**: barrel or
-pincushion). **Calibration** estimates K and the distortion from photos of a known pattern,
-typically a checkerboard in several poses (Zhang's method). Measuring sizes or combining
-cameras without calibration gives errors that grow towards the image corners.
+pincushion; the basics lesson *Lenses, focus and blur* covers the optics). **Calibration**
+estimates K and the distortion from photos of a known pattern, typically a checkerboard in
+several poses (Zhang's method). Measuring sizes or combining cameras without calibration
+gives errors that grow towards the image corners.
 """
 
 [steps.task]
@@ -58,40 +59,29 @@ success = "Right. Reflectance calibration fixes values; geometric calibration fi
 retry = "The question is about positions and lengths, not values."
 
 [[steps]]
-title = "What a pixel value measures"
+title = "Scanning cameras have their own geometry"
 text = """
-A pixel value is roughly **exposure × gain × ∫ illumination(λ) · reflectance(λ) ·
-sensitivity(λ) dλ** over the band, plus dark signal and noise. Only reflectance belongs to
-the material; everything else belongs to the setup. That is exactly what the dark and
-white references in the calibration lesson cancel.
+The pinhole model assumes the whole image is taken at one instant from one centre of
+projection. A **push-broom** camera (see *How spectral cameras capture a cube*) breaks that:
+each line is a separate exposure from a different position along the motion.
 
-This is the raw capture demo: the white tile's hump is the lamp times the sensor.
+The result is the **linear push-broom model**: perspective *across* the slit, as in a
+pinhole camera, but close to parallel projection *along* the motion, with a scale set by the
+speed. So a square seen by a push-broom camera can come out as a rectangle, straight lines
+stay straight only when the motion is steady, and calibration has to estimate the motion
+as well as K. Filter-wheel and snapshot cameras are frame cameras and follow the pinhole
+model, with one subtlety: each band can have a slightly different K (chromatic
+aberration), so bands are calibrated or aligned separately.
 """
-show = { mode = "band", band = 700, specView = "values" }
-
-[[steps]]
-title = "How spectral cameras build a cube"
-text = """
-A sensor is 2-D but a cube is 3-D, so spectral cameras trade something:
-
-- **Push-broom** (line scan): one image line at a time, spread into all wavelengths. The
-  object or camera must move. Each detector column sees one image column, so a bad element
-  makes a **stripe**; optics add *smile* and *keystone* (bands slightly bent or scaled).
-- **Filter wheel / tunable filter**: one band at a time. Motion between bands, or slightly
-  different optics per filter, **misregisters** the bands.
-- **Snapshot mosaic**: a pattern of tiny filters on the pixels, like an RGB camera's Bayer
-  pattern but with more bands. One shot, but each band is sampled at different positions and
-  must be **demosaiced**.
-
-This capture shows the misregistration of the last kind: colour fringes at every edge.
-"""
-show = { mode = "rgb", rgb = [830, 640, 545] }
-pipeline = []
 
 [steps.task]
 kind = "choice"
-prompt = "Your cubes have vertical stripes that stay in the same columns in every scan. Which camera type is most likely?"
-options = ["Push-broom", "Filter wheel", "Snapshot mosaic"]
+prompt = "A push-broom camera on a conveyor belt makes round parts look oval. Which parameter of its geometric model is off?"
+options = [
+  "The along-track scale (belt speed × line period)",
+  "The focal length",
+  "The lens distortion",
+]
 answer = 0
-success = "Right. In a push-broom camera each image column comes from the same detector element in every line."
-retry = "Which design records each image column with one fixed detector element?"
+success = "Right. Across the slit the camera behaves like a pinhole camera; along the belt, the scale comes from the motion, so a speed mismatch stretches or squashes everything."
+retry = "In which direction does the push-broom camera's image come from motion rather than from the lens?"

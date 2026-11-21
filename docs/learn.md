@@ -3,8 +3,10 @@
 `spektrify learn` opens the viewer with a lesson panel on the left. The bundled lessons form a
 course in computer vision taught on spectral images, in three levels:
 
-- **Basics**: digital images, cubes and wavelengths, colour and metamers, intensity
-  transforms, histograms, band math, thresholds, comparing materials.
+- **Basics**: digital images, cubes and wavelengths, colour and metamers; how images are
+  captured (light and what a pixel measures, exposure and noise, lenses and blur, colour
+  filter arrays and demosaicing, whisk-broom, push-broom, filter and snapshot spectral
+  imagers); intensity transforms, histograms, band math, thresholds, comparing materials.
 - **Intermediate**: convolution, noise and median filters, edges, sharpening, the Fourier
   domain, sampling and pyramids, morphology, regions, and cleaning raw data (sensor
   problems, calibration, band alignment, repairs, spectral pre-treatments).
@@ -33,16 +35,18 @@ The **Learn** button in the top bar opens the same panel from `spektrify view`.
 
 ## Demo cubes
 
-Both demos are generated in code (`spektrify/io/synthetic.py`), so they ship with the package
-and have no licence questions. They share one scene: a leaf, two kinds of discs and a tiny
-target with a narrow 760 nm peak.
+`scene` and `capture` are generated in code (`spektrify/io/synthetic.py`), so they ship with
+the package and have no licence questions. They share one scene: a leaf, two kinds of discs
+and a tiny target with a narrow 760 nm peak. `photo` is a real photograph
+(`spektrify/io/samples.py`) in the public domain.
 
 | Name | Contents |
 | --- | --- |
 | `scene` | Reflectance with planted defects: dead column, striped band, noisy band, saturated pixels, NaN patch, vignetting. Same as `spektrify view --demo`. |
 | `capture` | Raw counts: dark level 100, halogen-lamp × sensor response, stronger vignetting, a white reference tile, bands misregistered by up to ±2 px. |
+| `photo` | A real RGB photo as a 3-band cube (blue 460, green 535, red 600 nm, nominal), 256 × 256, in linear light: NASA's 1997 portrait of astronaut Eileen Collins, public domain, as distributed with scikit-image (`skimage.data.astronaut`). Used for the Bayer and demosaicing lesson. |
 
-Each demo carries a label map (`meta["labels"]`, `meta["label_names"]`): `background`, `leaf`,
+Each demo carries a label map (the photo's is all `background`) (`meta["labels"]`, `meta["label_names"]`): `background`, `leaf`,
 `pill_a` (upper discs), `pill_b` (lower discs), `target`, and per demo `dead_column`,
 `hot_pixels`, `nan_patch` or `white_tile`. A pixel task names one of these.
 
@@ -109,7 +113,8 @@ number maps 400 to 1000 nm onto the band axis.
 ### Image functions in band math
 
 Band math (in lessons and in the viewer's band-math box) can call these on any image, such
-as `nm(670)` or `b[4]`. They live in `spektrify/compute/imageops.py` (plain NumPy).
+as `nm(670)` or `b[4]`. They live in `spektrify/compute/imageops.py` and, for the capture simulations,
+`spektrify/compute/capture.py` (plain NumPy).
 
 | Group | Functions |
 | --- | --- |
@@ -120,7 +125,8 @@ as `nm(670)` or `b[4]`. They live in `spektrify/compute/imageops.py` (plain NumP
 | Morphology | `erode(x, r)`, `dilate(x, r)`, `opening(x, r)`, `closing(x, r)` (square of side 2r + 1) |
 | Regions | `components(mask)` (1 = largest, 8-connected), `area(mask)` |
 | Features | `harris(x, sigma=1.5)` (scaled so the strongest corner is 1) |
-| Whole cube | `kmeans(k)`: cluster map of every pixel's spectrum, 1..k from darkest |
+| Capture simulations | `expose(x, t, bits=12)` (a sensor: shot noise, 5 e⁻ read noise, 10,000 e⁻ full well, ADC; a value of 1 gives 1,000 e⁻ at t = 1), `defocus(x, r)` (disc blur), `bayer(r, g, b)` or `bayer(grey)` (RGGB raw frame), `debayer(raw, c)` (bilinear, c = 0 red, 1 green, 2 blue), `demosaic(raw, t, i)` (band i of a t × t spectral mosaic), `scan(x, speed, wobble)` (push-broom line scan) |
+| Whole cube | `kmeans(k)`: cluster map of every pixel's spectrum, 1..k from darkest; `mosaic(t)`: the raw frame of a t × t snapshot-mosaic sensor (t² evenly spaced bands) |
 | Test patterns | `x`, `y` (pixel column and row), `sin`, `cos`, e.g. the zone plate `cos(((x - 128)**2 + (y - 96)**2) / 150)` |
 
 A test runs every bundled lesson's expression on its demo, so a typo fails CI.
@@ -174,4 +180,4 @@ The API:
 | GET | `lessons` | `{lessons: [{id, title, summary, level, unit, demo, steps}], demo, labelled}` |
 | GET | `lesson?id=` | The lesson resolved for the current cube (band indices, effective view and pipeline per step, tasks without answers) |
 | POST | `lesson-check` | Body `{id, step, answer: {x, y} \| {band} \| {choice}}` → `{correct, message, note}` |
-| POST | `demo` | Body `{name: "scene" \| "capture"}`: show a built-in cube |
+| POST | `demo` | Body `{name: "scene" \| "capture" \| "photo"}`: show a built-in cube |

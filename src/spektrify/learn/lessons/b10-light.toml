@@ -1,0 +1,140 @@
+id = "light"
+title = "Light and what a pixel measures"
+summary = "Photons, wavelengths and silicon: a pixel counts electrons, it doesn't see colour, and its number mixes the material with the light and the camera."
+level = "basics"
+unit = "How images are captured"
+order = 51
+demo = "capture"
+reading = [
+  "Gonzalez & Woods, *Digital Image Processing* (4th ed.), ch. 2: light and the electromagnetic spectrum, image sensing and acquisition.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: photometric image formation and the digital camera.",
+  "Torralba, Isola & Freeman, *Foundations of Computer Vision*, chapters on light and imaging.",
+  "European Machine Vision Association, *EMVA Standard 1288* (release 4.0, 2021): how image sensors are measured and compared.",
+]
+
+[[steps]]
+title = "Light comes in photons"
+text = """
+Light is a stream of tiny packets of energy, **photons**. Each photon has a wavelength λ,
+and its energy is **E = h·c / λ**, roughly **1240 / λ** electronvolts with λ in nm. Short
+wavelengths carry more energy per photon than long ones.
+
+- **Visible** light runs from about 400 nm (violet) to 700 nm (red).
+- **Near infrared (NIR)**, 700 to about 1000 nm, is invisible to us but most cameras in
+  this course measure it.
+- Beyond that is short-wave infrared (SWIR, about 1000 to 2500 nm).
+
+This lesson uses the **raw capture demo**: the same scene as before, but as an uncalibrated
+camera records it, in raw counts.
+"""
+show = { mode = "band", band = 700, cmap = "gray", specView = "values" }
+
+[steps.task]
+kind = "choice"
+prompt = "Which photon carries more energy?"
+options = ["One at 450 nm (blue)", "One at 900 nm (near infrared)", "They carry the same"]
+answer = 0
+success = "Right: energy goes as 1/λ, so a 450 nm photon carries twice the energy of a 900 nm one (about 2.8 eV against 1.4 eV)."
+retry = "E = h·c / λ: what happens to E when λ gets smaller?"
+
+[[steps]]
+title = "A pixel counts electrons"
+text = """
+A camera pixel is a small patch of **silicon**. When a photon is absorbed there it can free
+one electron (the photoelectric effect), and the pixel collects these electrons during the
+exposure. The fraction of arriving photons that end up as collected electrons is the
+**quantum efficiency (QE)**, typically 50 to 90% at its peak.
+
+A photon can only free an electron if its energy exceeds silicon's **band gap** of about
+1.1 eV. With E ≈ 1240 / λ, that means wavelengths shorter than about **1100 nm**. Longer
+wavelengths pass through silicon without being detected. Near that limit QE already falls,
+because NIR photons travel deep into the silicon and many pass through it unabsorbed.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Why can't an ordinary silicon camera image at 1500 nm?"
+options = [
+  "Those photons don't have enough energy to free an electron in silicon",
+  "The lens blocks all infrared",
+  "The pixels are too large",
+]
+answer = 0
+success = "Right. A 1500 nm photon carries about 0.83 eV, below silicon's 1.1 eV band gap. SWIR cameras use other materials with smaller band gaps, such as InGaAs (about 900 to 1700 nm)."
+retry = "Compare the photon energy at 1500 nm (1240 / 1500 eV) with silicon's band gap."
+
+[[steps]]
+title = "The sensor is colour-blind"
+text = """
+Once a photon has freed an electron, its wavelength is forgotten: a blue photon and a red
+photon each add **one electron**. A bare pixel therefore reports *how much* light arrived,
+weighted by QE, but not *which* wavelengths.
+
+To measure colour or a spectrum, the camera must decide which wavelengths reach each pixel
+before they hit the silicon: with **filters** in front of the pixels, or by spreading the
+light out with a prism or grating. The next lessons show both.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "Two bare pixels each collect 1,000 electrons. One was lit by red light, the other by blue. Can you tell which is which from the numbers?"
+options = [
+  "No. The electrons carry no record of the photons' wavelength",
+  "Yes, red light gives larger electrons",
+  "Yes, from the noise",
+]
+answer = 0
+success = "Right. That is why every colour and spectral camera puts something wavelength-selective in front of the sensor."
+retry = "Every absorbed photon, whatever its wavelength, adds one identical electron."
+
+[[steps]]
+title = "From electrons to counts"
+text = """
+After the exposure, each pixel's charge is turned into a voltage, amplified, and converted
+to a whole number by an **analogue-to-digital converter (ADC)**. That number is the raw
+value, in **counts** or DN (digital numbers):
+
+**counts ≈ offset + electrons / gain**
+
+The **gain** says how many electrons make one count, and the **offset** (black level) is a
+fixed value added so that noise never goes below zero. In this demo the offset is 100
+counts. Click the white reference tile in the bottom-right corner and look at its spectrum
+below.
+"""
+
+[steps.task]
+kind = "pixel"
+region = "white_tile"
+prompt = "Click the white tile in the bottom-right corner."
+hint = "The bright strip along the bottom edge, on the right."
+success = "The tile reflects about 95% at every wavelength, yet its curve is a hump that peaks near 720 nm. The lamp (a halogen bulb gives little blue light) times the silicon's QE (falling in the NIR) makes the hump, not the tile."
+retry = "Not the tile. It's the bright strip along the bottom edge, on the right."
+
+[[steps]]
+title = "Material and setup, mixed together"
+text = """
+Put the chain together. For one band, a pixel's raw value is roughly
+
+**offset + (t / gain) · ∫ illumination(λ) · reflectance(λ) · optics(λ) · QE(λ) dλ + noise**
+
+where t is the exposure time and the integral sums over the wavelengths the band lets in.
+Only the **reflectance** belongs to the material. Illumination, optics, QE, gain and offset
+belong to the setup, which is why raw counts from two cameras, or one camera under two
+lamps, can't be compared directly. The lesson *From raw counts to reflectance* removes them.
+
+One surprise: for a surface that fills the pixel, the value **does not change with
+distance**. Twice as far, each pixel sees a patch four times larger, but receives a quarter
+as much light from each point of it, so the two cancel.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You photograph an evenly lit wall from 2 m, then from 4 m, with the same settings. What happens to the pixel values on the wall?"
+options = [
+  "They stay about the same",
+  "They halve",
+  "They drop to a quarter",
+]
+answer = 0
+success = "Right. The light from each point drops as 1/distance², but each pixel collects from an area that grows as distance². Small objects that no longer fill a pixel do get dimmer."
+retry = "Each pixel now sees a larger piece of the wall. Does that make up for the dimmer light from each point?"

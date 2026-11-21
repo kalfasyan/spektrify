@@ -9,8 +9,6 @@ change the image size (crop, bin) make the label map stale; users of it check th
 
 from __future__ import annotations
 
-from collections.abc import Callable
-
 import numpy as np
 
 from spektrify.model import Cube
@@ -161,7 +159,3 @@ def demo_capture(height: int = 192, width: int = 256, bands: int = 96, seed: int
     cube = sc.cube(raw, "demo capture (raw counts)", "capture", "synthetic raw capture")
     cube.meta["dark_level"] = DARK_LEVEL
     return cube
-
-
-DEMOS: dict[str, Callable[[], Cube]] = {"scene": demo_cube, "capture": demo_capture}
-"""Built-in demo cubes by name (``spektrify learn`` and the lessons pick them by name)."""

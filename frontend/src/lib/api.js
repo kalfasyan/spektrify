@@ -65,7 +65,7 @@ export const api = {
   steps: () => json('/api/steps'),
   /** Replace the preprocessing pipeline: [{name, params}] */
   pipeline: (steps) => json('/api/pipeline', { steps }),
-  /** Show a built-in synthetic cube: 'scene' or 'capture' (raw counts). */
+  /** Show a built-in demo cube: 'scene', 'capture' (raw counts) or 'photo' (RGB). */
   demo: (name) => json('/api/demo', { name }),
   /** Lessons: the catalog, one lesson resolved for the current cube, and answer checking. */
   lessons: () => json('/api/lessons', undefined, true),

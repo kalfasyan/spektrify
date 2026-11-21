@@ -128,6 +128,7 @@ def view(
 class DemoName(str, Enum):
     scene = "scene"
     capture = "capture"
+    photo = "photo"
 
 
 @app.command()
@@ -135,7 +136,9 @@ def learn(
     path: OptionalCubePath = None,
     demo: Annotated[
         DemoName,
-        typer.Option(help="Built-in cube when no file is given: scene, or capture (raw counts)."),
+        typer.Option(
+            help="Built-in cube when no file is given: scene, capture (raw counts) or photo (RGB)."
+        ),
     ] = DemoName.scene,
     lessons: Annotated[
         list[Path] | None,

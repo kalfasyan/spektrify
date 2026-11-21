@@ -1,0 +1,148 @@
+id = "sensor-noise"
+title = "Exposure, noise and dynamic range"
+summary = "Shot noise, read noise and saturation: how much light you collect sets how precise every pixel is, and what too much light destroys."
+level = "basics"
+unit = "How images are captured"
+order = 52
+demo = "scene"
+reading = [
+  "J. R. Janesick, *Photon Transfer: DN → λ* (SPIE Press, 2007): measuring a sensor's gain, noise and full well from its own images.",
+  "European Machine Vision Association, *EMVA Standard 1288* (release 4.0, 2021): the standard sensor noise model.",
+  "G. E. Healey and R. Kondepudy, 'Radiometric CCD camera calibration and noise estimation', *IEEE TPAMI* 16(3), 1994.",
+  "Szeliski, *Computer Vision: Algorithms and Applications* (2nd ed.), ch. 2: the digital camera, sampling and noise.",
+]
+
+[[steps]]
+title = "A simulated sensor"
+text = """
+`expose(image, t)` shows what a simple, made-up sensor would record if the image were the
+light reaching it and t the exposure. Its numbers are typical of a machine-vision camera:
+
+- a white surface at t = 1 gives **1,000 electrons** on average,
+- each pixel holds at most **10,000 electrons** (the **full well**),
+- the readout adds **5 electrons** of noise,
+- a **12-bit** ADC turns 0 to 10,000 electrons into 0 to 4,095 counts.
+
+Here is the 550 nm band at t = 1: `expose(nm(550), 1)`. The background reflects about 18%,
+so each of its pixels collects about 186 electrons.
+"""
+show = { mode = "math", mathExpr = "expose(nm(550), 1)", cmap = "gray" }
+
+[[steps]]
+title = "Shot noise: light itself is grainy"
+text = """
+Photons arrive at random, like raindrops. If a pixel expects N photons per exposure, the
+count it actually gets varies from shot to shot with a standard deviation of **√N**
+(a Poisson distribution). This **shot noise** is a property of light, not of the camera,
+so no sensor can beat it.
+
+So the **signal-to-noise ratio (SNR)** from shot noise alone is **N / √N = √N**. Collecting
+four times the light only doubles the SNR. At t = 1 the background gets about 186
+electrons: SNR ≈ 13, which is the speckle you see.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A pixel collects 10,000 electrons. What is its shot-noise-limited SNR?"
+options = ["100", "1,000", "10,000", "50"]
+answer = 0
+success = "Right: √10,000 = 100, so the value is uncertain by about 1%. Getting to 0.1% would take 100 times more light (a million electrons), more than one pixel can hold, so you average pixels or frames instead."
+retry = "Shot-noise SNR is √N."
+
+[[steps]]
+title = "Too little light"
+text = """
+Now t = 0.05: `expose(nm(550), 0.05)`. The background gets only about 9 electrons, and
+the image is mostly noise.
+
+Two noises add up (their variances add): **SNR = N / √(N + σ_read²)**. With N = 9 and
+σ_read = 5 electrons, SNR ≈ 1.6. In the dark, the **read noise** of the electronics
+dominates. The discs collect more light, so they still stand out a little.
+"""
+show = { mode = "math", mathExpr = "expose(nm(550), 0.05)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "At very low light, which noise sets the limit?"
+options = [
+  "Read noise, because it doesn't shrink with the signal",
+  "Shot noise, because it is always the largest",
+  "Quantisation, because there are too few bits",
+]
+answer = 0
+success = "Right. Shot noise is √N, which becomes small in absolute terms when N is small; read noise stays at about 5 electrons. Low-read-noise sensors (and cooling) matter most in dim scenes."
+retry = "Which noise stays the same size however little light arrives?"
+
+[[steps]]
+title = "Too much light"
+text = """
+Now t = 40: `expose(nm(550), 40)`. The background is cleaner (about 7,400 electrons, shot
+SNR about 86), but the four discs reflect about 42 to 46% and would need more than
+16,000 electrons, so every one of their pixels hits the **full well** and reads 4,095.
+
+A **saturated** (clipped) pixel has lost its information: the shading on the discs is
+gone, and any number computed from it, such as a ratio of two bands, is wrong without
+looking wrong. The usual rule is to expose so the **brightest thing you care about** sits
+just below full well.
+"""
+show = { mode = "math", mathExpr = "expose(nm(550), 40)", cmap = "gray" }
+
+[steps.task]
+kind = "choice"
+prompt = "A disc reads 4,095 in band A and 2,000 in band B. What can you say about its ratio A / B?"
+options = [
+  "Nothing reliable: A is clipped, so the true ratio is at least 2.05 but could be much larger",
+  "It is 2.05",
+  "It is about 1, because saturated pixels are white",
+]
+answer = 0
+success = "Right. Clipping only tells you the value was at least the maximum. Spectral tools should mask saturated pixels, as the lesson on sensor problems does."
+retry = "4,095 is the largest number the ADC can output. What was the true value?"
+
+[[steps]]
+title = "Dynamic range and bit depth"
+text = """
+The **dynamic range** is the ratio of the largest signal to the noise floor:
+**full well / read noise**. Here 10,000 / 5 = 2,000 : 1, about 66 dB or 11 bits.
+
+That is why a 12-bit ADC suits this sensor. Fewer bits would add rounding steps larger than
+the noise (the false contours from *What is a digital image?*); many more bits would only
+record the noise more finely. The **gain**, 10,000 / 4,095 ≈ 2.4 electrons per count, ties
+counts back to electrons.
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A sensor holds 20,000 electrons and has 2 electrons of read noise. Which ADC suits it?"
+options = ["14-bit", "8-bit", "10-bit", "24-bit"]
+answer = 0
+success = "Right: 20,000 / 2 = 10,000 : 1, about 13.3 bits, so 14 bits covers it with no waste."
+retry = "Compute full well / read noise, then the number of bits: 2^bits should just exceed it."
+
+[[steps]]
+title = "Dark current and fixed patterns"
+text = """
+Two more sources finish the picture:
+
+- **Dark current**: heat frees electrons even with no light. It grows with exposure time
+  and roughly doubles every 6 to 8 °C, which is why scientific cameras are cooled. Its
+  average adds to the offset; its randomness adds noise.
+- **Fixed-pattern noise**: each pixel has a slightly different offset and sensitivity
+  (DSNU and PRNU in the EMVA 1288 standard). It is the same in every frame. Hot and dead
+  pixels are its extreme cases.
+
+Random noise shrinks when you average frames; fixed patterns don't, but they can be
+measured once and subtracted (a dark frame) or divided out (a flat field).
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "You average 16 frames of a still scene. What happens?"
+options = [
+  "Random noise drops 4 times; fixed-pattern noise stays",
+  "All noise drops 16 times",
+  "Fixed-pattern noise drops 4 times; random noise stays",
+]
+answer = 0
+success = "Right: averaging n frames divides random noise by √n = 4, and leaves anything that repeats in every frame. Calibration frames handle that part."
+retry = "Averaging cancels what changes between frames. Does a fixed pattern change?"

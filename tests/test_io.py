@@ -138,3 +138,16 @@ def test_save_cube_roundtrip(tmp_path, suffix: str) -> None:
     np.testing.assert_allclose(back.axis, cube.axis)
     with pytest.raises(ValueError):
         save_cube(cube, tmp_path / "c.tif")
+
+
+def test_photo_demo_is_a_linear_three_band_cube() -> None:
+    from spektrify.io import DEMOS
+    from spektrify.io.samples import srgb_to_linear
+
+    cube = DEMOS["photo"]()
+    assert cube.data.shape == (3, 256, 256)
+    assert np.array_equal(cube.axis, [460.0, 535.0, 600.0])  # blue, green, red
+    assert float(np.min(cube.data)) >= 0.0
+    assert float(np.max(cube.data)) <= 1.0
+    assert abs(float(srgb_to_linear(np.array(0.5))) - 0.214) < 1e-3  # mid-grey is 21% light
+    assert cube.meta["labels"].shape == (256, 256)
