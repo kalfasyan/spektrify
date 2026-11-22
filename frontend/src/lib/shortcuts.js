@@ -1,6 +1,7 @@
 // Keyboard shortcuts: one table drives both the handler and the help dialog.
 
 import { ctl, store } from './controller.svelte.js';
+import { learn } from './learn.svelte.js';
 
 const s = () => store.state;
 const lastMark = () => s().marks[s().marks.length - 1];
@@ -40,6 +41,8 @@ export const SHORTCUTS = [
   [['G'], 'All channels', ['g'], () => ctl.setView('grid')],
   [['D'], '3D', ['d'], () => ctl.setView('3d')],
   [['Q'], 'Quality', ['q'], () => ctl.setView('quality')],
+  ['Learn'],
+  [[',', '.'], 'Previous / next lesson step', [',', '.'], (e) => { if (learn.ui.lesson) (e.key === '.' ? learn.next() : learn.prev()); }],
   ['Files'],
   [['Ctrl', 'O'], 'Open a cube (or drop a file on the window)', [], null],
   [['Ctrl', 'S'], 'Save the view as PNG', [], null],

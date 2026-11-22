@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "A derivative is a difference"
+figure = { kind = "kernel", op = "dx" }
 text = """
 An edge is a place where brightness changes quickly. On a pixel grid, the derivative is a
 difference between neighbours. The **Sobel** operator takes the difference left to right and
@@ -90,6 +91,7 @@ retry = "Find an outline that is still bright in this image."
 
 [[steps]]
 title = "Second derivatives and Canny"
+figure = { kind = "kernel", op = "laplace" }
 text = """
 The **Laplacian** (`laplace`) is the second derivative: zero on flat areas and even ramps,
 crossing zero right on an edge. Smoothed first (*Laplacian of Gaussian*), its zero crossings

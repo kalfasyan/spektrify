@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "One rule for every pixel"
+figure = { kind = "tone", curve = "linear" }
 text = """
 The simplest image operation looks at each pixel on its own: **output = T(input)**, the same
 function T everywhere. The neighbours play no part. These are called **point operations**.
@@ -30,6 +31,7 @@ retry = "Look for the large bright shape on the left."
 
 [[steps]]
 title = "The logarithm"
+figure = { kind = "tone", curve = "log" }
 text = """
 In plain red (670 nm) the leaf is almost black and looks flat. The **log transform**
 `log(nm(670))` stretches dark values apart and squeezes bright ones together, so detail in
@@ -50,6 +52,7 @@ retry = "Think of log(1), log(10) and log(100): equal steps for ever larger gaps
 
 [[steps]]
 title = "Gamma"
+figure = { kind = "tone", curve = "gamma" }
 text = """
 A **power law** `x ** γ` (on values scaled to 0..1) is the adjustable version: γ below 1
 brightens the dark tones, γ above 1 darkens them. Here γ = 0.4:
@@ -71,6 +74,7 @@ retry = "Try a pixel value of 0.1: compare 0.1 ** 0.5 with 0.1 ** 2."
 
 [[steps]]
 title = "Why some transforms change nothing"
+figure = { kind = "tone", curve = "stretch" }
 text = """
 This image is `2 * nm(670) + 1`. It looks exactly like plain 670 nm. Why?
 

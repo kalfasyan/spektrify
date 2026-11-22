@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Which pixels belong together?"
+figure = { kind = "pixels", show = "neighbours" }
 text = """
 A mask says *which* pixels are 'on', not *how many objects* there are. **Connected
 components** gives each group of touching pixels its own number. Two pixels touch if they

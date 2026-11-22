@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Noisy spectra"
+figure = { kind = "spectrum", show = "smooth" }
 text = """
 Every measurement has noise, so a single pixel's spectrum is jagged. Here the image shows the
 raw data.
@@ -55,6 +56,7 @@ retry = "Look for the highest point of the leaf's curve in the plot and click th
 
 [[steps]]
 title = "Standard normal variate"
+figure = { kind = "spectrum", show = "snv" }
 text = """
 **SNV** subtracts each spectrum's mean and divides by its standard deviation. Like the Shape
 view, it removes brightness and shading, but it changes the data itself, ready for modelling.

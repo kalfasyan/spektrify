@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "A pattern with every frequency"
+figure = { kind = "waves", show = "sum" }
 text = """
 This **zone plate**, `cos(((x - 128)**2 + (y - 96)**2) / 150)`, has rings that get finer from the centre outwards, so it
 contains every spacing from coarse to fine. At full resolution every ring is drawn
@@ -22,6 +23,7 @@ show = { mode = "math", mathExpr = "cos(((x - 128)**2 + (y - 96)**2) / 150)", cm
 
 [[steps]]
 title = "Aliasing"
+figure = { kind = "waves", show = "alias" }
 text = """
 Now keep only every 4th pixel in each direction: `subsample(…, 4)`. The centre is fine, but
 further out **new rings appear, centred in the wrong places**. Rings finer than the new pixel
@@ -65,6 +67,7 @@ retry = "Compare 1.5 pixels per period with the Nyquist rate."
 
 [[steps]]
 title = "Image pyramids"
+figure = { kind = "pixels", show = "coarse" }
 text = """
 Repeat *blur and halve* and you get a **Gaussian pyramid**: the same image at 1, 1/2, 1/4…
 of the size, each level safely blurred before shrinking. The difference between two

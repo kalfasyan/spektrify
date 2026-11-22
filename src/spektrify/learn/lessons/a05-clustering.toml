@@ -14,6 +14,7 @@ reading = [
 
 [[steps]]
 title = "Grouping without labels"
+figure = { kind = "scatter", show = "kmeans" }
 text = """
 **k-means** groups pixels into k clusters by spectrum:
 

@@ -36,6 +36,7 @@ retry = "Every object has the rims, always in the same directions. What would do
 
 [[steps]]
 title = "Register the bands"
+figure = { kind = "pipeline" }
 text = """
 The **align** step compares every band with a reference band (the middle one by default),
 finds the shift that matches them best, and moves the band back. The shifts it found are kept

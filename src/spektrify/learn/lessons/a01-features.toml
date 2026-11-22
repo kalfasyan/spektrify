@@ -15,6 +15,7 @@ reading = [
 
 [[steps]]
 title = "What makes a point easy to find again?"
+figure = { kind = "kernel", op = "corner" }
 text = """
 To stitch images, track motion or align bands we need points that can be found again in
 another image. Take a small window and imagine shifting it:

@@ -15,6 +15,7 @@ reading = [
 
 [[steps]]
 title = "Going deep: residual connections"
+figure = { kind = "layers", show = "resnet" }
 text = """
 Very deep plain networks are hard to train: the gradient signal fades as it passes back
 through many layers. **Residual networks** (ResNets) let each block learn a correction to
@@ -37,6 +38,7 @@ retry = "Look at y = x + F(x)."
 
 [[steps]]
 title = "Per-pixel outputs: U-Net"
+figure = { kind = "layers", show = "unet" }
 text = """
 Classification gives one label per image; **segmentation** gives one per pixel. A **U-Net**
 shrinks the image in an encoder (growing context, losing detail), expands it again in a
@@ -62,6 +64,7 @@ retry = "What does the encoder discard as it shrinks the image?"
 
 [[steps]]
 title = "Attention and transformers"
+figure = { kind = "layers", show = "attention" }
 text = """
 A **vision transformer** cuts the image into patches (often 16 × 16 pixels), turns each into
 a vector (a **token**) and lets every token **attend** to every other: each token's output

@@ -1,0 +1,160 @@
+/* Learn mode: a warm, paper-like reading panel next to the viewer, light or dark.
+   The panel redefines the app's colour tokens (--bg, --panel, --text, …) for itself, so the
+   shared controls (.btn, .seg, .icon-btn) restyle automatically; the --fig-* tokens colour
+   the diagrams. Light is the default; dark follows the system or the panel's own switch. */
+
+.learn {
+  --bg: #f7f4ee;
+  --bg-2: #f7f4ee;
+  --panel: #fffdf9;
+  --panel-2: #f1ece2;
+  --panel-3: #e9e2d5;
+  --line: #e6dfd2;
+  --line-strong: #d3c9b8;
+  --text: #24211c;
+  --text-2: #4f4a41;
+  --muted: #8b8376;
+  --accent: #c8551d;
+  --accent-2: #b5491a;
+  --accent-soft: rgba(200, 85, 29, .1);
+  --good: #2c8754;
+  --warn: #b46e12;
+  --bad: #c43d3d;
+  --shadow: 0 1px 2px rgba(60, 45, 20, .06), 0 6px 20px rgba(60, 45, 20, .06);
+  --fig-bg: #fbf9f4;
+  --fig-top: #fffdf8;
+  --fig-left: #ebe4d6;
+  --fig-right: #ddd3c1;
+  --fig-edge: #b6aa95;
+  --fig-ink: #2b2620;
+  --fig-ink-2: #6e665a;
+  --fig-grid: #e3dccd;
+  --fig-accent: #e0662f;
+  --fig-blue: #3b73b9;
+  --fig-green: #2f9461;
+  --fig-red: #d64545;
+  color-scheme: light;
+}
+/* Dark: the same values twice, once for "follow the system" and once for "always dark". */
+@media (prefers-color-scheme: dark) {
+  .learn[data-theme="auto"] {
+    --bg: #1c1b18; --bg-2: #1c1b18; --panel: #25231f; --panel-2: #2d2b26; --panel-3: #36332d;
+    --line: #34312b; --line-strong: #4a463e; --text: #efe9dd; --text-2: #c9c1b2; --muted: #958c7d;
+    --accent: #f08a52; --accent-2: #e07438; --accent-soft: rgba(240, 138, 82, .14);
+    --good: #5cc48a; --warn: #e3a646; --bad: #ef6b6b; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    --fig-bg: #22201c; --fig-top: #3a3731; --fig-left: #2c2a25; --fig-right: #25231f; --fig-edge: #5b564c;
+    --fig-ink: #efe9dd; --fig-ink-2: #a9a090; --fig-grid: #34312b;
+    --fig-accent: #f08a52; --fig-blue: #6d9fe0; --fig-green: #4fbf86; --fig-red: #ef6b6b;
+    color-scheme: dark;
+  }
+}
+.learn[data-theme="dark"] {
+  --bg: #1c1b18; --bg-2: #1c1b18; --panel: #25231f; --panel-2: #2d2b26; --panel-3: #36332d;
+  --line: #34312b; --line-strong: #4a463e; --text: #efe9dd; --text-2: #c9c1b2; --muted: #958c7d;
+  --accent: #f08a52; --accent-2: #e07438; --accent-soft: rgba(240, 138, 82, .14);
+  --good: #5cc48a; --warn: #e3a646; --bad: #ef6b6b; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  --fig-bg: #22201c; --fig-top: #3a3731; --fig-left: #2c2a25; --fig-right: #25231f; --fig-edge: #5b564c;
+  --fig-ink: #efe9dd; --fig-ink-2: #a9a090; --fig-grid: #34312b;
+  --fig-accent: #f08a52; --fig-blue: #6d9fe0; --fig-green: #4fbf86; --fig-red: #ef6b6b;
+  color-scheme: dark;
+}
+
+/* ---------- layout */
+.learn {
+  width: 400px; flex: none; display: flex; flex-direction: column; min-height: 0;
+  background: var(--bg); color: var(--text); border-right: 1px solid var(--line);
+  font-size: 14px; line-height: 1.55;
+}
+@media (min-width: 1600px) { .learn { width: 460px; } }
+.learn-head, .learn-foot { display: flex; align-items: center; gap: 8px; padding: 10px 16px; }
+.learn-head { border-bottom: 1px solid var(--line); }
+.learn-foot { border-top: 1px solid var(--line); background: var(--bg); }
+.learn-body > * { flex-shrink: 0; } /* a column of cards: scroll, never squash */
+.learn-body { flex: 1; overflow-y: auto; padding: 18px 20px 28px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+.learn-title { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+.learn-title svg { width: 18px; height: 18px; color: var(--accent); }
+.learn :is(.icon-btn, .learn-title, .task-prompt, .fig-btn, .btn) svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.learn .icon-btn svg { width: 17px; height: 17px; }
+.learn .btn { border-radius: 999px; padding: 7px 16px; font-weight: 600; box-shadow: none; }
+.learn .btn.primary { color: #fff; }
+.learn code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+.link { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; font-weight: 600; }
+.link:hover { text-decoration: underline; }
+.eyebrow { color: var(--accent); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; }
+
+/* ---------- catalog */
+.learn-hero h1 { margin: 2px 0 6px; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
+.learn-hero p { margin: 0; color: var(--text-2); }
+.meter { height: 6px; border-radius: 3px; background: var(--panel-3); overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s; }
+.meter-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.meter-row .meter { flex: 1; }
+.level { display: flex; flex-direction: column; gap: 8px; }
+.level-head { display: flex; align-items: baseline; justify-content: space-between; margin-top: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.level-head h2 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+.level-head span { font-size: 12px; color: var(--muted); }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lesson-list .unit-title { color: var(--muted); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin: 8px 0 0; }
+.lesson-card { width: 100%; display: grid; grid-template-columns: 30px 1fr; gap: 2px 12px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
+.lesson-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.lesson-card:disabled { opacity: .6; cursor: default; transform: none; }
+.lc-num { grid-row: span 3; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 700; background: var(--panel-2); color: var(--text-2); border: 1px solid var(--line); }
+.lc-num.done { background: var(--good); border-color: var(--good); color: #fff; }
+.lc-num.started { border-color: var(--accent); color: var(--accent); }
+.lc-title { font-weight: 650; font-size: 14.5px; line-height: 1.3; }
+.lc-sum { color: var(--text-2); font-size: 13px; line-height: 1.45; }
+.lc-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.learn .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+
+/* ---------- a lesson */
+.lesson-top { display: flex; flex-direction: column; gap: 8px; }
+.lesson-top h1 { margin: 0; font-size: 15px; font-weight: 650; color: var(--text-2); }
+.steps-bar { display: flex; gap: 4px; align-items: center; }
+.steps-bar button { flex: 1; height: 6px; border-radius: 3px; border: 0; padding: 0; background: var(--panel-3); cursor: pointer; transition: background .2s; }
+.steps-bar button.seen { background: color-mix(in srgb, var(--accent) 45%, var(--panel-3)); }
+.steps-bar button.solved { background: var(--good); }
+.steps-bar button.active { background: var(--accent); }
+.steps-bar .count { flex: none; margin-left: 6px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.step-head { display: flex; flex-direction: column; gap: 2px; }
+.step-title { margin: 0; font-size: 23px; line-height: 1.2; font-weight: 750; letter-spacing: -.02em; }
+.md { color: var(--text-2); line-height: 1.65; font-size: 14.5px; }
+.md p { margin: 0 0 10px; }
+.md ul { margin: 0 0 10px; padding-left: 20px; }
+.md li { margin-bottom: 3px; }
+.md b { color: var(--text); font-weight: 650; }
+.md a { color: var(--accent); }
+.step-anim { animation: step-in .35s ease-out; }
+@keyframes step-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .step-anim { animation: none; } }
+.banner { background: color-mix(in srgb, var(--warn) 10%, var(--panel)); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--text-2); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.compare { display: flex; flex-direction: column; gap: 6px; }
+.compare .ctrl-label { font-size: 12px; color: var(--muted); }
+.task { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
+.task.ok { border-color: var(--good); }
+.task.bad { border-color: var(--warn); }
+.task-prompt { display: flex; gap: 10px; align-items: flex-start; font-weight: 650; color: var(--text); }
+.task-prompt svg { width: 18px; height: 18px; margin-top: 2px; color: var(--accent); flex: none; }
+.task .hint { color: var(--muted); font-size: 12.5px; }
+.options { display: flex; flex-direction: column; gap: 6px; }
+.option { text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; cursor: pointer; line-height: 1.45; color: var(--text); transition: border-color .15s, background .15s; }
+.option:hover { border-color: var(--accent); background: var(--accent-soft); }
+.feedback { font-size: 13.5px; line-height: 1.55; color: var(--text-2); }
+.task.ok .feedback b { color: var(--good); }
+.task.bad .feedback b { color: var(--warn); }
+.finish { text-align: center; padding: 30px 6px; display: flex; flex-direction: column; gap: 8px; }
+.finish .big { width: 64px; height: 64px; margin: 0 auto 6px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; color: #fff; background: var(--good); }
+.finish h2 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+.finish p { color: var(--text-2); margin: 0 0 10px; }
+.finish .reading { text-align: left; margin: 0 0 14px; }
+.finish .reading ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-2); font-size: 13px; line-height: 1.5; }
+.finish .reading li { margin: 0 0 5px; }
+.finish .reading li p { margin: 0; }
+.finish .section-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+
+/* ---------- phones: the panel sits above the viewer instead of beside it */
+@media (max-width: 760px) {
+  .workarea { flex-direction: column; }
+  .learn { width: 100vw; max-height: 58vh; border-right: 0; border-bottom: 1px solid var(--line); }
+  .learn-body { padding: 14px 16px 20px; }
+  .step-title { font-size: 20px; }
+}

@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "True colour"
+figure = { kind = "cube", focus = "rgb" }
 text = """
 Your eye has three kinds of colour receptors (cones), sensitive to broad, overlapping ranges
 that peak near 420, 530 and 560 nm. So the eye reduces a whole spectrum to just **three
@@ -63,6 +64,7 @@ retry = "Not that one. Look for a small red dot near the top, just right of the 
 
 [[steps]]
 title = "Three numbers are not enough"
+figure = { kind = "spectrum", show = "sample" }
 text = """
 Because the eye keeps only three numbers, two **different spectra** can give exactly the same
 three numbers and look identical. Such pairs are called **metamers**. A paint that matches

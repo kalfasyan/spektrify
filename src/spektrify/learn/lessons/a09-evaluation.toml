@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "Accuracy can lie"
+figure = { kind = "scatter", show = "metrics" }
 text = """
 Treat this mask, `nm(800) > 0.4`, as a model that predicts 'leaf'. Compared with the true
 leaf, every pixel falls in one of four boxes, the **confusion matrix**:

@@ -36,6 +36,7 @@ retry = "Zoom in on the left half of the leaf and look for the thin vertical lin
 
 [[steps]]
 title = "Averaging smears outliers"
+figure = { kind = "kernel", op = "box" }
 text = """
 A Gaussian blur, `gauss(nm(670), 1.5)`, doesn't remove the defects. It spreads them: the dead
 column becomes a wider grey band and the saturated square a bright blob. One wildly wrong
@@ -45,6 +46,7 @@ show = { mode = "math", mathExpr = "gauss(nm(670), 1.5)", cmap = "gray" }
 
 [[steps]]
 title = "The median ignores outliers"
+figure = { kind = "kernel", op = "median" }
 text = """
 The **median filter** sorts the values in the window and keeps the middle one. A few extreme
 values can't move the middle of a sorted list, so `median(nm(670), 1)` (3 × 3 window) simply

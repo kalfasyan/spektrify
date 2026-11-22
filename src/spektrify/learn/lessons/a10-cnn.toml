@@ -14,6 +14,7 @@ reading = [
 
 [[steps]]
 title = "One layer, from known parts"
+figure = { kind = "layers", show = "cnn" }
 text = """
 A convolutional layer does three things you've already seen:
 

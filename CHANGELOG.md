@@ -9,6 +9,13 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- Learn mode has a new look: a warm, paper-like reading panel (light, dark, or following
+  the system; switch in the panel header), short step-by-step lessons, and an animated
+  diagram above each step with play, step and frame controls. Ten diagram kinds (spectral
+  cube, pixel grid, sliding 3 × 3 window, tone curve, spectra, preprocessing pipeline,
+  feature-space scatter, waves, camera geometry, network layers) are chosen per step with
+  `figure = { kind = "…" }` in a lesson file; 33 bundled lessons use them. `,` and `.`
+  step through a lesson. On phones the panel sits above the viewer.
 - Learn mode is a computer-vision course: 34 lessons in three levels (basics,
   intermediate, advanced), grouped into units, from digital images and histograms through
   filters, Fourier, morphology and calibration to features, multi-view geometry, clustering,

@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Divide one band by another"
+figure = { kind = "spectrum", show = "edge" }
 text = """
 Dividing bands cancels anything that scales both of them equally, such as shading or a
 brighter lamp. Here the near infrared (800 nm) is divided by red (670 nm), the two sides of
@@ -47,6 +48,7 @@ retry = "Try a = 0, then b = 0, in the formula."
 
 [[steps]]
 title = "Masks from rules"
+figure = { kind = "pixels", show = "threshold" }
 text = """
 Comparisons give a 0/1 mask, and multiplying masks combines rules. This one keeps pixels that
 are greener than red **and** fairly bright:

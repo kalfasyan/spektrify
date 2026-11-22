@@ -55,9 +55,13 @@ def lesson_json(lesson: Lesson, cube: Cube | None) -> dict[str, Any]:
         "reading": list(lesson.reading),
         "uses_pipeline": lesson.uses_pipeline,
         "steps": [
-            _step_json(s, cube, view, p)
-            for s, view, p in zip(
-                lesson.steps, _effective_views(lesson), _effective_pipelines(lesson), strict=True
+            _step_json(s, cube, view, p, f)
+            for s, view, p, f in zip(
+                lesson.steps,
+                _effective_views(lesson),
+                _effective_pipelines(lesson),
+                _effective_figures(lesson),
+                strict=True,
             )
         ],
     }
@@ -69,6 +73,17 @@ def _effective_views(lesson: Lesson) -> list[str]:
     out, current = [], "image"
     for s in lesson.steps:
         current = s.view or current
+        out.append(current)
+    return out
+
+
+def _effective_figures(lesson: Lesson) -> list[dict[str, Any] | None]:
+    """The diagram at each step: a step without ``figure`` keeps the previous one, so a
+    diagram can change step by step; ``kind = "none"`` hides it."""
+    out, current = [], None
+    for s in lesson.steps:
+        if s.figure is not None:
+            current = None if s.figure["kind"] == "none" else dict(s.figure)
         out.append(current)
     return out
 
@@ -100,7 +115,11 @@ def summary_json(lesson: Lesson) -> dict[str, Any]:
 
 
 def _step_json(
-    step: Step, cube: Cube | None, view: str, pipeline: list[dict[str, Any]] | None
+    step: Step,
+    cube: Cube | None,
+    view: str,
+    pipeline: list[dict[str, Any]] | None,
+    figure: dict[str, Any] | None,
 ) -> dict[str, Any]:
     show = dict(step.show)
     if cube is not None:
@@ -118,6 +137,7 @@ def _step_json(
         "view": view,
         "show": show,
         "pipeline": pipeline,
+        "figure": figure,
         "task": task,
     }
 

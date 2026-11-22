@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Mixed pixels"
+figure = { kind = "scatter", show = "unmix" }
 text = """
 A pixel collects light from a small area. Where that area covers two materials, at every
 object border and wherever the camera is coarse compared to the objects, the spectrum is a

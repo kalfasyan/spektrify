@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "A mask from one rule"
+figure = { kind = "pixels", show = "threshold" }
 text = """
 **Thresholding** is the simplest segmentation: every pixel above a value becomes 1 (white),
 every other pixel 0 (black). The result is a **mask**.

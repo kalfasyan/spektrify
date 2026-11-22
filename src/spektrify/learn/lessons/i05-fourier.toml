@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "Images are sums of waves"
+figure = { kind = "waves", show = "sum" }
 text = """
 Any image can be written as a sum of **waves**: stripes of different spacing (frequency),
 direction, strength and position. The **Fourier transform** tells you how much of each wave
@@ -52,6 +53,7 @@ retry = "Vertical stripes change as you move left to right, not up and down."
 
 [[steps]]
 title = "Low-pass and high-pass"
+figure = { kind = "waves", show = "filter" }
 text = """
 To see filtering clearly, use a test pattern instead of the scene. This **zone plate**,
 `cos(((x - 128)**2 + (y - 96)**2) / 150)`, is made of rings that get finer towards the edges: low frequencies in the centre,

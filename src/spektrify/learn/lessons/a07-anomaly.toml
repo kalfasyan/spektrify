@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "The RX detector"
+figure = { kind = "scatter", show = "anomaly" }
 text = """
 **RX** learns what the scene looks like on average (the mean spectrum and how bands vary
 together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.

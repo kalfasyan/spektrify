@@ -31,6 +31,7 @@ retry = "That's not the tile. It's the bright strip in the bottom-right corner."
 
 [[steps]]
 title = "Subtract the dark level"
+figure = { kind = "pipeline" }
 text = """
 Even with the lens capped, a sensor reports some signal: the **dark level** (here 100
 counts). The first correction subtracts it.
