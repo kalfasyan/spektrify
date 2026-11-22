@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from spektrify.compute import imageops
+from spektrify.compute import capture, imageops
 from spektrify.compute._util import finite_list as _clean
 from spektrify.compute.bandmath import safe_eval
 from spektrify.model import Cube
@@ -495,10 +495,12 @@ class NumpyAnalyzer:
         Names: ``b[i]`` (band by index), ``nm(λ)`` (band nearest to wavelength λ),
         ``mean``/``std`` (per-pixel across bands), numpy functions ``sqrt log exp abs
         clip minimum maximum where``, the image functions of
-        :mod:`spektrify.compute.imageops` (``gauss(nm(670), 2)``, ``grad``, ``otsu`` …),
-        ``kmeans(k)`` (cluster map of the whole cube), ``x`` / ``y`` (pixel column / row, for
-        test patterns such as ``cos(((x - 128)**2 + (y - 96)**2) / 150)``), ``sin`` ``cos``
-        and arithmetic / comparison operators.
+        :mod:`spektrify.compute.imageops` (``gauss(nm(670), 2)``, ``grad``, ``otsu`` …), the
+        capture simulations of :mod:`spektrify.compute.capture` (``expose``, ``bayer`` …),
+        ``kmeans(k)`` (cluster map of the whole cube), ``mosaic(t)`` (a snapshot-mosaic
+        frame), ``x`` / ``y`` (pixel column / row, for test patterns such as
+        ``cos(((x - 128)**2 + (y - 96)**2) / 150)``), ``sin`` ``cos`` and arithmetic /
+        comparison operators.
         Example: ``(nm(800) - nm(670)) / (nm(800) + nm(670))``.
         """
         cube = self.cube
@@ -542,7 +544,9 @@ class NumpyAnalyzer:
             "x": np.arange(cube.width, dtype=np.float32)[None, :],
             "y": np.arange(cube.height, dtype=np.float32)[:, None],
             "kmeans": self.clusters,
+            "mosaic": lambda t=4: capture.mosaic_frame(cube.data, t),
             **imageops.BANDMATH_FUNCTIONS,
+            **capture.BANDMATH_FUNCTIONS,
         }
         with np.errstate(all="ignore"):
             out = safe_eval(expr, env)

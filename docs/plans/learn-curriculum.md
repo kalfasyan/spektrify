@@ -46,6 +46,11 @@ lessons in order, with a done count per level. `*` marks a lesson that already e
 | | Band math and indices * | ratios, normalised difference, masks | band math |
 | | Thresholds and Otsu's method | binary masks, choosing a threshold automatically | `otsu` |
 | | Comparing materials * | brightness vs shape, spectral angle | similarity |
+| How images are captured (added later) | Light and what a pixel measures | photons, E = hc/λ, silicon band gap and the 1100 nm limit, QE, colour-blind pixels, electrons → counts (gain, offset), radiance and distance | capture demo, white tile |
+| | Exposure, noise and dynamic range | shot noise √N, read noise, SNR, saturation, full well, dynamic range and bit depth, dark current, fixed-pattern noise | `expose` |
+| | Lenses, focus and blur | thin lens, focal length and field of view, f-number and stops, defocus as convolution with a disc, depth of field, diffraction (2.44 λN), chromatic aberration, vignetting | `defocus` |
+| | Colour filter arrays and demosaicing | Bayer RGGB, raw frames, bilinear demosaicing, false colour and moiré, optical low-pass filter, other mosaics, multispectral filter arrays | `bayer`, `debayer` on the photo demo |
+| | How spectral cameras capture a cube | whisk-broom, push-broom (speed mismatch, jitter, stripes, smile, keystone), filter wheel / tunable filters, snapshot mosaics, choosing a design | `scan`, `mosaic`, `demosaic` |
 
 ### Intermediate: neighbourhoods, frequencies, shapes and clean data
 
@@ -66,7 +71,7 @@ lessons in order, with a done count per level. `*` marks a lesson that already e
 | Unit | Lesson | Key ideas | Viewer demo |
 | --- | --- | --- | --- |
 | Features and geometry | Corners and local features | structure tensor, Harris, scale space, descriptors, matching, RANSAC | `harris` |
-| | Cameras and image formation | pinhole, intrinsics / extrinsics, distortion, how spectral cameras scan | concept + capture demo |
+| | Cameras and image formation | pinhole, intrinsics / extrinsics, distortion, calibration, the linear push-broom camera model | concept |
 | | Geometry of several views | homography, DLT, epipolar geometry, essential / fundamental matrix, triangulation, bundle adjustment | concept |
 | Statistics without labels | Principal component analysis * | | PCA |
 | | Clustering into segments | k-means, choosing k, segmentation vs classification | `kmeans` |
@@ -88,7 +93,23 @@ lessons in order, with a done count per level. `*` marks a lesson that already e
 - A test evaluates every bundled lesson's band-math expression on its demo cube, so a typo in
   a lesson fails CI.
 
-## How accuracy was checked
+## How images are captured (added after the first release of the course)
+
+The course first touched image capture only in the advanced camera lesson. Capture comes
+early now, as the second Basics unit, because every later topic (noise, blur, aliasing,
+calibration, band alignment) has its cause there. The physics of capture (sensor, optics,
+filter arrays, scanning) moved out of *Cameras and image formation*, which keeps the
+geometry and adds the push-broom camera model.
+
+Each idea is shown by a small, explicitly stated simulation in band math
+(`compute/capture.py`): the learner sees the effect on the demo scene before it is named.
+
+Data: the Bayer lesson uses a real photo, NASA's public-domain portrait of astronaut Eileen
+Collins, as shipped with scikit-image (`astronaut`), stored at 256 × 256 (156 kB). Classic
+multispectral sets (CAVE, ICVL, Harvard) are free for research but have no clear licence for
+redistribution, so none is bundled; the spectral lessons keep using the synthetic scene.
+Classic remote-sensing cubes (Indian Pines, Pavia) are out of scope (no Earth observation).
+
 
 - Every claim about the demo scene (which object a map selects, which band is darkest, how
   many regions a mask has, precision / recall numbers) was computed from the cube's label map,

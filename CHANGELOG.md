@@ -11,11 +11,23 @@ First release (to be tagged `v0.1.0`).
 ### Added
 - Learn mode has a new look: a warm, paper-like reading panel (light, dark, or following
   the system; switch in the panel header), short step-by-step lessons, and an animated
-  diagram above each step with play, step and frame controls. Ten diagram kinds (spectral
+  diagram above each step with play, step and frame controls. Twelve diagram kinds (spectral
   cube, pixel grid, sliding 3 × 3 window, tone curve, spectra, preprocessing pipeline,
-  feature-space scatter, waves, camera geometry, network layers) are chosen per step with
-  `figure = { kind = "…" }` in a lesson file; 33 bundled lessons use them. `,` and `.`
+  feature-space scatter, waves, camera geometry and lenses, network layers, sensor wells,
+  filter mosaics) are chosen per step with `figure = { kind = "…" }` in a lesson file; 38
+  of the 39 bundled lessons use them. `,` and `.`
   step through a lesson. On phones the panel sits above the viewer.
+- Learn mode gains an early unit, **How images are captured** (5 lessons in Basics): light
+  and what a pixel measures (photons, silicon, QE, counts), exposure, noise and dynamic range,
+  lenses, focus and blur (f-number, defocus, diffraction, aberrations, vignetting), colour
+  filter arrays and demosaicing (Bayer, false colour, moiré, spectral mosaics), and how
+  spectral cameras capture a cube (whisk-broom, push-broom, filter / tunable, snapshot). The
+  advanced *Cameras and image formation* lesson now covers the push-broom camera model
+  instead of repeating them.
+- Band math can simulate capture: `expose`, `defocus`, `bayer`, `debayer`, `mosaic(t)`,
+  `demosaic` and `scan` (module `compute/capture.py`).
+- A third demo, `photo`: a real public-domain photo (NASA, via scikit-image) as a 3-band
+  cube in linear light (`spektrify learn --demo photo`).
 - Learn mode is a computer-vision course: 34 lessons in three levels (basics,
   intermediate, advanced), grouped into units, from digital images and histograms through
   filters, Fourier, morphology and calibration to features, multi-view geometry, clustering,

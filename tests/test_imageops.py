@@ -114,3 +114,84 @@ def test_kmeans_and_band_math_functions() -> None:
     k = an.band_math("kmeans(3)")
     assert set(np.unique(k[np.isfinite(k)])) <= {1.0, 2.0, 3.0}
     assert an.band_math("grad(gauss(nm(800), 1)) > otsu(nm(800))").shape == (48, 64)
+
+
+# --------------------------------------------------------------------------- capture simulations
+
+
+def test_expose_follows_the_sensor_model() -> None:
+    from spektrify.compute import capture as cap
+
+    flat = np.full((200, 200), 0.5, np.float32)
+    dn = cap.expose(flat, 1.0)  # 500 electrons on average
+    gain = cap.FULL_WELL / 4095
+    e_mean, e_std = float(dn.mean()) * gain, float(dn.std()) * gain
+    assert abs(e_mean - 500) < 5
+    assert abs(e_std - np.sqrt(500 + cap.READ_NOISE**2)) < 2  # shot and read noise add
+    assert np.all(cap.expose(flat, 100) == 4095)  # 50,000 electrons: saturated
+    assert np.array_equal(cap.expose(flat, 1.0), dn)  # deterministic
+
+
+def test_defocus_keeps_constants_and_spreads_a_point_into_a_disc() -> None:
+    from spektrify.compute import capture as cap
+
+    assert np.allclose(cap.defocus(np.full((20, 20), 2.0, np.float32), 3), 2.0)
+    point = np.zeros((31, 31), np.float32)
+    point[15, 15] = 1
+    psf = cap.defocus(point, 4)
+    assert abs(float(psf.sum()) - 1) < 1e-5
+    inside = psf[psf > 0]
+    assert np.allclose(inside, inside[0])  # flat-topped, not Gaussian
+    assert psf[15, 19] > 0 and psf[15, 21] == 0
+
+
+def test_bayer_round_trip_is_exact_on_smooth_images_and_aliases_fine_detail() -> None:
+    from spektrify.compute import capture as cap
+
+    yy, xx = np.mgrid[0:32, 0:32].astype(np.float32)
+    r, g, b = 0.1 * xx, 0.05 * yy + 1, np.full_like(xx, 0.3)
+    raw = cap.bayer(r, g, b)
+    assert raw[0, 0] == r[0, 0] and raw[0, 1] == g[0, 1] and raw[1, 1] == b[1, 1]
+    for c, truth in enumerate((r, g, b)):  # bilinear is exact on linear ramps, inside
+        assert np.allclose(cap.debayer(raw, c)[2:-2, 2:-2], truth[2:-2, 2:-2], atol=1e-5)
+    stripes = (xx % 2).astype(np.float32)  # grey stripes at the Nyquist frequency
+    grey = cap.bayer(stripes)
+    assert float(np.abs(cap.debayer(grey, 0) - cap.debayer(grey, 2)).mean()) > 0.2
+
+
+def test_spectral_mosaic_round_trip() -> None:
+    from spektrify.compute import capture as cap
+
+    bands = np.arange(16, dtype=np.float32)[:, None, None] * np.ones((16, 24, 32), np.float32)
+    frame = cap.mosaic_frame(bands, 4)
+    assert frame.shape == (24, 32)
+    assert frame[0, 0] == 0 and frame[0, 1] == 1 and frame[1, 0] == 4 and frame[3, 3] == 15
+    for i in (0, 5, 15):
+        assert np.allclose(cap.demosaic(frame, 4, i), i)
+
+
+def test_scan_squashes_along_track_and_wobble_shifts_lines() -> None:
+    from spektrify.compute import capture as cap
+
+    yy, xx = np.mgrid[0:40, 0:30].astype(np.float32)
+    assert np.allclose(cap.scan(yy, 1), yy)
+    fast = cap.scan(yy, 2)
+    assert np.allclose(fast[:20], 2 * yy[:20]) and np.isnan(fast[20:]).all()
+    wobbly = cap.scan(xx, 1, 2)
+    assert not np.allclose(wobbly, xx) and np.allclose(
+        wobbly[:, 10:20].std(axis=1), xx[0, 10:20].std(), atol=0.5
+    )
+
+
+def test_capture_functions_in_band_math() -> None:
+    an = NumpyAnalyzer(demo_cube())
+    for expr in (
+        "expose(nm(550), 1)",
+        "bayer(nm(640), nm(550), nm(465))",
+        "mosaic(4)",
+        "demosaic(mosaic(4), 4, 3)",
+        "debayer(bayer(nm(550)), 1)",
+        "scan(nm(800), 1.5)",
+        "defocus(nm(550), 2)",
+    ):
+        assert an.band_math(expr).shape == (192, 256), expr
