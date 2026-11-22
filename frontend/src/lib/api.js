@@ -1,5 +1,14 @@
 // The only module that knows the backend's URLs. Every other module calls these methods,
 // so the transport (or the whole backend) can change without touching UI code.
+//
+// Two transports: the Python server (`fetch`), or, in the online demo build
+// (`npm run build:site`), a static snapshot answered in the browser (static/backend.js).
+
+import { siteFetch } from './static/backend.js';
+
+/** True in the online demo: no server, so no file access and only precomputed results. */
+export const SITE = import.meta.env.MODE === 'site';
+const send = SITE ? siteFetch : (url, opts) => fetch(url, opts);
 
 let inflight = 0;
 function busy(delta) {
@@ -13,7 +22,7 @@ function busy(delta) {
 async function request(url, opts = {}, quiet = false) {
   if (!quiet) busy(+1);
   try {
-    const r = await fetch(url, opts);
+    const r = await send(url, opts);
     if (!r.ok) {
       let msg = `${r.status} ${r.statusText}`;
       try { msg = (await r.json()).error || msg; } catch { /* not JSON */ }

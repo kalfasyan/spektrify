@@ -2,6 +2,7 @@
 
 import { ctl, store } from './controller.svelte.js';
 import { learn } from './learn.svelte.js';
+import { SITE } from './api.js';
 
 const s = () => store.state;
 const lastMark = () => s().marks[s().marks.length - 1];
@@ -60,7 +61,7 @@ export function handleKey(e) {
   if (e.key === 'Escape') { ui.modal = null; ui.menu = null; ctl.engines.imageView?.cancelDraft(); if (ui.playing) ctl.togglePlay(); return; }
   if (ui.modal) return;
   const k = e.key.toLowerCase();
-  if (mod && k === 'o') { e.preventDefault(); ui.modal = 'open'; return; }
+  if (mod && k === 'o') { e.preventDefault(); if (!SITE) ui.modal = 'open'; return; }
   if (mod && k === 's') { e.preventDefault(); ctl.snapshot(); return; }
   if (mod && k === 'e') { e.preventDefault(); ctl.exportCsv(); return; }
   if (mod || e.altKey || !store.meta) return;

@@ -23,6 +23,7 @@ without touching the rest.
 | `compute/` | `base.py` defines the `Analyzer` protocol (stats, quality, PCA, RX, SAM, band math, regions, line profiles, 3-D data). `numpy_backend.py` is the reference implementation. `bandmath.py` is a whitelisted AST evaluator (no `eval`); `imageops.py` holds the image functions it can call (filters, edges, FFT, morphology, regions, Harris, k-means), plain NumPy and replaceable one function at a time. `regions.py` rasterises UI shapes to masks. | model |
 | `server/session.py` | The raw cube, the preprocessing pipeline, the lesson catalog, the cube on display (raw → pipeline), its analyzer, a product cache and a `generation` counter (bumped on every swap so open tabs reload). Thread-safe. | compute, preprocess |
 | `server/routes.py` | The whole HTTP API as plain functions `(Session, Request) → Json | Binary`, registered with `@route`. `dispatch()` is the only entry point. No HTTP types here. | session, io |
+| `server/snapshot.py` | Saves the API's responses for every state the lessons reach (demo cube × pipeline) to static files, for the online demo ([site.md](site.md)). Calls `dispatch()` like any transport; answer keys come from running `check_answer` over every possible answer. | routes, learn |
 | `server/http.py` | stdlib `ThreadingHTTPServer` adapter: static files, error mapping, binary headers. Swap it for FastAPI / aiohttp / a desktop shell by calling `dispatch()`. | routes |
 | `__init__.py` | Public Python API: `show()`, `serve()`, `Viewer.update()`, `Viewer.stop()`. | everything |
 | `cli.py` | The `spektrify` command (Typer): `view`, `learn`, `info`, `quality`, `convert`, `demo`, `steps`. Imports are lazy so `--help` is instant. | everything |
@@ -128,7 +129,10 @@ Svelte 5 handles panels, controls and state. Anything that draws a lot is a plai
 ```
 src/
   lib/
-    api.js                 fetch wrappers (JSON + binary)
+    api.js                 fetch wrappers (JSON + binary); the transport is the server or,
+                           in the site build, static/backend.js
+    static/                online demo backend: answers /api/ from the snapshot files, with
+                           per-pixel reads (spectra, regions, slices, SAM) in cubeops.js
     store.svelte.js        app state ($state) + band cache, layer resolution, stretch, marks
     controller.svelte.js   actions the UI performs; wires store changes to engines
     shortcuts.js           one table drives both key handling and the help dialog
@@ -153,4 +157,5 @@ cd frontend
 npm install
 npm run dev     # with `spektrify view --demo --no-browser` running; Vite proxies /api to :8765
 npm run build   # writes ../src/spektrify/static — commit it so pip users never need Node
+npm run build:site   # the online demo's UI into ../build/site (scripts/build-site.sh adds the data)
 ```
