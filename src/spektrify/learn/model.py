@@ -37,8 +37,10 @@ FIGURES: dict[str, dict[str, tuple[str, ...] | type]] = {
     "pipeline": {"steps": list},
     "scatter": {"show": ("pca", "kmeans", "boundary", "overfit", "metrics", "anomaly", "unmix")},
     "waves": {"show": ("sum", "alias", "filter")},
-    "camera": {"show": ("pinhole", "pushbroom", "epipolar")},
+    "camera": {"show": ("pinhole", "lens", "pushbroom", "epipolar")},
     "layers": {"show": ("cnn", "resnet", "unet", "attention")},
+    "sensor": {"show": ("photons", "counts", "shot", "saturate")},
+    "mosaic": {"show": ("bayer", "spectral")},
 }
 
 # Viewer state a step may set, with the type each value must have. Band references (``band``,

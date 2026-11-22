@@ -2,6 +2,7 @@
   // Image formation: a pinhole camera, a push-broom scanner building a cube, and two views.
   const CAPTIONS = {
     pinhole: ['Light from the top of the object passes through the pinhole and lands low on the sensor', 'Light from the bottom lands high: the image is upside down', 'Move the object away and its image shrinks: size = focal length × height ÷ distance'],
+    lens: ['A lens bends every ray from one point back to one point: a sharp image', 'Move the sensor away from that point and the rays land as a disc: defocus blur', 'Close the aperture (a larger f-number): the disc shrinks and more stays sharp, but less light gets in'],
     pushbroom: ['A push-broom camera sees one line of the scene at a time', 'A prism or grating spreads that line’s light by wavelength: line × bands on the sensor', 'As the camera moves, line after line…', '…the cube is built row by row'],
     epipolar: ['Camera 1 sees a point here: in 3D it lies somewhere on this ray', 'Seen from camera 2, every point on that ray falls on one line in its image: the epipolar line', 'So the match is searched along that line, and two crossing rays fix the point in 3D'],
   };
@@ -19,6 +20,15 @@
   let objX = $derived(lerp(90, 25, t2));
   const imgY = (x, y) => AX - (y - AX) * (SEN - PH) / (PH - x);
   let top = $derived([objX, 60]), bot = $derived([objX, AX + 10]);
+
+  // Lens (side view): a point at P, lens at x = LX, focus at FX on the axis' other side.
+  const P0 = [40, 70], LX = 140, FX = 240, FY = 2 * AX - 70 - 20;
+  let sensorX = $derived(lerp(FX, 285, at(f, 1)));
+  let aperture = $derived(lerp(45, 16, at(f, 2)));
+  let lensRays = $derived([-1, -0.5, 0, 0.5, 1].map((k) => {
+    const ly = AX + k * aperture, sy = ly + ((FY - ly) * (sensorX - LX)) / (FX - LX);
+    return { ly, sy };
+  }));
 
   // Push-broom: a 6 × 6 scene; scanned rows become slabs of a cube to the right.
   const N = 6, S = 12, BANDS = 2.2;
@@ -47,6 +57,17 @@
     <path class="ray" style="stroke:var(--fig-blue);opacity:{t1}" d="M{bot[0]},{bot[1]} L{SEN},{imgY(...bot)}" />
     <line class="arrow hot" style="opacity:{t1}" x1={SEN + 6} y1={imgY(...bot)} x2={SEN + 6} y2={imgY(...top)} />
     <text class="lbl" x={objX - 10} y={AX + 26}>object</text>
+  {:else if o.show === 'lens'}
+    <line class="grid" x1="10" x2="310" y1={AX} y2={AX} />
+    <ellipse cx={LX} cy={AX} rx="7" ry={aperture + 4} class="cam" style="fill-opacity:.5" />
+    {#each lensRays as r}
+      <path class="ray" style="stroke:var(--fig-accent);stroke-dasharray:none;opacity:.8" d="M{P0[0]},{P0[1]} L{LX},{r.ly} L{sensorX},{r.sy}" />
+    {/each}
+    <circle cx={P0[0]} cy={P0[1]} r="4" style="fill:var(--fig-accent)" />
+    <line class="axis thick" x1={sensorX} x2={sensorX} y1="40" y2="190" />
+    <line style="stroke:var(--fig-red);stroke-width:5;stroke-linecap:round" x1={sensorX - 6} x2={sensorX - 6} y1={Math.min(...lensRays.map((r) => r.sy))} y2={Math.max(...lensRays.map((r) => r.sy)) + 0.1} />
+    <text class="lbl" x={LX - 12} y="20">lens</text><text class="lbl" x={sensorX - 16} y="202">sensor</text>
+    <text class="lbl" x="22" y="58">a point</text>
   {:else if o.show === 'pushbroom'}
     <g transform="translate(92 70)">
       {#each SCENE as c, i}<polygon class="edge" points={tile(i % N, Math.floor(i / N), 0, 0.95, 0.95, S)} style="fill:{c}" />{/each}

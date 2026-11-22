@@ -14,6 +14,8 @@ import * as scatter from './Scatter.svelte';
 import * as waves from './Waves.svelte';
 import * as camera from './Camera.svelte';
 import * as layers from './Layers.svelte';
+import * as sensor from './Sensor.svelte';
+import * as mosaic from './Mosaic.svelte';
 
 const entry = (m) => ({ component: m.default, captions: m.captions });
 
@@ -28,4 +30,6 @@ export const FIGURES = {
   waves: entry(waves),
   camera: entry(camera),
   layers: entry(layers),
+  sensor: entry(sensor),
+  mosaic: entry(mosaic),
 };

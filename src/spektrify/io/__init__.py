@@ -6,13 +6,15 @@ Built-in readers: NumPy (.npy/.npz), HDF5 (.h5/.hdf5, incl. spektro raw mosaics)
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from spektrify.io import envi_io, hdf5_io, matlab_io, numpy_io, tiff_io  # noqa: F401  (register)
 from spektrify.io.base import RawArray, Reader, reader_for, register_reader, supported_suffixes
 from spektrify.io.demosaic import demosaic, demosaic_methods, mosaic, register_demosaicer
 from spektrify.io.envi_io import DATA_SUFFIXES, parse_envi_header
-from spektrify.io.synthetic import DEMOS, demo_capture, demo_cube
+from spektrify.io.samples import demo_photo
+from spektrify.io.synthetic import demo_capture, demo_cube
 from spektrify.io.writers import save_cube, save_raw_mosaic
 from spektrify.model import Cube
 
@@ -22,6 +24,7 @@ __all__ = [
     "Reader",
     "demo_capture",
     "demo_cube",
+    "demo_photo",
     "demosaic",
     "demosaic_methods",
     "load_cube",
@@ -34,6 +37,13 @@ __all__ = [
     "save_raw_mosaic",
     "supported_suffixes",
 ]
+
+DEMOS: dict[str, Callable[[], Cube]] = {
+    "scene": demo_cube,
+    "capture": demo_capture,
+    "photo": demo_photo,
+}
+"""Built-in demo cubes by name (``spektrify learn`` and the lessons pick them by name)."""
 
 
 def load_cube(
