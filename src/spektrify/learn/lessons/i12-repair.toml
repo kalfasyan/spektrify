@@ -11,6 +11,7 @@ reading = [
 
 [[steps]]
 title = "Bad pixels"
+figure = { kind = "pipeline" }
 text = """
 The **badpixels** step finds pixels, rows and columns that differ wildly from their
 neighbours (dead, hot, or missing) and replaces them with the local median.

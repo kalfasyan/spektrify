@@ -140,6 +140,34 @@ spectra can be compared. A step without `pipeline` keeps the previous step's. A 
 sets a pipeline anywhere starts from the raw cube, and the learner's own pipeline comes back
 when they leave the lesson. `pipeline = []` shows the raw cube.
 
+### `figure`: a diagram above the step
+
+```toml
+figure = { kind = "kernel", op = "median" }
+```
+
+An animated diagram with its own play / step controls and a caption per frame. A step
+without `figure` keeps the previous step's diagram, so it can change step by step;
+`figure = { kind = "none" }` hides it. The first value listed is the default.
+
+| `kind` | Option | Shows |
+| --- | --- | --- |
+| `cube` | `focus`: `stack`, `band`, `pixel`, `rgb` | the cube as band slices; `band` and `rgb` follow the viewer's current bands |
+| `pixels` | `show`: `values`, `levels`, `coarse`, `neighbours`, `threshold`, `histogram` | a small image as blocks, height = brightness |
+| `kernel` | `op`: `box`, `gauss`, `median`, `dx`, `laplace`, `erode`, `dilate`, `corner` | a 3 × 3 window sliding over an image, writing the output |
+| `tone` | `curve`: `linear`, `log`, `gamma`, `stretch` | an intensity transform with a grey ramp before and after |
+| `spectrum` | `show`: `sample`, `absorb`, `edge`, `compare`, `angle`, `smooth`, `snv` | reflectance spectra of leaf, soil and water |
+| `pipeline` | `steps`: a list of names (default: the step's own pipeline) | a cube travelling through preprocessing steps, with their help text |
+| `scatter` | `show`: `pca`, `kmeans`, `boundary`, `overfit`, `metrics`, `anomaly`, `unmix` | pixels as points in a two-band space |
+| `waves` | `show`: `sum`, `alias`, `filter` | a row of an image as a sum of waves |
+| `camera` | `show`: `pinhole`, `pushbroom`, `epipolar` | image formation and two-view geometry |
+| `layers` | `show`: `cnn`, `resnet`, `unet`, `attention` | network architectures |
+
+The diagrams are illustrations drawn in the browser (plain SVG, no extra libraries), not
+computed from the cube; the viewer next to them shows the real data. Each kind is one
+component in `frontend/src/components/learn/figures/`, listed in its `index.js` and in
+`FIGURES` in `learn/model.py` (a test checks the two lists match).
+
 ### `task`: what the learner does
 
 | `kind` | Fields | Correct when |

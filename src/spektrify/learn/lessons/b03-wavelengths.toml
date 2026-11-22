@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Why leaves look green"
+figure = { kind = "spectrum", show = "absorb" }
 text = """
 Our eyes see roughly 400 to 700 nm. Inside that range, chlorophyll absorbs blue and red light
 and reflects a little more green, which is why leaves look green.
@@ -45,6 +46,7 @@ retry = "Not there. Look for the lowest point of the leaf's curve between 600 an
 
 [[steps]]
 title = "The red edge"
+figure = { kind = "spectrum", show = "edge" }
 text = """
 Just past the red, a healthy leaf's reflectance shoots up. This **red edge** is one of the most
 useful features in plant science: its position and steepness change with stress and

@@ -1,30 +1,37 @@
 <script>
-  // The lesson panel: the catalog, or the current step of a lesson with its task.
+  // The lesson panel: the course catalog, or one step of a lesson (diagram, text, task).
   // All lesson content comes from the server (TOML files), so this file never changes when
-  // lessons are added.
+  // lessons are added. Its look lives in learn.css (a warm light theme with a dark variant).
   import { learn } from '../../lib/learn.svelte.js';
   import { store } from '../../lib/controller.svelte.js';
   import { markdown } from '../../lib/markdown.js';
   import Icon from '../Icon.svelte';
+  import Figure from './figures/Figure.svelte';
+  import './learn.css';
 
   const L = learn.ui;
   const s = store.state;
   const LEVELS = [['basics', 'Basics'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']];
-  const DEMO_NAMES = { scene: 'demo scene', capture: 'raw capture demo' };
+  const DEMO_NAMES = { scene: 'demo scene', capture: 'raw capture demo', photo: 'photo demo' };
   const TASK_ICONS = { pixel: 'inspect', band: 'band', choice: 'help' };
+  const THEME_LABEL = { auto: 'Theme: follows your system', light: 'Theme: light', dark: 'Theme: dark' };
+  const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 
   let lesson = $derived(L.lesson);
   let step = $derived(lesson?.steps[L.step] ?? null);
   let finished = $derived(lesson && L.step >= lesson.steps.length);
   let mismatch = $derived(lesson?.demo && lesson.demo !== L.demo);
-  let nextLesson = $derived.by(() => {
-    if (!lesson) return null;
-    const i = L.lessons.findIndex((x) => x.id === lesson.id);
-    return L.lessons[i + 1] ?? null;
-  });
+  let index = $derived(lesson ? L.lessons.findIndex((x) => x.id === lesson.id) : -1);
+  let nextLesson = $derived(index >= 0 ? L.lessons[index + 1] ?? null : null);
+  let doneCount = $derived(L.lessons.filter((x) => L.progress[x.id]?.done).length);
+  let levelName = $derived(LEVELS.find(([k]) => k === lesson?.level)?.[1] ?? '');
+  let scroller = $state();
+
+  // Each new step starts at the top of the panel.
+  $effect(() => { L.step; lesson; scroller?.scrollTo({ top: 0 }); });
 </script>
 
-<aside class="learn" aria-label="Lessons">
+<aside class="learn" aria-label="Lessons" data-theme={L.theme}>
   <header class="learn-head">
     {#if lesson}
       <button class="link" onclick={() => learn.leave()}>← All lessons</button>
@@ -32,33 +39,48 @@
       <span class="learn-title"><Icon name="learn" /> Learn</span>
     {/if}
     <div class="spacer"></div>
-    <button class="icon-btn small" title="Close lessons" onclick={() => learn.setOpen(false)}><Icon name="close" /></button>
+    <button class="icon-btn small" title={THEME_LABEL[L.theme]} aria-label={THEME_LABEL[L.theme]} onclick={() => learn.cycleTheme()}><Icon name={THEME_ICON[L.theme]} /></button>
+    <button class="icon-btn small" title="Close lessons" aria-label="Close lessons" onclick={() => learn.setOpen(false)}><Icon name="close" /></button>
   </header>
 
-  <div class="learn-body">
+  <div class="learn-body" bind:this={scroller}>
     {#if !lesson}
-      <p class="intro">A hands-on course in computer vision, taught on spectral images: from pixels to filters, geometry and learning. Each step changes the viewer next to it; click, scrub and compare as you go.</p>
+      <section class="learn-hero">
+        <div class="eyebrow">Computer vision, step by step</div>
+        <h1>Learn to see like a camera</h1>
+        <p>Short lessons from pixels to filters, geometry and learning, taught on spectral images. Each step has a diagram you can play through and changes the real viewer next to it.</p>
+      </section>
+      {#if L.lessons.length}
+        <div class="meter-row">
+          <div class="meter"><span style="width:{(100 * doneCount) / L.lessons.length}%"></span></div>
+          {doneCount} of {L.lessons.length} done
+        </div>
+      {/if}
       {#each LEVELS as [level, label]}
         {@const items = L.lessons.filter((x) => x.level === level)}
         {#if items.length}
-          <div class="section-title">{label}<span class="hint">{items.filter((x) => L.progress[x.id]?.done).length} / {items.length} done</span></div>
-          <ol class="lesson-list">
-            {#each items as item, i}
-              {#if item.unit && item.unit !== items[i - 1]?.unit}<li class="unit-title">{item.unit}</li>{/if}
-              <li>
-                <button class="lesson-card" disabled={L.busy} onclick={() => learn.start(item.id)}>
-                  <span class="lc-title">{item.title}{#if L.progress[item.id]?.done}<span class="done" title="Completed">✓</span>{/if}</span>
-                  <span class="lc-sum">{item.summary}</span>
-                  <span class="lc-meta">{item.steps} steps{item.demo ? ` · ${DEMO_NAMES[item.demo] ?? item.demo}` : ''}</span>
-                </button>
-              </li>
-            {/each}
-          </ol>
+          <section class="level">
+            <div class="level-head"><h2>{label}</h2><span>{items.filter((x) => L.progress[x.id]?.done).length} / {items.length}</span></div>
+            <ol class="lesson-list">
+              {#each items as item, i}
+                {@const p = L.progress[item.id]}
+                {#if item.unit && item.unit !== items[i - 1]?.unit}<li class="unit-title">{item.unit}</li>{/if}
+                <li>
+                  <button class="lesson-card" disabled={L.busy} onclick={() => learn.start(item.id)}>
+                    <span class="lc-num" class:done={p?.done} class:started={!p?.done && p?.step > 0}>{p?.done ? '✓' : L.lessons.indexOf(item) + 1}</span>
+                    <span class="lc-title">{item.title}</span>
+                    <span class="lc-sum">{item.summary}</span>
+                    <span class="lc-meta">{item.steps} steps{item.demo ? ` · ${DEMO_NAMES[item.demo] ?? item.demo}` : ''}</span>
+                  </button>
+                </li>
+              {/each}
+            </ol>
+          </section>
         {/if}
       {/each}
       <p class="note">Lessons are plain text files. Write your own and load them with <code>spektrify learn --lessons my-folder/</code>.</p>
     {:else if finished}
-      <div class="finish">
+      <div class="finish step-anim">
         <div class="big">✓</div>
         <h2>{lesson.title}</h2>
         <p>Lesson complete.</p>
@@ -75,12 +97,15 @@
         </div>
       </div>
     {:else if step}
-      <div class="lesson-name">{lesson.title}</div>
-      <div class="dots" role="tablist">
-        {#each lesson.steps as st, i}
-          <button class="dot" class:active={i === L.step} class:solved={L.solved[i]} title="{i + 1}. {st.title}" aria-label="Step {i + 1}: {st.title}" onclick={() => learn.go(i)}></button>
-        {/each}
-        <span class="count">{L.step + 1} / {lesson.steps.length}</span>
+      <div class="lesson-top">
+        <div class="eyebrow">Lesson {index + 1} · {levelName}{lesson.unit ? ` · ${lesson.unit}` : ''}</div>
+        <h1>{lesson.title}</h1>
+        <div class="steps-bar">
+          {#each lesson.steps as st, i}
+            <button class:active={i === L.step} class:seen={i < L.step} class:solved={L.solved[i]} title="{i + 1}. {st.title}" aria-label="Step {i + 1}: {st.title}" onclick={() => learn.go(i)}></button>
+          {/each}
+          <span class="count">{L.step + 1} / {lesson.steps.length}</span>
+        </div>
       </div>
 
       {#if mismatch}
@@ -91,8 +116,14 @@
         </div>
       {/if}
 
-      <h2 class="step-title">{step.title}</h2>
-      <div class="md">{@html markdown(step.text)}</div>
+      {#if step.figure}<Figure figure={step.figure} {step} />{/if}
+
+      {#key L.step}
+        <div class="step-head step-anim">
+          <h2 class="step-title">{step.title}</h2>
+        </div>
+        <div class="md step-anim">{@html markdown(step.text)}</div>
+      {/key}
 
       {#if learn.comparable}
         <div class="compare">
@@ -135,9 +166,9 @@
 
   {#if step && !finished}
     <footer class="learn-foot">
-      <button class="btn" disabled={L.step === 0} onclick={() => learn.prev()}>Back</button>
+      <button class="btn" title="Previous step (key ,)" disabled={L.step === 0} onclick={() => learn.prev()}>Back</button>
       <div class="spacer"></div>
-      <button class="btn" class:primary={!step.task || L.solved[L.step]} onclick={() => learn.next()}>
+      <button class="btn" title="Next step (key .)" class:primary={!step.task || L.solved[L.step]} onclick={() => learn.next()}>
         {L.step === lesson.steps.length - 1 ? 'Finish' : step.task && !L.solved[L.step] ? 'Skip' : 'Next'}
       </button>
     </footer>

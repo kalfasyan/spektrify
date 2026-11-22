@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "Light becomes numbers"
+figure = { kind = "pixels", show = "values" }
 text = """
 A camera does two things to the light that reaches it:
 
@@ -35,6 +36,7 @@ retry = "Each extra bit doubles the number of values. Start from 2 values for 1 
 
 [[steps]]
 title = "Too few grey levels"
+figure = { kind = "pixels", show = "levels" }
 text = """
 Here the same band keeps only **4 levels**, as if the camera had 2 bits:
 `quantize(stretch(nm(550)), 4)`.
@@ -59,6 +61,7 @@ retry = "The difference is in the values, not in space or display."
 
 [[steps]]
 title = "Too few pixels"
+figure = { kind = "pixels", show = "coarse" }
 text = """
 Now the image keeps only every 8th pixel in each direction and blows it back up:
 `subsample(nm(550), 8)`.
@@ -81,6 +84,7 @@ retry = "Look at how the target and the disc edges changed."
 
 [[steps]]
 title = "Rows, columns and neighbours"
+figure = { kind = "pixels", show = "neighbours" }
 text = """
 Pixels are addressed by column **x** (left to right) and row **y** (top to bottom), starting
 at the top-left corner. In code an image is usually an array indexed `[y, x]`, row first,

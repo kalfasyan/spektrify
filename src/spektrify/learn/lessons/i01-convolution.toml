@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "A very noisy band"
+figure = { kind = "kernel", op = "box" }
 text = """
 This band (471 nm, band 4) is buried in noise: every pixel is off by a random amount,
 independently of its neighbours. But neighbouring pixels usually show the *same* material.
@@ -42,6 +43,7 @@ retry = "Independent noise averages down with the square root of the number of s
 
 [[steps]]
 title = "The Gaussian filter"
+figure = { kind = "kernel", op = "gauss" }
 text = """
 The box treats a pixel at the corner of the square like the centre. A **Gaussian kernel**
 gives weights that fall off smoothly with distance; σ (in pixels) sets the scale:

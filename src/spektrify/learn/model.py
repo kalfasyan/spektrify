@@ -23,6 +23,24 @@ VIEWS = ("image", "grid", "3d", "quality")
 MODES = ("band", "rgb", "pca", "anomaly", "similarity", "summary", "math")
 TASK_KINDS = ("pixel", "band", "choice")
 
+# Diagrams a step can show above its text: kind -> {option: allowed values}. ``list`` means a
+# list of names. Each kind is a Svelte component in ``frontend/src/components/learn/figures/``
+# (a test keeps both lists in sync); the first value of an option is its default.
+# ``none`` hides the diagram carried over from an earlier step.
+FIGURES: dict[str, dict[str, tuple[str, ...] | type]] = {
+    "none": {},
+    "cube": {"focus": ("stack", "band", "pixel", "rgb")},
+    "pixels": {"show": ("values", "levels", "coarse", "neighbours", "threshold", "histogram")},
+    "kernel": {"op": ("box", "gauss", "median", "dx", "laplace", "erode", "dilate", "corner")},
+    "tone": {"curve": ("linear", "log", "gamma", "stretch")},
+    "spectrum": {"show": ("sample", "absorb", "edge", "compare", "angle", "smooth", "snv")},
+    "pipeline": {"steps": list},
+    "scatter": {"show": ("pca", "kmeans", "boundary", "overfit", "metrics", "anomaly", "unmix")},
+    "waves": {"show": ("sum", "alias", "filter")},
+    "camera": {"show": ("pinhole", "pushbroom", "epipolar")},
+    "layers": {"show": ("cnn", "resnet", "unet", "attention")},
+}
+
 # Viewer state a step may set, with the type each value must have. Band references (``band``,
 # ``rgb``) are resolved per cube by :mod:`spektrify.learn.checks`.
 SHOW_KEYS: dict[str, type | tuple[type, ...]] = {
@@ -74,6 +92,7 @@ class Step:
     show: Mapping[str, Any] = field(default_factory=dict)
     pipeline: tuple[Mapping[str, Any], ...] | None = None
     task: Task | None = None
+    figure: Mapping[str, Any] | None = None  # {kind, ...options}; see FIGURES
 
 
 @dataclass(frozen=True)
@@ -131,7 +150,7 @@ def parse_lesson(data: Mapping[str, Any], *, default_id: str, source: str = "") 
 def _step(d: Any, where: str) -> Step:
     if not isinstance(d, Mapping):
         raise LessonError(f"{where}: must be a table")
-    _known(d, {"title", "text", "view", "show", "pipeline", "task"}, where)
+    _known(d, {"title", "text", "view", "show", "pipeline", "task", "figure"}, where)
     view = _get(d, "view", str, where, None)
     if view is not None and view not in VIEWS:
         raise LessonError(f"{where}.view: must be one of {', '.join(VIEWS)}")
@@ -161,7 +180,30 @@ def _step(d: Any, where: str) -> Step:
         show=show,
         pipeline=pipeline,
         task=None if task is None else _task(task, f"{where}.task"),
+        figure=_figure(d.get("figure"), f"{where}.figure"),
     )
+
+
+def _figure(d: Any, where: str) -> Mapping[str, Any] | None:
+    if d is None:
+        return None
+    if not isinstance(d, Mapping):
+        raise LessonError(f'{where}: must be a table like {{ kind = "cube" }}')
+    kind = _get(d, "kind", str, where)
+    if kind not in FIGURES:
+        raise LessonError(f"{where}.kind: must be one of {', '.join(FIGURES)}")
+    options = FIGURES[kind]
+    _known(d, {"kind", *options}, where)
+    for k, allowed in options.items():
+        if k not in d:
+            continue
+        v = d[k]
+        if isinstance(allowed, tuple) and v not in allowed:
+            raise LessonError(f"{where}.{k}: must be one of {', '.join(allowed)}")
+        if allowed is list and not (isinstance(v, list) and all(isinstance(x, str) for x in v)):
+            raise LessonError(f"{where}.{k}: must be a list of names")
+    defaults = {k: v[0] for k, v in options.items() if isinstance(v, tuple)}
+    return {**defaults, **d}
 
 
 def _task(d: Any, where: str) -> Task:

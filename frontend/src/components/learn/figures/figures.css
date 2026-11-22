@@ -1,0 +1,60 @@
+/* Lesson diagrams. Colours come from the --fig-* tokens in learn.css, so light and dark
+   themes need nothing here. Class names are shared by all figure components. */
+
+.fig { margin: 0; background: var(--fig-bg); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+.fig-stage svg { display: block; width: 100%; height: auto; max-height: 260px; }
+.fig-bar { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--line); background: var(--panel); }
+.fig-cap { font-size: 13px; line-height: 1.45; color: var(--text-2); min-height: 2.9em; }
+.fig-ctrl { display: flex; align-items: center; gap: 6px; }
+.fig-btn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); cursor: pointer; font-size: 17px; line-height: 1; padding: 0; }
+.fig-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.fig-btn:disabled { opacity: .35; cursor: default; }
+.fig-btn.play { background: var(--accent); border-color: var(--accent); color: #fff; }
+.fig-btn.play:hover { color: #fff; filter: brightness(1.08); }
+.fig-btn svg { width: 13px; height: 13px; }
+.fig-dots { display: flex; gap: 5px; margin-left: auto; }
+.fig-dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: var(--panel-3); cursor: pointer; transition: background .2s, transform .2s; }
+.fig-dot.on { background: var(--accent); }
+.fig-dot:hover { transform: scale(1.3); }
+
+/* ---- shapes */
+.fig svg { font-family: var(--font); }
+.fig .face-t { fill: var(--fig-top); }
+.fig .face-l { fill: var(--fig-left); stroke: var(--fig-edge); stroke-width: .6; stroke-linejoin: round; }
+.fig .face-r { fill: var(--fig-right); stroke: var(--fig-edge); stroke-width: .6; stroke-linejoin: round; }
+.fig .edge { fill: none; stroke: var(--fig-edge); stroke-width: .7; stroke-linejoin: round; }
+.fig .plane { fill: var(--fig-accent); stroke: var(--fig-accent); stroke-width: 1; }
+.fig .win { fill: color-mix(in srgb, var(--fig-accent) 22%, transparent); stroke: var(--fig-accent); stroke-width: 1.6; stroke-linejoin: round; }
+.fig .win.top { fill: color-mix(in srgb, var(--fig-accent) 14%, transparent); }
+.fig .lbl { font-size: 10.5px; fill: var(--fig-ink-2); }
+.fig .lbl.strong { fill: var(--fig-ink); font-weight: 700; }
+.fig .lbl.mono { font-family: var(--mono); font-size: 9.5px; }
+.fig .axis { stroke: var(--fig-ink-2); stroke-width: 1.2; fill: none; }
+.fig .axis.thick { stroke-width: 4; stroke-linecap: round; }
+.fig .grid { stroke: var(--fig-grid); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+.fig .ray { stroke: var(--fig-ink-2); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+.fig .ray-fan { fill: color-mix(in srgb, var(--fig-accent) 16%, transparent); stroke: var(--fig-accent); stroke-width: .8; stroke-dasharray: 3 2; }
+.fig .curve { stroke: var(--fig-ink); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fig .curve.accent { stroke: var(--fig-accent); }
+.fig .curve.thin { stroke-width: 1.2; }
+.fig .curve.dashed { stroke-dasharray: 5 4; }
+.fig .dot { fill: var(--fig-ink); stroke: var(--fig-bg); stroke-width: 1.5; }
+.fig .band { stroke: none; }
+.fig .shade { fill: var(--fig-grid); }
+.fig .pt { fill: var(--fig-ink-2); stroke: var(--fig-bg); stroke-width: 1; transition: fill .3s; }
+.fig .pt.hollow { fill: none; stroke-width: 2; }
+.fig .ring { fill: none; stroke: var(--fig-ink-2); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.fig .ring.hot { stroke: var(--fig-red); stroke-width: 2; stroke-dasharray: none; }
+.fig .centre { stroke: var(--fig-bg); stroke-width: 2; }
+.fig .boundary { stroke: var(--fig-ink); stroke-width: 2.2; stroke-dasharray: 7 4; }
+.fig .simplex { fill: color-mix(in srgb, var(--fig-accent) 8%, transparent); stroke: var(--fig-ink-2); stroke-width: 1.2; }
+.fig .arrow { stroke: var(--fig-ink-2); stroke-width: 1.8; stroke-linecap: round; fill: none; }
+.fig .arrow.hot { stroke: var(--fig-accent); stroke-width: 2.6; }
+.fig .tip { fill: var(--fig-ink-2); }
+.fig .tip.hot { fill: var(--fig-accent); }
+.fig .cell { fill: var(--fig-top); stroke: var(--fig-edge); stroke-width: .7; }
+.fig .cam { fill: var(--fig-left); stroke: var(--fig-ink-2); stroke-width: 1.2; stroke-linejoin: round; }
+.fig .block { fill: var(--fig-top); stroke: var(--fig-ink-2); stroke-width: 1.2; }
+.fig .skip { fill: none; stroke: var(--fig-accent); stroke-width: 2; stroke-dasharray: 5 3; }
+.fig .plus { fill: var(--fig-accent); }
+.fig .attn { stroke: var(--fig-accent); stroke-linecap: round; }

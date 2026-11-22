@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Many bands, few stories"
+figure = { kind = "scatter", show = "pca" }
 text = """
 Neighbouring bands are highly correlated: band 600 nm looks almost exactly like 605 nm.
 **PCA** finds new axes, mixtures of all bands, ordered by how much of the variation in the

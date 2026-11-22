@@ -20,6 +20,9 @@
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
     up: '<path d="M12 19V5M6 11l6-6 6 6"/>',
     learn: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5M22 9v6"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    auto: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>',
     band: '<rect x="4" y="5" width="16" height="14" rx="1"/><path d="M9 5v14M15 5v14"/>',
   };
 </script>

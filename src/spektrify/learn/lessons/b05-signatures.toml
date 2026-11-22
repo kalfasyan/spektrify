@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Same material, different brightness"
+figure = { kind = "spectrum", show = "angle" }
 text = """
 The four discs are lit from above, so their edges are darker than their centres. The material
 is the same everywhere on a disc; only the amount of light differs.

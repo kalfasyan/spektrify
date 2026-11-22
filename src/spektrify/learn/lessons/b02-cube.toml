@@ -13,6 +13,7 @@ reading = [
 
 [[steps]]
 title = "A stack of pictures"
+figure = { kind = "cube", focus = "stack" }
 text = """
 A normal photo stores three numbers per pixel: red, green and blue. A **spectral cube** stores
 many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
@@ -34,6 +35,7 @@ retry = "Not yet: that band is below 800 nm. Keep going to the right."
 
 [[steps]]
 title = "Every pixel is a spectrum"
+figure = { kind = "cube", focus = "pixel" }
 text = """
 Look at the cube the other way: pick one pixel and read its value in every band. That curve
 is the pixel's **spectrum**, and it says what the material is made of far better than its
@@ -52,6 +54,7 @@ retry = "That's not the leaf. It's the large shape on the left."
 
 [[steps]]
 title = "Different materials, different curves"
+figure = { kind = "spectrum", show = "compare" }
 text = """
 Every material has its own spectral fingerprint. Pins stay on the image and their spectra stay
 in the plot, so you can compare them.
@@ -67,6 +70,7 @@ retry = "Close, but that's not one of the two lower discs."
 
 [[steps]]
 title = "The cube in 3D"
+figure = { kind = "cube", focus = "band" }
 text = """
 Here is the whole cube as a solid block. The top face is one band; the sides show how every
 pixel along the edges changes across wavelengths.
@@ -77,6 +81,7 @@ view = "3d"
 
 [[steps]]
 title = "Check yourself"
+figure = { kind = "cube", focus = "stack" }
 text = "This demo is 192 × 256 pixels with 96 bands."
 view = "image"
 

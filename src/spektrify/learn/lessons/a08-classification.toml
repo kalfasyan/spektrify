@@ -14,6 +14,7 @@ reading = [
 
 [[steps]]
 title = "Learning from examples"
+figure = { kind = "scatter", show = "boundary" }
 text = """
 In **supervised** learning you have examples whose answer is known, pairs (x, y), and want a
 function that predicts y for new x. In pixel classification x is a pixel's features (its
@@ -59,6 +60,7 @@ retry = "Which points are exactly as far from one centre as from the other?"
 
 [[steps]]
 title = "Overfitting"
+figure = { kind = "scatter", show = "overfit" }
 text = """
 A flexible model can fit the training examples perfectly by **memorising** them, noise
 included, and then fail on new data. That is **overfitting**: training error keeps falling

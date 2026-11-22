@@ -14,6 +14,7 @@ reading = [
 
 [[steps]]
 title = "The pinhole camera"
+figure = { kind = "camera", show = "pinhole" }
 text = """
 The simplest camera model is a pinhole. A point at (X, Y, Z) in front of the camera lands
 on the image at **x = f·X / Z, y = f·Y / Z**, where f is the focal length. Dividing by depth
@@ -71,6 +72,7 @@ show = { mode = "band", band = 700, specView = "values" }
 
 [[steps]]
 title = "How spectral cameras build a cube"
+figure = { kind = "camera", show = "pushbroom" }
 text = """
 A sensor is 2-D but a cube is 3-D, so spectral cameras trade something:
 

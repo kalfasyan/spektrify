@@ -310,58 +310,8 @@ textarea.expr:focus { border-color: var(--accent); }
 .loading-bar.on { width: 70%; opacity: 1; transition: width 4s cubic-bezier(.1,.7,.2,1); }
 .loading-bar.done { width: 100%; opacity: 0; }
 
-/* ---------- learn mode */
+/* ---------- learn mode (the panel's own styles are in components/learn/learn.css) */
 .learn-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 5px 12px; color: var(--text-2); cursor: pointer; }
 .learn-btn:hover { color: var(--text); border-color: var(--line-strong); }
-.learn-btn.active { color: var(--good); border-color: var(--good); background: rgba(61, 220, 151, .1); }
-.learn-btn svg, .learn-title svg, .task-prompt svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.learn { width: 340px; flex: none; display: flex; flex-direction: column; background: var(--bg-2); border-right: 1px solid var(--line); min-height: 0; }
-.learn-head, .learn-foot { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-.learn-foot { border-bottom: 0; border-top: 1px solid var(--line); }
-.learn-title { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--good); }
-.learn-body { flex: 1; overflow-y: auto; padding: 12px 14px 18px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
-.learn .intro { color: var(--text-2); margin: 0; line-height: 1.5; }
-.learn .section-title { margin-top: 6px; }
-.learn code { font-family: var(--mono); font-size: 11.5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
-.link { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; }
-.link:hover { text-decoration: underline; }
-.lesson-list .unit-title { color: var(--text-2); font-size: 12px; font-weight: 600; margin: 6px 0 0; }
-.finish .reading { text-align: left; margin: 0 0 12px; }
-.finish .reading ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-2); font-size: 12px; line-height: 1.45; }
-.finish .reading li { margin: 0 0 4px; }
-.finish .reading li p { margin: 0; }
-.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.lesson-card { width: 100%; display: flex; flex-direction: column; gap: 3px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 11px; cursor: pointer; }
-.lesson-card:hover { border-color: var(--line-strong); background: var(--panel-2); }
-.lc-title { font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
-.lc-sum { color: var(--text-2); font-size: 12px; line-height: 1.4; }
-.lc-meta { color: var(--muted); font-size: 11px; }
-.done { color: var(--good); }
-.lesson-name { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
-.dots { display: flex; align-items: center; gap: 5px; }
-.dots .dot { width: 22px; height: 6px; border-radius: 3px; border: 0; padding: 0; background: var(--line-strong); cursor: pointer; }
-.dots .dot.solved { background: rgba(61, 220, 151, .55); }
-.dots .dot.active { background: var(--accent); }
-.dots .count { margin-left: auto; color: var(--muted); font-size: 11px; font-family: var(--mono); }
-.step-title { margin: 2px 0 0; font-size: 17px; font-weight: 600; }
-.md { color: var(--text-2); line-height: 1.55; font-size: 13px; }
-.md p { margin: 0 0 9px; }
-.md ul { margin: 0 0 9px; padding-left: 18px; }
-.md b { color: var(--text); font-weight: 600; }
-.banner { background: rgba(255, 180, 84, .1); border: 1px solid rgba(255, 180, 84, .45); border-radius: var(--radius-s); padding: 8px 10px; font-size: 12px; color: var(--text-2); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-.compare { display: flex; flex-direction: column; gap: 5px; }
-.task { border: 1px solid var(--line-strong); border-left: 3px solid var(--accent); border-radius: var(--radius-s); background: var(--panel); padding: 10px 11px; display: flex; flex-direction: column; gap: 8px; }
-.task.ok { border-left-color: var(--good); }
-.task.bad { border-left-color: var(--warn); }
-.task-prompt { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; color: var(--text); }
-.task-prompt svg { margin-top: 1px; color: var(--accent); }
-.options { display: flex; flex-direction: column; gap: 5px; }
-.option { text-align: left; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 6px 9px; cursor: pointer; line-height: 1.4; }
-.option:hover { border-color: var(--accent); }
-.feedback { font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
-.task.ok .feedback b { color: var(--good); }
-.task.bad .feedback b { color: var(--warn); }
-.finish { text-align: center; padding: 30px 6px; display: flex; flex-direction: column; gap: 6px; }
-.finish .big { font-size: 40px; color: var(--good); }
-.finish h2 { margin: 0; font-size: 17px; }
-.finish p { color: var(--text-2); margin: 0 0 10px; }
+.learn-btn.active { color: #f2a679; border-color: #f2a679; background: rgba(242, 166, 121, .1); }
+.learn-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }

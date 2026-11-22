@@ -59,6 +59,7 @@ retry = "Which scene is flat?"
 
 [[steps]]
 title = "Epipolar geometry"
+figure = { kind = "camera", show = "epipolar" }
 text = """
 With two views of a 3-D scene, a point in image 1 could be anywhere along a ray. Seen from
 camera 2 that ray is a line, the **epipolar line**, so the match must lie on it. The

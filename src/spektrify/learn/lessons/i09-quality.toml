@@ -29,6 +29,7 @@ retry = "Not that one. Keep looking among the first few bands."
 
 [[steps]]
 title = "Stripes"
+figure = { kind = "camera", show = "pushbroom" }
 text = """
 Push-broom cameras record each column with its own detector element. If one element is a
 little off, the whole column is off: **stripes**.

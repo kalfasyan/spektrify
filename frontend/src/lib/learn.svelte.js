@@ -7,12 +7,14 @@ import { api } from './api.js';
 import { ctl, store } from './controller.svelte.js';
 
 const PROGRESS_KEY = 'spektrify.learn.progress';
+const THEME_KEY = 'spektrify.learn.theme';
+export const THEMES = ['auto', 'light', 'dark']; // auto follows the system setting
 
-function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}') || {}; } catch { return {}; }
+function load(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
-function saveProgress(p) {
-  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch { /* private mode */ }
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ }
 }
 const same = (a, b) => JSON.stringify(a ?? []) === JSON.stringify(b ?? []);
 
@@ -29,7 +31,8 @@ class Learn {
       compare: 'after', // 'before' shows the raw cube while a step's pipeline is active
       showHint: false,
       busy: false,
-      progress: loadProgress(), // lesson id -> {done, step}
+      progress: load(PROGRESS_KEY, {}), // lesson id -> {done, step}
+      theme: THEMES.includes(load(THEME_KEY)) ? load(THEME_KEY) : 'auto',
     });
     this._userPipeline = null; // restored when the lesson ends
     this._applying = false;
@@ -118,6 +121,12 @@ class Learn {
 
   prev() { return this.go(this.ui.step - 1); }
 
+  /** Cycle the panel's colour theme: auto → light → dark. */
+  cycleTheme() {
+    this.ui.theme = THEMES[(THEMES.indexOf(this.ui.theme) + 1) % THEMES.length];
+    save(THEME_KEY, this.ui.theme);
+  }
+
   /** Back to the lesson list, restoring the learner's own pipeline. */
   async leave() {
     this.ui.lesson = null;
@@ -170,7 +179,7 @@ class Learn {
     const id = this.ui.lesson?.id;
     if (!id) return;
     this.ui.progress = { ...this.ui.progress, [id]: { ...this.ui.progress[id], ...patch } };
-    saveProgress(this.ui.progress);
+    save(PROGRESS_KEY, this.ui.progress);
   }
 }
 

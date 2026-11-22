@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Detail is what a blur removes"
+figure = { kind = "waves", show = "filter" }
 text = """
 Subtract a blurred copy from the image and what is left is the **detail**: edges and fine
 texture. `nm(800) - gauss(nm(800), 2)` shows it. It is zero on flat areas.

@@ -12,6 +12,7 @@ reading = [
 
 [[steps]]
 title = "Counting values"
+figure = { kind = "pixels", show = "histogram" }
 text = """
 A **histogram** counts how many pixels fall into each range of values. It throws away *where*
 the pixels are and keeps only *how often* each value occurs.

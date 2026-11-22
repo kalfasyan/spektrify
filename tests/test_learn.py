@@ -208,3 +208,45 @@ def test_cli_learn_check(tmp_path: Path) -> None:
     (tmp_path / "bad.toml").write_text('title = "x"\n')
     r = runner.invoke(app, ["learn", "--check", "--lessons", str(tmp_path)])
     assert r.exit_code == 1
+
+
+def test_figures_validate_fill_defaults_and_carry_forward() -> None:
+    def lesson(*figures: object) -> dict:
+        steps = [
+            {"title": f"S{i}", **({"figure": fig} if fig else {})} for i, fig in enumerate(figures)
+        ]
+        return {"title": "T", "steps": steps}
+
+    le = parse_lesson(
+        lesson({"kind": "cube"}, None, {"kind": "none"}, {"kind": "pipeline"}), default_id="x"
+    )
+    assert le.steps[0].figure == {"kind": "cube", "focus": "stack"}  # first value is the default
+    figs = [s["figure"] for s in lesson_json(le, None)["steps"]]
+    assert figs == [
+        {"kind": "cube", "focus": "stack"},
+        {"kind": "cube", "focus": "stack"},
+        None,
+        {"kind": "pipeline"},
+    ]
+    for bad, msg in [
+        ({"kind": "teapot"}, "figure.kind"),
+        ({"kind": "cube", "focus": "teapot"}, "figure.focus"),
+        ({"kind": "cube", "colour": "red"}, "unknown field"),
+        ({"kind": "pipeline", "steps": [1]}, "list of names"),
+        ("cube", "must be a table"),
+    ]:
+        with pytest.raises(LessonError, match=msg):
+            parse_lesson(lesson(bad), default_id="x")
+
+
+def test_figure_kinds_match_the_frontend() -> None:
+    """Every figure kind a lesson may name has a component, and vice versa."""
+    import re
+
+    from spektrify.learn.model import FIGURES
+
+    index = Path(__file__).parents[1] / "frontend/src/components/learn/figures/index.js"
+    if not index.exists():
+        pytest.skip("frontend sources not available")
+    registered = set(re.findall(r"^\s+(\w+): entry\(", index.read_text(), re.M))
+    assert registered == set(FIGURES) - {"none"}
