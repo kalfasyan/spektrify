@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { ctl, store } from './lib/controller.svelte.js';
-  import { api } from './lib/api.js';
+  import { api, SITE } from './lib/api.js';
   import TopBar from './components/TopBar.svelte';
   import StatusBar from './components/StatusBar.svelte';
   import ImageWorkspace from './components/image/ImageWorkspace.svelte';
@@ -22,7 +22,7 @@
   $effect(() => { if (s.view === '3d') seen3d = true; });
 
   onMount(() => {
-    const learning = location.hash === '#learn'; // `spektrify learn` opens this URL
+    const learning = SITE || location.hash === '#learn'; // `spektrify learn` opens this URL
     ctl.loadCube().then(() => {
       if (learning) learn.setOpen(true);
       else if (!store.meta) ui.modal = 'open';

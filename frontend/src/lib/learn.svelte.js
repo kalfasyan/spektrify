@@ -3,7 +3,7 @@
 // switch) and ask for a pixel, a band or a multiple-choice answer, which the server grades.
 // Lessons are data (TOML files in Python), so nothing here knows about any one lesson.
 
-import { api } from './api.js';
+import { api, SITE } from './api.js';
 import { ctl, store } from './controller.svelte.js';
 
 const PROGRESS_KEY = 'spektrify.learn.progress';
@@ -65,7 +65,14 @@ class Learn {
     this.ui.busy = true;
     try {
       const summary = this.ui.lessons.find((l) => l.id === id);
-      if (!store.meta) { await api.demo(summary?.demo || 'scene'); await ctl.loadCube(); await this.refresh(); }
+      const demo = summary?.demo || 'scene';
+      // Online, answers are only precomputed on each lesson's own demo: always switch to it.
+      if (!store.meta || (SITE && this.ui.demo !== demo)) {
+        await api.demo(demo);
+        this._userPipeline = null;
+        await ctl.loadCube();
+        await this.refresh();
+      }
       const lesson = await api.lesson(id);
       if (lesson.uses_pipeline && this._userPipeline == null) this._userPipeline = store.meta?.pipeline ?? [];
       Object.assign(this.ui, { lesson, solved: {}, feedback: null });

@@ -314,4 +314,6 @@ textarea.expr:focus { border-color: var(--accent); }
 .learn-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 5px 12px; color: var(--text-2); cursor: pointer; }
 .learn-btn:hover { color: var(--text); border-color: var(--line-strong); }
 .learn-btn.active { color: #f2a679; border-color: #f2a679; background: rgba(242, 166, 121, .1); }
+.get-btn { padding: 5px 12px; border-radius: var(--radius); background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.get-btn:hover { filter: brightness(1.1); }
 .learn-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }

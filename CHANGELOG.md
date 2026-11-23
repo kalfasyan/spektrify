@@ -9,6 +9,11 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- An online demo of learn mode that needs no server: `scripts/build-site.sh` builds the UI in
+  a static mode plus precomputed data (`python -m spektrify.server.snapshot`), and
+  `vercel.json` deploys it on Vercel. All 39 lessons, answer checking, hover spectra, pins,
+  regions and the 3-D view work in the browser. CI builds it on every pull request. See
+  [docs/site.md](docs/site.md).
 - Learn mode has a new look: a warm, paper-like reading panel (light, dark, or following
   the system; switch in the panel header), short step-by-step lessons, and an animated
   diagram above each step with play, step and frame controls. Twelve diagram kinds (spectral

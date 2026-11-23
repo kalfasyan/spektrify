@@ -17,6 +17,9 @@ spektrify view                  # empty viewer: use the open dialog or drag & dr
 spektrify learn                 # interactive lessons on spectral imaging (see below)
 ```
 
+The lessons also run as a website with no install: the online demo is built from this
+repository on every push ([docs/site.md](docs/site.md)).
+
 ### Example data
 
 ```bash
@@ -126,6 +129,9 @@ The project is built so any layer can be replaced without touching the others:
   thin shell around them.
 - **Lessons** (`spektrify/learn`): plain TOML files validated in Python; the UI runs any of
   them, so adding a lesson needs no code ([docs/learn.md](docs/learn.md)).
+- **Online demo** (`spektrify/server/snapshot.py`, `frontend/src/lib/static/`): the API's
+  answers for the lessons are saved to files, and the same UI reads them in the browser
+  instead of calling a server ([docs/site.md](docs/site.md)).
 - **UI** (`frontend/`): Svelte for panels and state. The WebGL image renderer and the three.js
   3D engine are framework-free modules.
 
