@@ -62,7 +62,7 @@ jobs:
           fi
 
   site:
-    # The online learn-mode demo (deployed by Vercel from vercel.json): it must build, and
+    # The online learn-mode demo (deployed by Vercel from frontend/vercel.json): it must build, and
     # every lesson's data must export. The result is kept as an artifact to inspect.
     runs-on: ubuntu-latest
     steps:
@@ -79,7 +79,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: site
-          path: build/site
+          path: frontend/dist-site
           retention-days: 7
 
   package:

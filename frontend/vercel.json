@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "echo 'scripts/build-site.sh installs what it needs'",
-  "buildCommand": "bash scripts/build-site.sh",
-  "outputDirectory": "build/site",
+  "installCommand": "echo '../scripts/build-site.sh installs what it needs'",
+  "buildCommand": "bash ../scripts/build-site.sh",
+  "outputDirectory": "dist-site",
   "headers": [
     {
       "source": "/assets/(.*)",
