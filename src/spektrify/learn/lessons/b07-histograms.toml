@@ -18,7 +18,7 @@ A **histogram** counts how many pixels fall into each range of values. It throws
 the pixels are and keeps only *how often* each value occurs: the taller a peak, the more
 pixels have values in that range.
 
-The Stretch panel on the left shows the histogram of the current image. In red light
+The Stretch panel shows the histogram of the current image. In red light
 (670 nm), each material sits at its own brightness, so it makes its own peak: the dark leaf,
 the background, the brighter discs.
 """

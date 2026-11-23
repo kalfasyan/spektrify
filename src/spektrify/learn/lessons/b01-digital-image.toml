@@ -21,8 +21,8 @@ A camera does two things to the light that reaches it:
 - **Quantisation**: it rounds each measurement to one of a fixed number of levels.
 
 So a digital image is a table of numbers. This one is a single wavelength (550 nm) shown in
-grey: dark means little light, bright means a lot. Hover over the image and the status bar
-shows each pixel's position and value.
+grey: dark means little light, bright means a lot. Point at a pixel (hover with the mouse, or
+tap on a touch screen) and the viewer shows its position and value.
 
 Some steps show a line in code font, such as `nm(550)`: it is the formula the viewer
 computed to make the picture. You'll learn to write your own in *Band math and indices*;
@@ -49,7 +49,7 @@ many grey levels quantisation can use:
 With 8 bits, one level is 1/256 of the range, about 0.4%: two brightnesses closer than
 that get the same number. After processing, values are often stored as decimals instead
 (**floating-point** numbers, usually 32 bits each). This demo holds reflectance from 0 to
-1 that way, which is why the status bar shows values like 0.18.
+1 that way, which is why pixel values read like 0.18.
 """
 show = { mode = "band", band = 550, cmap = "gray" }
 
@@ -127,6 +127,6 @@ show = { mode = "band", band = 550, cmap = "gray" }
 kind = "pixel"
 region = "hot_pixels"
 prompt = "Find the small white square near x = 20, y = 120 and click it."
-hint = "It is just left of the leaf's lower half. Zoom in with the mouse wheel and watch the coordinates in the status bar."
+hint = "It is just left of the leaf's lower half. Zoom in (mouse wheel or pinch) and watch the pixel coordinates."
 success = "That 4 × 4 square of saturated pixels starts at x = 20, y = 120. As an array, it is data[120:124, 20:24]."
-retry = "Not there. Watch the coordinates in the status bar while you move the mouse."
+retry = "Not there. Watch the pixel coordinates as you point at the image."

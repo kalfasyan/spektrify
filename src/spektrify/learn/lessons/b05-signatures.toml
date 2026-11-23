@@ -52,7 +52,8 @@ text = """
 measures the angle between two arrows. Brightness changes the arrow's length, not its
 direction, so shaded pixels of the same material stay close.
 
-Right-click one of your pins and choose **Find similar pixels**. Dark means a small angle,
+Open one of your pins' menu (right-click it, or press and hold on a touch screen) and
+choose **Find similar pixels**. Dark means a small angle,
 that is, similar.
 """
 show = { mode = "similarity", simDeg = 5, specView = "values" }

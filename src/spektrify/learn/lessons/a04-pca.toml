@@ -41,7 +41,7 @@ retry = "It's about the variation in the data, not counting objects."
 title = "Later components"
 text = """
 Later components carry less structure and more noise, plus anything rare: stripes, dead
-columns, small targets. Step through them with **← →** and watch the image change from
+columns, small targets. Step through them with the **‹ ›** buttons in the Display panel and watch the image change from
 scene to noise.
 """
 show = { mode = "pca", pcaOffset = 3, pcaAsRgb = true }

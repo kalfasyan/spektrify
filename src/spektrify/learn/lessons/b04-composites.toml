@@ -24,7 +24,7 @@ get roughly what your eye would see: a **true-colour composite**. It is only app
 exact colour weights the whole spectrum with standard curves (the CIE colour-matching
 functions) instead of picking three narrow bands.
 
-The **Display** panel on the left shows which band feeds each channel; you can change them
+The **Display** panel shows which band feeds each channel; you can change them
 there at any time.
 """
 show = { mode = "rgb", rgb = [640, 550, 465] }
@@ -52,7 +52,7 @@ text = """
 A composite of three *neighbouring* bands is a sharp tool: anything with a smooth spectrum
 comes out grey, and anything with a narrow feature in one of the bands comes out coloured.
 
-These are 760, 735 and 785 nm, all invisible to the eye. Zoom with the mouse wheel.
+These are 760, 735 and 785 nm, all invisible to the eye. Zoom in (mouse wheel or pinch).
 """
 show = { mode = "rgb", rgb = [760, 735, 785] }
 
