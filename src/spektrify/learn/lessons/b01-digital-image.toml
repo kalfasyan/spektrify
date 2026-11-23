@@ -1,6 +1,6 @@
 id = "digital-image"
 title = "What is a digital image?"
-summary = "Sampling and quantisation: how a camera turns light into a grid of numbers, and what each step loses."
+summary = "Sampling, quantisation and bit depth: how a camera turns light into a grid of numbers, and what each step loses."
 level = "basics"
 unit = "Images and spectra"
 order = 10
@@ -23,16 +23,43 @@ A camera does two things to the light that reaches it:
 So a digital image is a table of numbers. This one is a single wavelength (550 nm) shown in
 grey: dark means little light, bright means a lot. Hover over the image and the status bar
 shows each pixel's position and value.
+
+Some steps show a line in code font, such as `nm(550)`: it is the formula the viewer
+computed to make the picture. You'll learn to write your own in *Band math and indices*;
+for now, just read them as labels.
+"""
+show = { mode = "band", band = 550, cmap = "gray" }
+
+[[steps]]
+title = "Bits and bit depth"
+figure = { kind = "pixels", show = "levels" }
+text = """
+How many levels? Computers store every number in **bits**. A bit is a single switch with
+two states, 0 or 1. Several bits together give one value per combination: 1 bit gives 2
+values, 2 bits give 4 (00, 01, 10, 11), 3 bits give 8. Each extra bit doubles the count,
+so **n bits give 2ⁿ values**.
+
+The number of bits a camera stores for each pixel is its **bit depth**, and it sets how
+many grey levels quantisation can use:
+
+- **8 bits**: 2⁸ = 256 levels, numbered 0 to 255 (most photos and screens),
+- **12 bits**: 4,096 levels (many machine-vision and scientific cameras),
+- **16 bits**: 65,536 levels.
+
+With 8 bits, one level is 1/256 of the range, about 0.4%: two brightnesses closer than
+that get the same number. After processing, values are often stored as decimals instead
+(**floating-point** numbers, usually 32 bits each). This demo holds reflectance from 0 to
+1 that way, which is why the status bar shows values like 0.18.
 """
 show = { mode = "band", band = 550, cmap = "gray" }
 
 [steps.task]
 kind = "choice"
-prompt = "An 8-bit pixel can take how many different values?"
-options = ["8", "256", "255", "65,536"]
-answer = 1
-success = "Right: 2⁸ = 256 values, 0 to 255. Scientific cameras often use 12 bits (4,096 levels) or 16 bits (65,536)."
-retry = "Each extra bit doubles the number of values. Start from 2 values for 1 bit."
+prompt = "A camera stores 10 bits per pixel. How many grey levels can it record?"
+options = ["10", "100", "1,024", "1,023"]
+answer = 2
+success = "Right: 2¹⁰ = 1,024 levels, numbered 0 to 1,023."
+retry = "n bits give 2ⁿ values: start from 2 values for 1 bit and double once for every extra bit."
 
 [[steps]]
 title = "Too few grey levels"
@@ -56,7 +83,7 @@ options = [
   "A colour map",
 ]
 answer = 0
-success = "Yes. With 8 bits one level is about 0.4% of the range, too coarse; 12 bits gives 0.025%. Noise must also be below that difference."
+success = "Yes. With 8 bits one level is about 0.4% of the range, too coarse; 12 bits gives about 0.025%. Noise must also be below that difference."
 retry = "The difference is in the values, not in space or display."
 
 [[steps]]

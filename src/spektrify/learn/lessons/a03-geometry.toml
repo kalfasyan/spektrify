@@ -91,7 +91,9 @@ Once the cameras are known, a matched point is the intersection of two rays:
 **Structure from motion** chains it all: features → matches → RANSAC on F or E → camera poses
 → triangulated points. **Bundle adjustment** then refines every camera and every point
 together to minimise the **reprojection error**: the distance, in pixels, between where each
-3-D point projects and where it was observed.
+3-D point projects and where it was observed. The errors in the data are errors in where
+features were found in the image, measured in pixels, so an error in pixels weighs every
+measurement fairly; algebraic errors such as x′ᵀ F x have no such meaning.
 """
 
 [steps.task]

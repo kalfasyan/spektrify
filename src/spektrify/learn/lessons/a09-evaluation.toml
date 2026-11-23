@@ -21,7 +21,8 @@ leaf, every pixel falls in one of four boxes, the **confusion matrix**:
 - **true positive** (leaf, predicted leaf), **false positive** (not leaf, predicted leaf),
 - **false negative** (leaf, missed), **true negative** (not leaf, not predicted).
 
-The background covers about 70% of this image and the leaf about 22%.
+**Accuracy** is the fraction of all pixels in the two 'true' boxes: (TP + TN) / all. The
+background covers about 70% of this image and the leaf about 22%.
 """
 show = { mode = "math", mathExpr = "nm(800) > 0.4", cmap = "gray" }
 

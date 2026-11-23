@@ -60,7 +60,8 @@ retry = "Not quite on the line. Zoom in and try again."
 [[steps]]
 title = "Saturation"
 text = """
-Too much light fills a pixel to its maximum, and anything brighter reads the same. Those
+Too much light fills a pixel to its maximum, and anything brighter reads the same, so the
+true value is unknown: it can be flagged or masked, but not recovered. Those
 values are **clipped**.
 """
 

@@ -57,6 +57,10 @@ In band space, mixtures of k endmembers fill a **simplex** (a triangle for 3, a 
 for 4) whose corners are the pure spectra. Endmember-finding algorithms (PPI, N-FINDR, VCA)
 look for the most extreme pixels, usually after PCA to reduce noise.
 
+How many endmembers can one pixel be split into? Each band gives one equation and the
+sum-to-one rule one more, so C bands give C + 1 equations: enough for at most **C + 1**
+unknown abundances.
+
 The linear model fails when light bounces between materials before reaching the camera:
 intimate mixtures such as powders, or leaves in a canopy. Those need nonlinear models.
 """

@@ -33,7 +33,9 @@ show = { mode = "rgb", rgb = [640, 550, 465] }
 title = "False colour"
 text = """
 Nothing forces us to use visible bands. Here near infrared (800 nm) goes into red, red into
-green, and green into blue. This **false-colour composite** is a classic for spotting plants.
+green, and green into blue. This **false-colour composite** is a classic for spotting plants:
+healthy vegetation reflects strongly in the near infrared (the red edge from the last
+lesson), so it shows up bright red.
 """
 show = { mode = "rgb", rgb = [800, 650, 550] }
 

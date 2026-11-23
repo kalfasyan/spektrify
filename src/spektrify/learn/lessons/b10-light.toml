@@ -120,7 +120,8 @@ Put the chain together. For one band, a pixel's raw value is roughly
 **offset + (t / gain) · ∫ illumination(λ) · reflectance(λ) · optics(λ) · QE(λ) dλ + noise**
 
 where t is the exposure time and the integral sums over the wavelengths the band lets in.
-Only the **reflectance** belongs to the material. Illumination, optics, QE, gain and offset
+Only the **reflectance**, the fraction of the arriving light that the surface sends back at
+each wavelength (0 to 1), belongs to the material. Illumination, optics, QE, gain and offset
 belong to the setup, which is why raw counts from two cameras, or one camera under two
 lamps, can't be compared directly. The lesson *From raw counts to reflectance* removes them.
 

@@ -16,6 +16,10 @@ figure = { kind = "scatter", show = "anomaly" }
 text = """
 **RX** learns what the scene looks like on average (the mean spectrum and how bands vary
 together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.
+This is a distance measured in units of the scene's own spread: a step in a direction where
+the bands normally vary a lot counts little, the same step in an unusual direction counts a
+lot. So anything unlike the bulk of the scene, a rare material or a faulty pixel, scores
+high.
 Bright means unusual.
 
 Global RX models the whole scene as one bell-shaped (Gaussian) cloud. Real scenes hold

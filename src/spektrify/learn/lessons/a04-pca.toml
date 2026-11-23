@@ -14,11 +14,14 @@ reading = [
 title = "Many bands, few stories"
 figure = { kind = "scatter", show = "pca" }
 text = """
-Neighbouring bands are highly correlated: band 600 nm looks almost exactly like 605 nm.
+Neighbouring bands are highly **correlated** (when one is bright, so is the other): band
+600 nm looks almost exactly like 605 nm.
 **PCA** finds new axes, mixtures of all bands, ordered by how much of the variation in the
 cube they carry. Here the first three are shown as red, green and blue.
 
-The label at the top of the image shows how much variance each component explains.
+The **variance** of a set of values measures how much they spread around their mean. The
+label at the top of the image shows how much of the cube's total variance each component
+explains, that is, how much of all the variation in the data it captures.
 """
 show = { mode = "pca", pcaOffset = 0, pcaAsRgb = true }
 
@@ -46,7 +49,8 @@ show = { mode = "pca", pcaOffset = 3, pcaAsRgb = true }
 [[steps]]
 title = "Largest is not always most useful"
 text = """
-Mathematically, the components are the **eigenvectors of the band covariance matrix**,
+Mathematically, the components are the **eigenvectors of the band covariance matrix** (the
+table of how every pair of bands varies together; its eigenvectors are its natural axes),
 sorted by their eigenvalues (the variance along each). They are uncorrelated with each
 other, and keeping the first k gives the best k-dimensional approximation of the data in
 the least-squares sense.

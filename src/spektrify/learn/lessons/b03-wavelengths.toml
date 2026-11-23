@@ -48,7 +48,10 @@ retry = "Not there. Look for the lowest point of the leaf's curve between 600 an
 title = "The red edge"
 figure = { kind = "spectrum", show = "edge" }
 text = """
-Just past the red, a healthy leaf's reflectance shoots up. This **red edge** is one of the most
+Just past the red, a healthy leaf's reflectance (the fraction of light it sends back) shoots
+up. Nothing in a leaf absorbs near-infrared light, and the many walls between its cells and
+air pockets scatter that light around until much of it comes back out. This **red edge**,
+from dark in the red to bright in the near infrared, is one of the most
 useful features in plant science: its position and steepness change with stress and
 chlorophyll content.
 """

@@ -19,6 +19,11 @@ A normal photo stores three numbers per pixel: red, green and blue. A **spectral
 many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
 450 nm (blue) to 950 nm (near infrared).
 
+Light is a wave, and the distance between two crests, its **wavelength**, decides its
+colour. Wavelengths of light are tiny, so they are measured in **nanometres** (nm, a
+millionth of a millimetre): blue light is about 450 nm, red about 650 nm. Wavelengths past
+about 700 nm are **near infrared**, invisible to the eye.
+
 Flip through the bands with the slider under the image, the **← →** keys, or the strip of
 thumbnails on the right.
 """

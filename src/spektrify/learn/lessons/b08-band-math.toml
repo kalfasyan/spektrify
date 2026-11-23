@@ -34,17 +34,21 @@ retry = "Look for the area with the highest values."
 title = "Normalised difference"
 text = """
 A **normalised difference** `(a − b) / (a + b)` does the same job but gives tidy values.
-With near infrared and red it is the best-known vegetation index.
+With near infrared and red it is the best-known vegetation index, **NDVI**.
+
+For two positive bands it always lies between −1 and +1: it is +1 when only a reflects,
+−1 when only b does, and 0 when they are equal. Healthy leaves, bright in the near infrared
+and dark in the red, come out high.
 """
 show = { mode = "math", mathExpr = "(nm(800) - nm(670)) / (nm(800) + nm(670))" }
 
 [steps.task]
 kind = "choice"
-prompt = "Which range can a normalised difference of two positive bands take?"
-options = ["0 to 1", "−1 to 1", "0 to 255"]
+prompt = "A pixel reflects 0.6 in the near infrared (a) and 0.2 in the red (b). What is its normalised difference?"
+options = ["3", "0.5", "0.4"]
 answer = 1
-success = "Right: −1 when only b reflects, +1 when only a does, 0 when they are equal."
-retry = "Try a = 0, then b = 0, in the formula."
+success = "Right: (0.6 − 0.2) / (0.6 + 0.2) = 0.4 / 0.8 = 0.5. The ratio a / b would be 3."
+retry = "Put the numbers in (a − b) / (a + b): the difference on top, the sum below."
 
 [[steps]]
 title = "Masks from rules"

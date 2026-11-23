@@ -53,6 +53,9 @@ The motion must match the line rate. Here the object moves 1.5 image rows per ca
 line instead of 1: `scan(nm(800), 1.5)`. Everything is squashed along the scan direction,
 the discs became ellipses, and the scan ran out of object before the image was full
 (the coloured area at the bottom has no data).
+
+Too slow gives the opposite: each part of the object is captured on more than one line, so
+objects come out stretched along the scan direction.
 """
 show = { mode = "math", mathExpr = "scan(nm(800), 1.5)", cmap = "gray" }
 
@@ -104,8 +107,9 @@ scene, line by line. Classic airborne instruments such as NASA's AVIRIS work thi
 so do lab instruments that move a sample under a point spectrometer.
 
 One detector measures every pixel, so the calibration is uniform and there are no
-column stripes. The price is time: the instrument can spend only a tiny fraction of each
-line's time on each pixel, so it collects less light per pixel or scans slowly. Moving
+column stripes. The price is time. A push-broom sees a whole line at once, but a whisk-broom
+must share the line's time among its pixels: in a line of 500 pixels, each gets only 1/500
+of it. So it collects less light per pixel or scans slowly. Moving
 mirrors also add their own geometric distortions.
 """
 
