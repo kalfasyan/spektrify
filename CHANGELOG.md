@@ -9,6 +9,10 @@ All notable changes to this project are documented here. The format follows
 First release (to be tagged `v0.1.0`).
 
 ### Added
+- Phone and portrait-tablet layout (up to 900 px wide): a bottom bar switches between Learn,
+  Image, Adjust and Spectrum, each showing the image on top and one panel under it, so a lesson
+  and the viewer it changes are on screen together. Pinch to zoom the image, tap to pin a pixel,
+  larger touch targets, and hints that say "tap" on touch screens. Desktop is unchanged.
 - An online demo of learn mode that needs no server: `scripts/build-site.sh` builds the UI in
   a static mode plus precomputed data (`python -m spektrify.server.snapshot`), and
   `frontend/vercel.json` deploys it on Vercel (root directory `frontend`). All 39 lessons, answer checking, hover spectra, pins,

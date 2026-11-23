@@ -317,3 +317,74 @@ textarea.expr:focus { border-color: var(--accent); }
 .get-btn { padding: 5px 12px; border-radius: var(--radius); background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .get-btn:hover { filter: brightness(1.1); }
 .learn-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- phone and portrait-tablet layout (≤ 900 px)
+   One pane at a time, picked in the bottom nav (MobileNav.svelte, `ui.pane`): the image on top
+   and the lesson, the display controls or the spectrum under it; "Image" shows the image alone.
+   The other views (Channels, 3D, Quality) stay in the top bar. */
+.mobile-nav, .get-btn .short { display: none; }
+#overlay { touch-action: none; } /* pinch and pan go to the image, not the page */
+#scrub-canvas, #histogram { touch-action: pan-y; } /* horizontal drags scrub, vertical ones scroll */
+
+@media (max-width: 900px) {
+  #app { grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; height: 100dvh; }
+  #statusbar { display: none; }
+
+  /* top bar: logo, scrollable view tabs, one action */
+  #topbar { gap: 8px; padding: 6px 8px; padding-top: max(6px, env(safe-area-inset-top)); min-width: 0; }
+  .brand span { display: none; }
+  .file-chip, .learn-btn, .top-actions .icon-btn { display: none; }
+  #topbar .spacer { display: none; }
+  #topbar .tabs { flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  #topbar .tabs button { padding: 7px 10px; flex: none; }
+  .get-btn { padding: 7px 10px; font-size: 12px; }
+  .get-btn .long { display: none; }
+  .get-btn .short { display: inline; }
+
+  /* bottom nav */
+  .mobile-nav { display: flex; background: var(--bg-2); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .mobile-nav button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 0 6px; background: none; border: 0; color: var(--muted); font-size: 11px; cursor: pointer; }
+  .mobile-nav button.active { color: var(--accent); }
+  .mobile-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* work area: the lesson goes under the image */
+  .workarea { flex-direction: column; }
+  .workarea > .learn { display: none; }
+  #main { flex: 1; min-height: 0; }
+  .pane-learn .learn { display: flex; order: 2; flex: 1; width: auto; max-height: none; border-right: 0; border-top: 1px solid var(--line); }
+  .pane-learn #main { flex: 0 0 36%; }
+  .pane-learn.learn-catalog #main { display: none; } /* the course list needs no image */
+
+  /* image view: the image alone, or the image over the display controls / the spectrum */
+  #view-image.active { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  #view-image .side.right, #view-image .resize-handle, #view-image .side.left, #view-image .bottom { display: none; }
+  .center { grid-row: 1; grid-template-rows: minmax(0, 1fr) 40px; } /* the hidden resize handle takes no row */
+  .scrub-label { min-width: 0; font-size: 11px; }
+  .pane-adjust #view-image.active { grid-template-rows: 42% minmax(0, 1fr); }
+  .pane-adjust #view-image .side.left { display: block; grid-row: 2; border-right: 0; border-top: 1px solid var(--line); }
+  .pane-spectrum .center { grid-template-rows: 42% 40px minmax(0, 1fr); }
+  .pane-spectrum #view-image .bottom { display: flex; }
+  .bottom-bar .seg.small button { padding: 6px 10px; }
+  .bottom-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(180px, 1fr) auto; overflow-y: auto; }
+
+  /* touch-sized controls; 16 px inputs stop iOS from zooming on focus */
+  .tool-dock { flex-direction: row; top: 8px; left: 8px; }
+  .tool-dock button { width: 36px; height: 36px; }
+  .band-hud { top: auto; bottom: 8px; right: 8px; padding: 4px 8px; }
+  .band-hud .s { display: none; }
+  .tool-dock .sep { width: 1px; height: auto; margin: 4px 3px; }
+  .seg button { padding: 8px 6px; }
+  .seg-wrap button { padding: 8px 2px; }
+  input[type=text], input[type=number], input.num, select, textarea.expr { font-size: 16px; }
+  .panel-section { padding: 14px 16px 16px; }
+  .grid-toolbar { flex-wrap: wrap; gap: 8px 12px; padding: 8px 12px; }
+  .grid-toolbar .hint, .three-hint { display: none; }
+  .float-panel { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; max-height: 42%; }
+  .toast { bottom: calc(76px + env(safe-area-inset-bottom)); max-width: 90vw; }
+}
+@media (max-width: 900px) {
+  .pane-learn .tool-dock { display: none; } /* lessons only need tap-to-pin; the strip stays clear */
+}
+@media (max-width: 900px) and (max-height: 700px) {
+  .pane-learn #main { flex-basis: 30%; }
+}

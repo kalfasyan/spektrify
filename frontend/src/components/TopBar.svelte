@@ -39,7 +39,7 @@
   <div class="spacer"></div>
   <div class="top-actions">
     {#if SITE}
-      <a class="get-btn" href={REPO} target="_blank" rel="noopener" title="Install spektrify to open your own data">Get spektrify</a>
+      <a class="get-btn" href={REPO} target="_blank" rel="noopener" title="Install spektrify to open your own data"><span class="long">Get spektrify</span><span class="short">Install</span></a>
     {:else}
       <button class="icon-btn" title="Open cube (Ctrl+O)" onclick={openDialog}><Icon name="folder" /></button>
     {/if}

@@ -1,5 +1,6 @@
 <script>
   import { ctl, store } from '../../lib/controller.svelte.js';
+  import { TOUCH } from '../../lib/util.js';
   const s = store.state;
 
   function sub(m) {
@@ -10,7 +11,7 @@
 
 <div class="marks">
   {#if !s.marks.length}
-    <div class="marks-empty">Click the image to pin a pixel.<br />Shift+drag for a region.</div>
+    <div class="marks-empty">{#if TOUCH}Tap the image to pin a pixel.<br />Pick the rectangle tool to draw a region.{:else}Click the image to pin a pixel.<br />Shift+drag for a region.{/if}</div>
   {/if}
   <ul id="marks-list">
     {#each s.marks as m (m.id)}

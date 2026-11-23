@@ -152,9 +152,10 @@
 .finish .section-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
 
 /* ---------- phones: the panel sits above the viewer instead of beside it */
-@media (max-width: 760px) {
-  .workarea { flex-direction: column; }
-  .learn { width: 100vw; max-height: 58vh; border-right: 0; border-bottom: 1px solid var(--line); }
-  .learn-body { padding: 14px 16px 20px; }
+@media (max-width: 900px) { /* the phone layout itself lives in app.css */
+  .learn-body { padding: 14px 16px 24px; }
   .step-title { font-size: 20px; }
+  .learn .icon-btn.small { width: 36px; height: 36px; }
+  .learn .option { padding: 12px 14px; }
 }
+
