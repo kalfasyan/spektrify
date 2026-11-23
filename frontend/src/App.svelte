@@ -4,6 +4,7 @@
   import { api, SITE } from './lib/api.js';
   import TopBar from './components/TopBar.svelte';
   import StatusBar from './components/StatusBar.svelte';
+  import MobileNav from './components/MobileNav.svelte';
   import ImageWorkspace from './components/image/ImageWorkspace.svelte';
   import ChannelsView from './views/ChannelsView.svelte';
   import ThreeView from './views/ThreeView.svelte';
@@ -20,9 +21,17 @@
   const ui = ctl.ui;
   let seen3d = $state(false);
   $effect(() => { if (s.view === '3d') seen3d = true; });
+  // Phone layout: closing the lessons leaves their pane for the image.
+  let wasOpen = false;
+  $effect(() => {
+    const open = learn.ui.open;
+    if (wasOpen && !open && ui.pane === 'learn') ui.pane = 'image';
+    wasOpen = open;
+  });
 
   onMount(() => {
     const learning = SITE || location.hash === '#learn'; // `spektrify learn` opens this URL
+    if (!learning) ui.pane = 'image';
     ctl.loadCube().then(() => {
       if (learning) learn.setOpen(true);
       else if (!store.meta) ui.modal = 'open';
@@ -52,7 +61,7 @@
 
 <svelte:window onkeydown={handleKey} ondragenter={dragenter} ondragleave={dragleave} ondragover={(e) => e.preventDefault()} ondrop={drop} />
 
-<div id="app" class:dragging={ui.dragging}>
+<div id="app" class:dragging={ui.dragging} class="pane-{s.view === 'image' ? ui.pane : 'other'}" class:learn-catalog={learn.ui.open && !learn.ui.lesson}>
   <TopBar />
   <div class="workarea">
   {#if learn.ui.open}<LearnPanel />{/if}
@@ -70,6 +79,7 @@
   </main>
   </div>
   <StatusBar />
+  <MobileNav />
 </div>
 
 {#if ui.modal === 'open'}<OpenDialog />{/if}

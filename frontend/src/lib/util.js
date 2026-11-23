@@ -134,3 +134,6 @@ export function wavelengthColor(nm) {
 
 // Categorical palette for pins / regions (distinct on dark backgrounds).
 export const PALETTE = ['#ff6b6b', '#4dabf7', '#51cf66', '#fcc419', '#cc5de8', '#ff922b', '#20c997', '#f06595', '#94d82d', '#748ffc', '#ffa8a8', '#66d9e8'];
+
+/** True on touch-first devices (phones, tablets): hints say "tap" instead of "hover / click". */
+export const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;

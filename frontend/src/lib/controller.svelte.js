@@ -32,6 +32,7 @@ class Controller {
       modal: null, // 'open' | 'help' | null
       menu: null, // {kind: 'cmap' | 'ctx', x, y, items?}
       bottomTab: 'spectrum',
+      pane: 'learn', // phone layout only: 'learn' | 'image' | 'adjust' | 'spectrum' (see MobileNav)
       lineReady: false,
       mathError: '',
       playing: false,
@@ -244,6 +245,14 @@ class Controller {
   setView(name) {
     if (!store.meta && name !== 'image') return;
     store.set({ view: name });
+  }
+
+  /** Phone layout: show one pane under the image (or the image alone), on the Image view. */
+  setPane(pane) {
+    this.ui.pane = pane;
+    this.setView('image');
+    // The image area changes size: re-fit once the layout has settled.
+    requestAnimationFrame(() => this.engines.imageView?.fit());
   }
 
   openBand(b) { store.set({ mode: 'band', band: b }); this.setView('image'); }

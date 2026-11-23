@@ -5,6 +5,7 @@
   import { learn } from '../../lib/learn.svelte.js';
   import { store } from '../../lib/controller.svelte.js';
   import { markdown } from '../../lib/markdown.js';
+  import { TOUCH } from '../../lib/util.js';
   import Icon from '../Icon.svelte';
   import Figure from './figures/Figure.svelte';
   import './learn.css';
@@ -146,7 +147,7 @@
               {/each}
             </div>
           {:else if t.kind === 'pixel'}
-            <div class="hint">Click on the image.</div>
+            <div class="hint">{TOUCH ? 'Tap' : 'Click'} on the image.</div>
           {:else}
             <div class="hint">Current band: {store.bandLabel(s.band)}</div>
           {/if}
