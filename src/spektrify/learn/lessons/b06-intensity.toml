@@ -60,7 +60,7 @@ brightens the dark tones, γ above 1 darkens them. Here γ = 0.4:
 
 Gamma is everywhere: screens and image files store values with a gamma of about 2.2 because
 our eyes are more sensitive to differences in dark tones. The **Gamma** slider in the
-Stretch panel on the left applies the same idea to the display only.
+Stretch panel applies the same idea to the display only.
 """
 show = { mode = "math", mathExpr = "stretch(nm(670)) ** 0.4", cmap = "gray" }
 

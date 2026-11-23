@@ -39,7 +39,8 @@ retry = "Where does shifting the window in *any* direction change what you see?"
 title = "The Harris detector"
 text = """
 Harris and Stephens turned this into a formula. Around each pixel, collect the gradients in
-the **structure tensor** (the averages of dx², dy² and dx·dy). Its two eigenvalues say how
+the **structure tensor** (the averages of dx², dy² and dx·dy), a 2 × 2 matrix. Its two
+**eigenvalues** are two numbers that summarise it: they say how
 much the window changes in its most and least changing directions:
 
 - both small: flat; one large: edge; both large: **corner**.
@@ -115,7 +116,9 @@ text = """
 Even after the ratio test some matches are wrong (**outliers**), and a least-squares fit is
 ruined by a few of them. **RANSAC** repeats: pick the *minimum* number of matches that
 define the model (2 for a shift with rotation and scale, 4 for a homography), fit it, count
-how many other matches agree. Keep the model with the most agreement, then refit on those
+how many other matches agree. Small samples matter: if half the matches are right, a random
+pair is all-correct with probability ½ · ½ = 1/4, but a random set of 8 only 1/256. Keep the
+model with the most agreement, then refit on those
 inliers.
 """
 

@@ -24,7 +24,9 @@ show = { mode = "band", band = "#4", cmap = "gray" }
 [[steps]]
 title = "The box filter"
 text = """
-`box(b[4], 2)` replaces each pixel by the mean of the 5 × 5 square around it. The table of
+`box(b[4], 2)` replaces each pixel by the mean of the 5 × 5 square around it. Averaging N
+values whose noise is independent divides the noise's standard deviation by **√N** (the
+rule from *Exposure, noise and dynamic range*), so 25 pixels give 5 times less noise. The table of
 weights (here 25 equal weights of 1/25) is called the **kernel**. Sliding the kernel over
 the image and taking the weighted sum at every position is **convolution**.
 
@@ -50,7 +52,9 @@ gives weights that fall off smoothly with distance; σ (in pixels) sets the scal
 `gauss(b[4], 1.5)`.
 
 The Gaussian is the default blur in vision. It treats all directions alike, it creates no
-blocky artefacts, and blurring twice is the same as blurring once with a larger σ.
+blocky artefacts, and blurring twice is the same as blurring once with a larger σ. The σs
+combine like the sides of a right triangle: **σ = √(σ₁² + σ₂²)**, so σ = 6 then σ = 8 is
+one blur with σ = 10.
 """
 show = { mode = "math", mathExpr = "gauss(b[4], 1.5)", cmap = "gray" }
 

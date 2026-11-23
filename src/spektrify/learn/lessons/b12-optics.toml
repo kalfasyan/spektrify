@@ -26,7 +26,8 @@ point at distance u is sharp at distance v behind the lens when **1/f = 1/u + 1/
 one distance is perfectly in focus at a time.
 
 The focal length also sets the **field of view**: the longer f, the narrower the view and
-the larger objects appear. (The geometry of projection is in the advanced lesson *Cameras
+the larger objects appear: an object's size in the image is proportional to f, so doubling
+f doubles it. (The geometry of projection is in the advanced lesson *Cameras
 and image formation*.)
 """
 show = { mode = "band", band = 550, cmap = "gray" }
@@ -72,7 +73,9 @@ A point that is not at the focused distance spreads into a small disc on the sen
 larger N) increases the **depth of field**, the range of distances that look sharp.
 
 The image of a single point is the lens's **point spread function (PSF)**. Every point of
-the scene spreads the same way, so the whole image is the sharp image **convolved** with
+the scene spreads the same way, so every sharp point is replaced by a copy of the PSF and
+the copies add up. That operation is called **convolution**: the image is the sharp image
+**convolved** with
 the PSF. Here it is with a disc of radius 4 pixels: `defocus(nm(550), 4)`. Compare its edges
 with the Gaussian blur you'll meet in *Neighbourhoods and convolution*: a disc gives a
 flatter, harder-edged blur.

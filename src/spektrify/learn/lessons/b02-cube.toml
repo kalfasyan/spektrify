@@ -19,8 +19,13 @@ A normal photo stores three numbers per pixel: red, green and blue. A **spectral
 many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
 450 nm (blue) to 950 nm (near infrared).
 
-Flip through the bands with the slider under the image, the **← →** keys, or the strip of
-thumbnails on the right.
+Light is a wave, and the distance between two crests, its **wavelength**, decides its
+colour. Wavelengths of light are tiny, so they are measured in **nanometres** (nm, a
+millionth of a millimetre): blue light is about 450 nm, red about 650 nm. Wavelengths past
+about 700 nm are **near infrared**, invisible to the eye.
+
+Flip through the bands with the slider under the image (on a keyboard, the **← →** keys do
+the same).
 """
 show = { mode = "band", band = 550 }
 
@@ -29,7 +34,7 @@ kind = "band"
 prompt = "Go to a band in the near infrared, above 800 nm."
 near = 875
 tolerance = 75
-hint = "Drag the slider under the image to the right, or click a thumbnail near the bottom of the strip."
+hint = "Move the slider under the image to the right."
 success = "In the near infrared the leaf turns bright: plants reflect a lot of light there that our eyes can't see."
 retry = "Not yet: that band is below 800 nm. Keep going to the right."
 
@@ -75,7 +80,8 @@ text = """
 Here is the whole cube as a solid block. The top face is one band; the sides show how every
 pixel along the edges changes across wavelengths.
 
-Drag to rotate, scroll to zoom, and use the sliders on the left to cut into the cube.
+Drag to rotate, zoom with the mouse wheel or a pinch, and use the sliders in the panel to cut
+into the cube.
 """
 view = "3d"
 

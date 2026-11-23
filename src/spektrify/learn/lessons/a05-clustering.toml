@@ -19,7 +19,8 @@ text = """
 **k-means** groups pixels into k clusters by spectrum:
 
 1. pick k starting spectra (spread out: k-means++),
-2. give each pixel to the nearest one,
+2. give each pixel to the nearest one (smallest Euclidean distance between spectra, which
+   counts every difference, brightness included),
 3. move each centre to the mean of its pixels, and repeat 2–3 until nothing changes.
 
 It minimises the total squared distance of pixels to their centres. Here, `kmeans(6)`:

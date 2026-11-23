@@ -34,7 +34,8 @@ title = "Shot noise: light itself is grainy"
 figure = { kind = "sensor", show = "shot" }
 text = """
 Photons arrive at random, like raindrops. If a pixel expects N photons per exposure, the
-count it actually gets varies from shot to shot with a standard deviation of **√N**
+count it actually gets varies from shot to shot. The **standard deviation** measures that
+spread: the typical distance of a measurement from its average. For photons it is **√N**
 (a Poisson distribution). This **shot noise** is a property of light, not of the camera,
 so no sensor can beat it.
 
@@ -57,7 +58,9 @@ text = """
 Now t = 0.05: `expose(nm(550), 0.05)`. The background gets only about 9 electrons, and
 the image is mostly noise.
 
-Two noises add up (their variances add): **SNR = N / √(N + σ_read²)**. With N = 9 and
+Two independent noises don't add their standard deviations; they add their **variances**
+(the variance is the standard deviation squared, σ²). Shot noise has variance N, read noise
+σ_read², so **SNR = N / √(N + σ_read²)**. With N = 9 and
 σ_read = 5 electrons, SNR ≈ 1.6. In the dark, the **read noise** of the electronics
 dominates. The discs collect more light, so they still stand out a little.
 """
@@ -106,7 +109,11 @@ retry = "4,095 is the largest number the ADC can output. What was the true value
 title = "Dynamic range and bit depth"
 text = """
 The **dynamic range** is the ratio of the largest signal to the noise floor:
-**full well / read noise**. Here 10,000 / 5 = 2,000 : 1, about 66 dB or 11 bits.
+**full well / read noise**. Here 10,000 / 5 = 2,000 : 1.
+
+To record that range in steps no bigger than the noise, the ADC needs about 2,000 levels.
+Since n bits give 2ⁿ levels, count how many doublings reach the ratio: 2¹¹ = 2,048, so
+**about 11 bits**. (Engineers also write it in decibels, 20 · log₁₀(2,000) ≈ 66 dB.)
 
 That is why a 12-bit ADC suits this sensor. Fewer bits would add rounding steps larger than
 the noise (the false contours from *What is a digital image?*); many more bits would only
@@ -134,8 +141,10 @@ Two more sources finish the picture:
   (DSNU and PRNU in the EMVA 1288 standard). It is the same in every frame. Hot and dead
   pixels are its extreme cases.
 
-Random noise shrinks when you average frames; fixed patterns don't, but they can be
-measured once and subtracted (a dark frame) or divided out (a flat field).
+Random noise shrinks when you average frames: averaging N frames divides its standard
+deviation by **√N**, for the same reason that shot noise grows only as √N. Fixed patterns
+don't shrink, but they can be measured once and subtracted (a dark frame) or divided out
+(a flat field).
 """
 
 [steps.task]

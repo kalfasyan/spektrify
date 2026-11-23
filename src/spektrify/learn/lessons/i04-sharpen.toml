@@ -29,6 +29,9 @@ where a blurred ('unsharp') negative was used as a mask.
 Zoom into a disc: each edge now has a dark band on its dark side and a bright band on its
 bright side. These **overshoots** are what makes an edge look sharper, and what makes
 over-sharpened photos look haloed.
+
+Note what it can't do: it only amplifies differences that are still in the image. Detail
+the lens blurred away completely is not in the data, so no sharpening brings it back.
 """
 show = { mode = "math", mathExpr = "nm(800) + 1.5 * (nm(800) - gauss(nm(800), 2))", cmap = "gray" }
 

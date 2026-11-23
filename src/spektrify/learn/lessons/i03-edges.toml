@@ -51,7 +51,9 @@ text = """
 Differences between neighbours magnify anything that changes from pixel to pixel, which is
 exactly what noise does. On the noisy band 4 the gradient is pure static:
 `grad(b[4])`. Try `grad(gauss(b[4], 2))` in the band-math box: smooth first, then
-differentiate, and the outlines come back.
+differentiate, and the outlines come back. σ sets the scale of the edges you find: a small
+σ keeps fine edges (and some noise), a large σ smooths both away and leaves only the coarse
+outlines.
 
 Because convolution is associative, *blur then differentiate* is one filter: the
 **derivative of a Gaussian**, the standard edge filter.

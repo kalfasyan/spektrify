@@ -30,6 +30,9 @@ further out **new rings appear, centred in the wrong places**. Rings finer than 
 spacing don't simply disappear: each sample lands a little further along the pattern than
 the one before, and that slow drift draws a fake, coarser pattern. This is **aliasing**.
 Moiré on photos of fabric or screens is the same effect.
+
+The **sampling theorem** (Nyquist and Shannon) gives the rule: a repeating pattern is
+captured faithfully only with **more than 2 samples per period**. Anything finer aliases.
 """
 show = { mode = "math", mathExpr = "subsample(cos(((x - 128)**2 + (y - 96)**2) / 150), 4)", cmap = "gray" }
 

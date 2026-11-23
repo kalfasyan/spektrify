@@ -19,7 +19,9 @@ text = """
 A convolutional layer does three things you've already seen:
 
 1. **convolve** with a small kernel (here a smoothed horizontal derivative),
-2. apply a **nonlinearity**, usually ReLU = max(0, x), which keeps positive responses,
+2. apply a **nonlinearity**, usually ReLU = max(0, x), which keeps positive responses
+   (without it, two convolutions in a row are just one bigger convolution, as with
+   *blur then differentiate* in *Gradients and edges*),
 3. optionally **pool**: keep the maximum of each small window, then subsample.
 
 `maximum(dx(gauss(nm(800), 1)), 0)` is one such **feature map**: it responds only where the
@@ -45,7 +47,9 @@ text = """
 **Max pooling**, a dilation followed by subsampling, keeps 'is the feature somewhere around
 here?' and drops its exact position: `subsample(dilate(maximum(dx(gauss(nm(800), 1)), 0), 2), 4)`.
 
-Stack layers and each unit sees a larger patch of the input, its **receptive field**.
+Stack layers and each unit sees a larger patch of the input, its **receptive field**. A
+single 3 × 3 layer sees 3 × 3 input pixels; every further 3 × 3 layer widens that by one
+pixel on every side.
 Visualisations of trained networks show early layers responding to edges and blobs, middle
 layers to textures and parts, and late layers to whole objects.
 """
@@ -89,7 +93,8 @@ retry = "What did we choose by hand in the first step that a network would choos
 title = "Cubes as input"
 text = """
 A normal 2-D convolution already mixes all input channels: each kernel has
-**bands × height × width** weights. So a first layer on a 96-band cube is large. Options:
+**bands × height × width** weights, and a layer has one kernel per output feature map.
+So a first layer on a 96-band cube is large. Options:
 
 - **2-D** convolutions with all bands as channels (spatial patterns, spectra mixed at once),
 - **1-D** convolutions along the spectrum, per pixel (spectral shape only, small models),

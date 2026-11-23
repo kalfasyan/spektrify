@@ -15,9 +15,10 @@ title = "Counting values"
 figure = { kind = "pixels", show = "histogram" }
 text = """
 A **histogram** counts how many pixels fall into each range of values. It throws away *where*
-the pixels are and keeps only *how often* each value occurs.
+the pixels are and keeps only *how often* each value occurs: the taller a peak, the more
+pixels have values in that range.
 
-The Stretch panel on the left shows the histogram of the current image. In red light
+The Stretch panel shows the histogram of the current image. In red light
 (670 nm), each material sits at its own brightness, so it makes its own peak: the dark leaf,
 the background, the brighter discs.
 """
@@ -38,7 +39,9 @@ In the Stretch panel, press **min–max**: the image turns almost black. A handf
 saturated pixels (the white square left of the leaf) are far brighter than everything else,
 and they set the top of the range.
 
-The default **2–98%** stretch maps the 2nd percentile to black and the 98th to white, so a
+A **percentile** is a value with a given share of pixels below it: 2% of the pixels are
+darker than the 2nd percentile, 98% are darker than the 98th. The default **2–98%** stretch
+maps the 2nd percentile to black and the 98th to white, so a
 few extreme pixels can't take over. Press it again to go back.
 """
 

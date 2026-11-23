@@ -76,6 +76,12 @@ fades the high frequencies. That is why blurring and low-pass filtering are the 
 
 It is also practical: a large kernel is much faster to apply with an FFT than by sliding it
 over the image.
+
+The shape of a kernel's transform tells you how it treats each wave. A Gaussian's transform
+is a smooth Gaussian: fine waves fade steadily. A box's transform is not smooth: it falls,
+then ripples up again (**side lobes**), and some ripples are negative. So a box blur lets
+some fine patterns through, and those with negative weight come out with their contrast
+flipped.
 """
 
 [steps.task]

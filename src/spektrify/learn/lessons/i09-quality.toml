@@ -53,14 +53,15 @@ show = { mode = "band", band = 600 }
 kind = "pixel"
 region = "dead_column"
 prompt = "Click on the dark vertical line crossing the leaf."
-hint = "Zoom in with the mouse wheel; it's on the leaf's left side."
+hint = "Zoom in (mouse wheel or pinch); it's on the leaf's left side."
 success = "Column 37 records almost nothing. Its 'spectrum' is just noise."
 retry = "Not quite on the line. Zoom in and try again."
 
 [[steps]]
 title = "Saturation"
 text = """
-Too much light fills a pixel to its maximum, and anything brighter reads the same. Those
+Too much light fills a pixel to its maximum, and anything brighter reads the same, so the
+true value is unknown: it can be flagged or masked, but not recovered. Those
 values are **clipped**.
 """
 

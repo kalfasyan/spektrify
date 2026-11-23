@@ -119,7 +119,7 @@
 .step-title { margin: 0; font-size: 23px; line-height: 1.2; font-weight: 750; letter-spacing: -.02em; }
 .md { color: var(--text-2); line-height: 1.65; font-size: 14.5px; }
 .md p { margin: 0 0 10px; }
-.md ul { margin: 0 0 10px; padding-left: 20px; }
+.md ul, .md ol { margin: 0 0 10px; padding-left: 20px; }
 .md li { margin-bottom: 3px; }
 .md b { color: var(--text); font-weight: 650; }
 .md a { color: var(--accent); }

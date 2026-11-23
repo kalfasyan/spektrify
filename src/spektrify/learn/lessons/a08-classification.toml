@@ -22,8 +22,8 @@ spectrum, an index, local texture) and y its material.
 
 The simplest classifier stores one **reference spectrum per class** and gives each pixel the
 class of the closest one. With spectral angle as the distance this is the classic
-**Spectral Angle Mapper**. Pin a pixel on one of the lower discs, then right-click the pin
-and choose **Find similar pixels**: the map shows each pixel's angle to it.
+**Spectral Angle Mapper**. Pin a pixel on one of the lower discs, open the pin's menu
+(right-click it, or press and hold on a touch screen) and choose **Find similar pixels**: the map shows each pixel's angle to it.
 """
 show = { mode = "similarity", simDeg = 5, specView = "values" }
 
@@ -85,7 +85,10 @@ retry = "Perfect on what it has seen, poor on what it hasn't."
 title = "Rare classes and priors"
 text = """
 Many classifiers produce a **probability**. Bayes' rule says how evidence and prior belief
-combine: **P(class | x) ∝ P(x | class) · P(class)**. The prior P(class) matters enormously
+combine: **P(class | x) ∝ P(x | class) · P(class)**. In words: count where the flags come
+from. Of 1,000 items with 1 in 100 defective (10 defects, 990 good), a test that catches
+90% of defects and wrongly flags 10% of good items flags 9 defects and 99 good ones; a
+flagged item is defective only 9 / 108 ≈ 8% of the time. The prior P(class) matters enormously
 when one class is rare, such as defects on a production line.
 """
 
