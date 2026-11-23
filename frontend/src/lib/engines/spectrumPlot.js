@@ -2,7 +2,7 @@
 // wavelength colour strip. Click / drag selects a band; hovering shows every curve's value.
 // Emits: 'band' (index).
 
-import { Emitter, fitCanvas, fmt, ticks, wavelengthColor } from '../util.js';
+import { Emitter, TOUCH, fitCanvas, fmt, ticks, wavelengthColor } from '../util.js';
 
 const PAD = { l: 58, r: 14, t: 12, b: 34 };
 
@@ -178,7 +178,7 @@ export class SpectrumPlot extends Emitter {
     if (!d.series.some((s) => s.values)) {
       ctx.fillStyle = muted; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.font = '12px Inter, system-ui';
-      ctx.fillText('Hover the image to see a spectrum · click to pin it', PAD.l + G.pw / 2, PAD.t + G.ph / 2);
+      ctx.fillText(TOUCH ? 'Tap the image to see a spectrum' : 'Hover the image to see a spectrum · click to pin it', PAD.l + G.pw / 2, PAD.t + G.ph / 2);
     }
   }
 

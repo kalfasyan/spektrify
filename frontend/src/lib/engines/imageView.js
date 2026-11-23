@@ -292,6 +292,44 @@ export class ImageView extends Emitter {
     const ov = this.ov;
     const pos = (e) => { const r = ov.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
 
+    // Two-finger pinch: zoom about the fingers' midpoint and pan with it. Registered first so
+    // it can take over from the one-finger gesture (pan / draw / tap-to-pin) below.
+    const touches = new Map();
+    const pair = () => {
+      const [a, b] = [...touches.values()];
+      return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
+    ov.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'touch') return;
+      touches.set(e.pointerId, pos(e));
+      if (touches.size === 2) {
+        e.stopImmediatePropagation();
+        ov.setPointerCapture(e.pointerId);
+        this.drag = { type: 'pinch', last: pair() };
+        this.draft = null;
+        this.redraw();
+      }
+    });
+    ov.addEventListener('pointermove', (e) => {
+      if (!touches.has(e.pointerId)) return;
+      touches.set(e.pointerId, pos(e));
+      if (this.drag?.type !== 'pinch') return;
+      e.stopImmediatePropagation();
+      if (touches.size < 2) return;
+      const p = pair(), last = this.drag.last;
+      this.view.tx += p.x - last.x;
+      this.view.ty += p.y - last.y;
+      this.drag.last = p;
+      this.zoomAt(p.x, p.y, p.d / last.d);
+    });
+    const lift = (e) => {
+      if (!touches.delete(e.pointerId) || this.drag?.type !== 'pinch') return;
+      e.stopImmediatePropagation();
+      if (touches.size === 0) this.drag = null; // a finger left over does nothing until lifted
+    };
+    ov.addEventListener('pointerup', lift);
+    ov.addEventListener('pointercancel', lift);
+
     ov.addEventListener('wheel', (e) => {
       e.preventDefault();
       const p = pos(e);
