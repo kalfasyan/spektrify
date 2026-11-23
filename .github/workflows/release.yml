@@ -22,7 +22,7 @@ jobs:
         run: |
           cd frontend && npm ci && npm run build && cd ..
           test -z "$(git status --porcelain -- src/spektrify/static)"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --locked && uv run pytest
       - run: uv build
       - name: Version matches the tag
