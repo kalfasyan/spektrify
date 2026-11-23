@@ -9,4 +9,5 @@ venv/
 .ruff_cache/
 .coverage
 frontend/node_modules/
+frontend/dist-site/
 .DS_Store

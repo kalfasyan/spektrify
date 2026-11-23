@@ -157,5 +157,5 @@ cd frontend
 npm install
 npm run dev     # with `spektrify view --demo --no-browser` running; Vite proxies /api to :8765
 npm run build   # writes ../src/spektrify/static — commit it so pip users never need Node
-npm run build:site   # the online demo's UI into ../build/site (scripts/build-site.sh adds the data)
+npm run build:site   # the online demo's UI into dist-site (scripts/build-site.sh adds the data)
 ```

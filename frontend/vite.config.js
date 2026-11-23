@@ -6,12 +6,12 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // and `npm run dev`: Vite proxies /api to it.
 //
 // `--mode site` builds the online learn-mode demo instead (no server; see docs/site.md) into
-// build/site, which scripts/build-site.sh then fills with the precomputed data.
+// frontend/dist-site, which scripts/build-site.sh then fills with the precomputed data.
 export default defineConfig(({ mode }) => ({
   plugins: [svelte()],
   base: './',
   build: {
-    outDir: mode === 'site' ? '../build/site' : '../src/spektrify/static',
+    outDir: mode === 'site' ? 'dist-site' : '../src/spektrify/static',
     emptyOutDir: true,
     chunkSizeWarningLimit: 900,
   },
