@@ -87,4 +87,12 @@ First release (to be tagged `v0.1.0`).
   macOS and Windows (Python 3.10–3.13), a wheel smoke test, and a tag-driven release workflow
   (GitHub release, optional PyPI trusted publishing).
 
+### Changed
+- Faster scrubbing: a single band is uploaded to the GPU once instead of three times.
+- Band math no longer recomputes the whole-cube `mean` / `std` maps on every expression (only
+  when used, then memoised), and its results are cached per cube like the other products.
+- The browser caches the UI's content-hashed bundles instead of re-downloading them each visit.
+- Internal: NaN-aware helpers shared by compute and preprocessing live in one module
+  (`spektrify._numeric`); unused frontend helpers removed.
+
 [Unreleased]: https://github.com/kalfasyan/spektrify/commits/main

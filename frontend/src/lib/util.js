@@ -1,7 +1,4 @@
-// Small shared helpers: API access, DOM, formatting, events.
-
-export const $ = (sel, root = document) => root.querySelector(sel);
-export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+// Small shared helpers: DOM, events, formatting, canvas, statistics on typed arrays.
 
 export function el(tag, attrs = {}, ...children) {
   const e = document.createElement(tag);
@@ -44,6 +41,13 @@ export function fmtBytes(n) {
   return `${n.toFixed(n < 10 && i ? 1 : 0)} ${u[i]}`;
 }
 export const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/** Index of the entry of `values` closest to `v` (e.g. the band nearest a wavelength). */
+export function nearestIndex(values, v) {
+  let best = 0;
+  for (let i = 1; i < values.length; i++) if (Math.abs(values[i] - v) < Math.abs(values[best] - v)) best = i;
+  return best;
+}
 
 // ---------------------------------------------------------------- canvas
 export function fitCanvas(canvas, w = canvas.clientWidth, h = canvas.clientHeight) {
@@ -103,16 +107,6 @@ export function download(name, blobOrText, type = 'text/plain') {
   document.body.append(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-}
-
-export function throttleRAF(fn) {
-  let pending = false, lastArgs;
-  return (...args) => {
-    lastArgs = args;
-    if (pending) return;
-    pending = true;
-    requestAnimationFrame(() => { pending = false; fn(...lastArgs); });
-  };
 }
 
 /** Approximate colour of a wavelength (nm) for visual cues; NIR fades to deep red/grey. */

@@ -27,6 +27,7 @@ from spektrify.server.routes import ApiError, Binary, Json, Request, dispatch
 from spektrify.server.session import Session
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+_IMMUTABLE = "public, max-age=31536000, immutable"
 _CLIENT_ERRORS = (
     ValueError,
     TypeError,
@@ -48,12 +49,17 @@ def make_handler(session: Session) -> type[BaseHTTPRequestHandler]:
                 super().log_message(format, *args)
 
         def _send(
-            self, status: int, body: bytes, ctype: str, headers: dict[str, str] | None = None
+            self,
+            status: int,
+            body: bytes,
+            ctype: str,
+            headers: dict[str, str] | None = None,
+            cache: str = "no-store",
         ) -> None:
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("Cache-Control", cache)
             for k, v in (headers or {}).items():
                 self.send_header(k, v)
             self.end_headers()
@@ -120,7 +126,9 @@ def make_handler(session: Session) -> type[BaseHTTPRequestHandler]:
             ctype = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
             if target.suffix == ".js":
                 ctype = "text/javascript"
-            self._send(200, target.read_bytes(), ctype)
+            # Vite names bundled files by content hash, so they never change under one name.
+            cache = _IMMUTABLE if rel.startswith("assets/") else "no-store"
+            self._send(200, target.read_bytes(), ctype, cache=cache)
 
     return Handler
 

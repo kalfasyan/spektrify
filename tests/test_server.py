@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.request
 
 import numpy as np
@@ -74,8 +75,14 @@ def test_quality_and_3d_routes(call, session: Session, demo: Cube) -> None:
 def test_http_server_serves_ui_and_api() -> None:
     v = show(np.random.rand(12, 10, 5).astype(np.float32), port=0, open_browser=False)
     try:
-        html = urllib.request.urlopen(v.url, timeout=5).read().decode()
+        with urllib.request.urlopen(v.url, timeout=5) as resp:
+            html = resp.read().decode()
+            assert resp.headers["Cache-Control"] == "no-store"  # the page names the bundles
         assert 'id="root"' in html
+        bundle = re.search(r'src="\./(assets/[^"]+\.js)"', html)
+        assert bundle is not None
+        with urllib.request.urlopen(v.url + bundle.group(1), timeout=5) as resp:
+            assert "immutable" in resp.headers["Cache-Control"]  # content-hashed: cache forever
         meta = json.load(urllib.request.urlopen(v.url + "api/meta", timeout=5))
         assert meta["bands"] == 5
         with urllib.request.urlopen(v.url + "api/band?i=2", timeout=5) as resp:

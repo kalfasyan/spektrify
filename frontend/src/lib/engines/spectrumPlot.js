@@ -2,7 +2,7 @@
 // wavelength colour strip. Click / drag selects a band; hovering shows every curve's value.
 // Emits: 'band' (index).
 
-import { Emitter, TOUCH, fitCanvas, fmt, ticks, wavelengthColor } from '../util.js';
+import { Emitter, TOUCH, fitCanvas, fmt, nearestIndex, ticks, wavelengthColor } from '../util.js';
 
 const PAD = { l: 58, r: 14, t: 12, b: 34 };
 
@@ -189,9 +189,7 @@ export class SpectrumPlot extends Emitter {
     const G = this._geom();
     const x = clientX - r.left;
     const val = G.xmin + ((x - PAD.l) / G.pw) * (G.xmax - G.xmin);
-    let best = 0;
-    for (let i = 1; i < d.axis.length; i++) if (Math.abs(d.axis[i] - val) < Math.abs(d.axis[best] - val)) best = i;
-    return best;
+    return nearestIndex(d.axis, val);
   }
 
   _bind() {

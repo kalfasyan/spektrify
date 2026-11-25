@@ -40,6 +40,16 @@ def test_band_math_expressions(demo: Cube) -> None:
         an.band_math("b[999]")
 
 
+def test_summary_maps_are_memoised_and_read_only(demo: Cube) -> None:
+    an = create_analyzer(demo)
+    mean = an.summary_map("mean")
+    assert an.summary_map("mean") is mean and not mean.flags.writeable
+    np.testing.assert_allclose(mean, np.nanmean(demo.data, axis=0), rtol=1e-6)
+    np.testing.assert_allclose(an.band_math("mean - std"), mean - an.summary_map("std"))
+    with pytest.raises(ValueError):
+        an.summary_map("median")
+
+
 def test_products_shapes(demo: Cube) -> None:
     an = create_analyzer(demo)
     hw = (demo.height, demo.width)
