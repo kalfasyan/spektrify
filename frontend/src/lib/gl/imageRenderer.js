@@ -116,6 +116,7 @@ export class ImageRenderer {
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     this.tex = [0, 1, 2].map(() => this._makeTex());
     this.texSrc = [null, null, null];
+    this.nChannels = 1;
     this.lutTex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.lutTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -134,13 +135,18 @@ export class ImageRenderer {
     return t;
   }
 
-  /** Upload channels (Float32Array, w×h each). Re-uploads only arrays that changed. */
+  /**
+   * Upload channels (Float32Array, w×h each; one for a single band, three for RGB). Re-uploads
+   * only arrays that changed, and each array once: a single band is not copied into all three
+   * textures, which would triple the GPU upload on every step while scrubbing.
+   */
   setChannels(channels, w, h) {
     const gl = this.gl;
     this.size = [w, h];
+    this.nChannels = Math.min(channels.length, 3);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    for (let i = 0; i < 3; i++) {
-      const src = channels[Math.min(i, channels.length - 1)];
+    for (let i = 0; i < this.nChannels; i++) {
+      const src = channels[i];
       if (this.texSrc[i] === src) continue;
       gl.bindTexture(gl.TEXTURE_2D, this.tex[i]);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, w, h, 0, gl.RED, gl.FLOAT, src);
@@ -175,8 +181,9 @@ export class ImageRenderer {
     gl.bindVertexArray(this.vao);
     gl.uniform4f(this.u.uRect, (x0 / cw) * 2 - 1, 1 - (y1 / ch) * 2, (x1 / cw) * 2 - 1, 1 - (y0 / ch) * 2);
     for (let i = 0; i < 3; i++) {
+      // Fewer than three channels: the missing units repeat the last one.
       gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(gl.TEXTURE_2D, this.tex[i]);
+      gl.bindTexture(gl.TEXTURE_2D, this.tex[Math.min(i, this.nChannels - 1)]);
       gl.uniform1i(this.u[`uT${i}`], i);
     }
     gl.activeTexture(gl.TEXTURE3);

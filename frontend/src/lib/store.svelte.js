@@ -5,7 +5,7 @@
 // Data fetching that several components share (bands, products, marks' spectra) lives here.
 
 import { api } from './api.js';
-import { Emitter, PALETTE, percentiles } from './util.js';
+import { Emitter, PALETTE, nearestIndex, percentiles } from './util.js';
 
 const BAND_CACHE_BYTES = 768 * 2 ** 20;
 
@@ -115,12 +115,7 @@ class Store extends Emitter {
     return [`#${i}`, wl, !wl && name ? name : null].filter(Boolean).join(' · ');
   }
 
-  nearestBand(value) {
-    const ax = this.meta.axis;
-    let best = 0;
-    for (let i = 1; i < ax.length; i++) if (Math.abs(ax[i] - value) < Math.abs(ax[best] - value)) best = i;
-    return best;
-  }
+  nearestBand(value) { return nearestIndex(this.meta.axis, value); }
 
   // ---------------------------------------------------------------- data
   band(i) {
@@ -311,8 +306,7 @@ function defaultRgb(meta) {
   if (C < 3) return [0, Math.min(1, C - 1), C - 1];
   const ax = meta.axis;
   if (meta.wavelengths && ax[0] <= 480 && ax[C - 1] >= 620) {
-    const near = (nm) => ax.reduce((b, v, i) => (Math.abs(v - nm) < Math.abs(ax[b] - nm) ? i : b), 0);
-    return [near(640), near(550), near(465)];
+    return [640, 550, 465].map((nm) => nearestIndex(ax, nm));
   }
   return [Math.round((C - 1) * 0.85), Math.round((C - 1) * 0.5), Math.round((C - 1) * 0.15)];
 }

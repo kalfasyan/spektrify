@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 
 import numpy as np
 
+from spektrify._numeric import nanmean
 from spektrify.model import Cube
 from spektrify.preprocess import references as refs
 from spektrify.preprocess.base import param, register_step
@@ -98,6 +98,4 @@ class Bin:
         if not hh or not ww:
             raise ValueError("bin factor is larger than the image")
         blocks = cube.data[:, : hh * f, : ww * f].reshape(c, hh, f, ww, f)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN blocks stay NaN
-            return cube.with_data(np.nanmean(blocks, axis=(2, 4)))
+        return cube.with_data(nanmean(blocks, axis=(2, 4)))  # all-NaN blocks stay NaN

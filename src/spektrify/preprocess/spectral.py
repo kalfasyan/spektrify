@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from spektrify._numeric import nanmean
 from spektrify.model import Cube
 from spektrify.preprocess import _ops as ops
 from spektrify.preprocess import references as refs
@@ -49,7 +50,7 @@ class MSC:
         if refs.is_set(self.reference):
             ref = refs.spectrum(self.reference, cube, what="reference spectrum")
         else:
-            ref = ops._nanmean(cube.data.reshape(cube.n_bands, -1), axis=1)
+            ref = nanmean(cube.data.reshape(cube.n_bands, -1), axis=1)
         return cube.with_data(ops.msc(cube.data, np.nan_to_num(ref)))
 
 

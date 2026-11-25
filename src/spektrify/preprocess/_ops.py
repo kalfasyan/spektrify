@@ -14,20 +14,9 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 from numpy.typing import NDArray
 
+from spektrify._numeric import nanmean, nanmedian, robust_sigma
+
 F32 = NDArray[np.float32]
-_MAD_TO_SIGMA = 1.4826
-
-
-def _nanmedian(a: np.ndarray, axis: int | tuple[int, ...] | None = None) -> np.ndarray:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN slices -> NaN
-        return np.nanmedian(a, axis=axis)
-
-
-def _nanmean(a: np.ndarray, axis: int | tuple[int, ...] | None = None) -> np.ndarray:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)
-        return np.nanmean(a, axis=axis)
 
 
 # ------------------------------------------------------------------ bad pixels / lines
@@ -38,31 +27,24 @@ def local_median(img: F32, size: int) -> F32:
     r = size // 2
     padded = np.pad(img, r, mode="reflect")
     windows = sliding_window_view(padded, (size, size)).reshape(*img.shape, size * size)
-    fn = _nanmedian if np.isnan(windows).any() else np.median
+    fn = nanmedian if np.isnan(windows).any() else np.median
     return fn(windows, axis=-1).astype(np.float32)
-
-
-def _robust_sigma(x: np.ndarray) -> float:
-    x = x[np.isfinite(x)]
-    if x.size == 0:
-        return 0.0
-    return float(_MAD_TO_SIGMA * np.median(np.abs(x - np.median(x))))
 
 
 def repair_lines(band: F32, axis: int, threshold: float, window: int = 5) -> F32:
     """Replace whole rows (``axis=0``) or columns (``axis=1``) that deviate from their
     neighbours by interpolating between the nearest good lines."""
-    profile = _nanmedian(band, axis=1 - axis)  # one value per line
+    profile = nanmedian(band, axis=1 - axis)  # one value per line
     n = profile.size
     if n < window + 2:
         return band
     r = window // 2
     padded = np.pad(profile, r, mode="reflect")
-    trend = _nanmedian(sliding_window_view(padded, window), axis=-1)
+    trend = nanmedian(sliding_window_view(padded, window), axis=-1)
     resid = profile - trend
     # Floor σ at 1 % of the profile's range: scenes with flat areas have MAD 0.
     spread = float(np.nanmax(profile) - np.nanmin(profile))
-    sigma = max(_robust_sigma(resid), 0.01 * spread)
+    sigma = max(robust_sigma(resid, empty=0.0), 0.01 * spread)
     if sigma <= 0:
         return band
     bad = np.abs(resid) > threshold * sigma
@@ -100,7 +82,7 @@ def repair_pixels(band: F32, size: int, threshold: float, fix_nonfinite: bool) -
     resid = work - med
     # A noise-free (piecewise constant) band has MAD 0, so floor σ at 1 % of the band's range.
     lo, hi = np.nanpercentile(work, (1, 99)) if np.isfinite(work).any() else (0.0, 0.0)
-    sigma = max(_robust_sigma(resid), 0.01 * float(hi - lo))
+    sigma = max(robust_sigma(resid, empty=0.0), 0.01 * float(hi - lo))
     # A defect is isolated: beyond *all* its neighbours, not just the median. (This keeps
     # the corners of real objects, which differ from the median but match some neighbours.)
     r = size // 2
@@ -145,7 +127,7 @@ def poly_surface(img: F32, degree: int, step: int = 4) -> F32:
 
 def normalise_gain(gain: np.ndarray, min_gain: float) -> np.ndarray:
     """Scale a gain image(s) to unit median over the last two axes, floored at ``min_gain``."""
-    med = _nanmedian(gain, axis=(-2, -1))[..., None, None]
+    med = nanmedian(gain, axis=(-2, -1))[..., None, None]
     med = np.where(np.isfinite(med) & (med != 0), med, 1.0)
     return np.maximum(gain / med, min_gain).astype(np.float32)
 
@@ -170,14 +152,14 @@ def destripe(data: F32, axis: int, window: int, mode: str) -> F32:
     other axis) and its own running median, so structure wider than ``window`` pixels is kept.
     """
     c = data.shape[0]
-    prof = _nanmedian(data, axis=1 if axis == 1 else 2)  # (C, W) for columns / (C, H) for rows
+    prof = nanmedian(data, axis=1 if axis == 1 else 2)  # (C, W) for columns / (C, H) for rows
     n = prof.shape[1]
     window = min(window | 1, (n // 2) * 2 - 1) if n > 2 else 1
     if window < 3:
         return data
     r = window // 2
     padded = np.pad(prof, ((0, 0), (r, r)), mode="reflect")
-    trend = _nanmedian(sliding_window_view(padded, window, axis=1), axis=-1)
+    trend = nanmedian(sliding_window_view(padded, window, axis=1), axis=-1)
     # The median of random stripes still wobbles a little; a running mean removes that.
     trend = np.nanmean(
         sliding_window_view(np.pad(trend, ((0, 0), (r, r)), mode="reflect"), window, axis=1),
@@ -231,8 +213,8 @@ def savgol_matrix(n: int, window: int, order: int, deriv: int, delta: float = 1.
 
 def snv(data: F32) -> F32:
     """Standard normal variate: each pixel spectrum to zero mean, unit standard deviation."""
-    mean = _nanmean(data, axis=0)
-    std = np.sqrt(_nanmean((data - mean) ** 2, axis=0))
+    mean = nanmean(data, axis=0)
+    std = np.sqrt(nanmean((data - mean) ** 2, axis=0))
     with np.errstate(divide="ignore", invalid="ignore"):
         out = (data - mean) / std
     out[:, ~(std > 1e-12)] = np.nan
@@ -262,7 +244,7 @@ def msc(data: F32, ref: np.ndarray) -> F32:
 
 def _prepare(band: F32) -> np.ndarray:
     """Gradient magnitude (brightness-invariant edges), windowed, for phase correlation."""
-    img = np.nan_to_num(band, nan=float(_nanmean(band)) if np.isfinite(band).any() else 0.0)
+    img = np.nan_to_num(band, nan=float(nanmean(band)) if np.isfinite(band).any() else 0.0)
     gy, gx = np.gradient(img.astype(np.float64))
     g = np.hypot(gx, gy)
     g -= g.mean()

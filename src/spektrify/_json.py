@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 
-from spektrify.compute._util import finite_list
+from spektrify._numeric import finite_list
 
 
 def _default(o: Any) -> Any:

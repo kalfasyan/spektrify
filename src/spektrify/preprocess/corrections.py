@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from spektrify._numeric import nanmean
 from spektrify.model import Cube
 from spektrify.preprocess import _ops as ops
 from spektrify.preprocess import references as refs
@@ -65,7 +66,7 @@ class FlatField:
         else:
             if self.degree < 0:
                 raise ValueError("degree must be ≥ 0")
-            mean_img = ops._nanmean(cube.data, axis=0).astype(np.float32)
+            mean_img = nanmean(cube.data, axis=0).astype(np.float32)
             gain = ops.normalise_gain(ops.poly_surface(mean_img, self.degree), self.min_gain)[None]
         return cube.with_data(cube.data / gain)
 
@@ -93,13 +94,13 @@ class WhiteBalance:
             patch = cube.data[:, self.y0 : self.y1 or None, self.x0 : self.x1 or None]
             if patch.size == 0:
                 raise ValueError("the patch is empty")
-            ref = ops._nanmean(patch.reshape(cube.n_bands, -1), axis=1)
+            ref = nanmean(patch.reshape(cube.n_bands, -1), axis=1)
         elif self.method == "reference":
             if not refs.is_set(self.reference):
                 raise ValueError("method 'reference' needs a reference spectrum")
             ref = refs.spectrum(self.reference, cube, what="reference spectrum")
         else:  # gray-world: every band gets the same mean
-            ref = ops._nanmean(cube.data.reshape(cube.n_bands, -1), axis=1)
+            ref = nanmean(cube.data.reshape(cube.n_bands, -1), axis=1)
             target = float(np.nanmean(ref))
             gain = ops.band_gain_from_spectrum(ref, target)
             return cube.with_data(cube.data * gain[:, None, None])

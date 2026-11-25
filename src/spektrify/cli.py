@@ -10,6 +10,7 @@ import typer
 
 if TYPE_CHECKING:
     from spektrify.model import Cube
+    from spektrify.preprocess import Pipeline
 
 app = typer.Typer(
     name="spektrify",
@@ -48,6 +49,15 @@ Steps = Annotated[
 AsJson = Annotated[bool, typer.Option("--json", help="Print machine-readable JSON.")]
 
 
+def _pipeline(steps: list[str] | None) -> Pipeline:
+    from spektrify.preprocess import Pipeline
+
+    try:
+        return Pipeline.parse(steps or [])
+    except ValueError as e:
+        raise typer.BadParameter(str(e), param_hint="--step") from e
+
+
 def _load(
     path: Path,
     dataset: str | None,
@@ -57,12 +67,8 @@ def _load(
     steps: list[str] | None,
 ) -> Cube:
     from spektrify.io import load_cube
-    from spektrify.preprocess import Pipeline
 
-    try:
-        pipeline = Pipeline.parse(steps or [])
-    except ValueError as e:
-        raise typer.BadParameter(str(e), param_hint="--step") from e
+    pipeline = _pipeline(steps)
     try:
         cube = load_cube(
             path, dataset=dataset, layout=layout.value, mosaic=mosaic, demosaic_method=demosaic
@@ -115,11 +121,10 @@ def view(
     """Open the viewer in your browser (with no file, use the open dialog or drag & drop)."""
     from spektrify import serve
     from spektrify.io import demo_cube
-    from spektrify.preprocess import Pipeline
 
     cube = None
     if demo:
-        cube = Pipeline.parse(step or []).apply(demo_cube())
+        cube = _pipeline(step).apply(demo_cube())
     elif path:
         cube = _load(path, dataset, layout, mosaic, demosaic, step)
     serve(cube, port=port, host=host, open_browser=browser)

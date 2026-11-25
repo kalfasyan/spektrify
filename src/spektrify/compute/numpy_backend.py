@@ -7,6 +7,7 @@ Expensive results are memoised per instance.
 
 from __future__ import annotations
 
+import ast
 import threading
 import warnings
 from functools import cached_property
@@ -15,21 +16,15 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from spektrify._numeric import finite_list as _clean
+from spektrify._numeric import nanmean, nanmedian, robust_sigma
 from spektrify.compute import capture, imageops
-from spektrify.compute._util import finite_list as _clean
 from spektrify.compute.bandmath import safe_eval
 from spektrify.model import Cube
 
 F32 = NDArray[np.float32]
 
 _MAX_SAMPLES = 120_000
-
-
-def _robust_sigma(x: np.ndarray) -> float:
-    x = x[np.isfinite(x)]
-    if x.size == 0:
-        return float("nan")
-    return float(1.4826 * np.median(np.abs(x - np.median(x))))
 
 
 class NumpyAnalyzer:
@@ -41,6 +36,7 @@ class NumpyAnalyzer:
         self._lock = threading.RLock()
         self._pca_cache: dict[int, dict[str, Any]] = {}
         self._cluster_cache: dict[int, F32] = {}
+        self._summary_cache: dict[str, F32] = {}
 
     # ------------------------------------------------------------------ sampling
 
@@ -86,7 +82,7 @@ class NumpyAnalyzer:
             mean, std = float(v.mean()), float(v.std())
             # Noise from horizontal neighbour differences (robust to scene structure).
             d = np.diff(band, axis=1)
-            noise = _robust_sigma(d.ravel()[:: max(1, d.size // 400_000)]) / np.sqrt(2)
+            noise = robust_sigma(d.ravel()[:: max(1, d.size // 400_000)]) / np.sqrt(2)
             sat_level = dtype_max if dtype_max is not None else vmax
             n_max = int(np.count_nonzero(v >= sat_level))
             n_min = int(np.count_nonzero(v <= vmin))
@@ -175,12 +171,10 @@ class NumpyAnalyzer:
             lo = np.take(sub, range(n_line - 2), axis=axis)
             hi = np.take(sub, range(2, n_line), axis=axis)
             d2 = mid - 0.5 * (lo + hi)
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", RuntimeWarning)
-                med = np.nanmedian(d2, axis=1 if axis == 2 else 2)  # (C, n_line-2)
+            med = nanmedian(d2, axis=1 if axis == 2 else 2)  # (C, n_line-2)
             med = np.nan_to_num(med)
             scale = np.array(
-                [_robust_sigma(d2[b].ravel()[:: max(1, d2[b].size // 200_000)]) for b in range(c)]
+                [robust_sigma(d2[b].ravel()[:: max(1, d2[b].size // 200_000)]) for b in range(c)]
             )
             # Median of n noisy samples has ~1.25/sqrt(n) of their spread.
             scale = scale * 1.2533 / np.sqrt(max(1, d2.shape[1 if axis == 2 else 2]))
@@ -361,7 +355,7 @@ class NumpyAnalyzer:
         ref = ref.astype(np.float32)
         flat = self._flat_filled()
         dot = ref @ flat
-        norm = np.sqrt(np.sum(flat.astype(np.float32) ** 2, axis=0)) * float(np.linalg.norm(ref))
+        norm = np.sqrt(np.sum(flat**2, axis=0)) * float(np.linalg.norm(ref))
         with np.errstate(all="ignore"):
             cos = np.clip(dot / norm, -1, 1)
         ang = np.arccos(cos).reshape(self.cube.height, self.cube.width).astype(np.float32)
@@ -375,20 +369,14 @@ class NumpyAnalyzer:
             return np.nanmean(d, axis=0).astype(np.float32) if d.size else self.cube.data[0] * 0
 
     def summary_map(self, kind: str) -> F32:
-        with np.errstate(all="ignore"):
-            if kind == "mean":
-                return np.nanmean(self.cube.data, axis=0).astype(np.float32)
-            if kind == "std":
-                return np.nanstd(self.cube.data, axis=0).astype(np.float32)
-            if kind == "max":
-                return np.nanmax(self.cube.data, axis=0).astype(np.float32)
-            if kind == "argmax":
-                filled = np.where(np.isfinite(self.cube.data), self.cube.data, -np.inf)
-                idx = np.argmax(filled, axis=0)
-                return self.cube.axis[idx].astype(np.float32)
-            if kind == "invalid":
-                return (~np.isfinite(self.cube.data)).sum(0).astype(np.float32)
-        raise ValueError(f"Unknown summary {kind!r}")
+        """Per-pixel statistic across bands: ``mean`` ``std`` ``max`` ``argmax`` (the axis
+        value of the peak) or ``invalid`` (count of non-finite bands). Memoised, read-only."""
+        with self._lock:
+            if kind not in self._summary_cache:
+                out = _summary(self.cube, kind).astype(np.float32)
+                out.flags.writeable = False  # shared between callers
+                self._summary_cache[kind] = out
+            return self._summary_cache[kind]
 
     # ------------------------------------------------------------------ sampling helpers
 
@@ -444,9 +432,7 @@ class NumpyAnalyzer:
         hh, ww, cc = h // sy, w // sx, c // sc
         v = self.cube.data[: cc * sc, : hh * sy, : ww * sx]
         v = v.reshape(cc, sc, hh, sy, ww, sx)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            v = np.nanmean(v, axis=(1, 3, 5))
+        v = nanmean(v, axis=(1, 3, 5))
         g = self.global_range
         lo, hi = g["p005"], g["p995"]
         u8 = np.clip((np.nan_to_num(v, nan=lo) - lo) / max(hi - lo, 1e-12) * 255, 0, 255)
@@ -465,9 +451,7 @@ class NumpyAnalyzer:
         if th == 0 or tw == 0:
             s, th, tw = 1, h, w
         v = self.cube.data[:, : th * s, : tw * s].reshape(c, th, s, tw, s)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            t = np.nanmean(v, axis=(2, 4)).astype(np.float32) if s > 1 else v[:, :, 0, :, 0].copy()
+        t = nanmean(v, axis=(2, 4)).astype(np.float32) if s > 1 else v[:, :, 0, :, 0].copy()
         return np.ascontiguousarray(t), {"bands": c, "height": th, "width": tw, "step": s}
 
     # ------------------------------------------------------------------ clustering
@@ -504,6 +488,9 @@ class NumpyAnalyzer:
         Example: ``(nm(800) - nm(670)) / (nm(800) + nm(670))``.
         """
         cube = self.cube
+        names = {
+            n.id for n in ast.walk(ast.parse(expr.strip(), mode="eval")) if isinstance(n, ast.Name)
+        }
 
         class _Bands:
             def __getitem__(self, i: int) -> np.ndarray:
@@ -520,15 +507,14 @@ class NumpyAnalyzer:
             sel = (ax >= min(a, b)) & (ax <= max(a, b))
             if not sel.any():
                 sel[int(np.argmin(np.abs(ax - (a + b) / 2)))] = True
-            with np.errstate(all="ignore"):
-                return np.nanmean(cube.data[sel], axis=0)
+            return nanmean(cube.data[sel], axis=0)
 
         env: dict[str, Any] = {
             "b": _Bands(),
             "nm": nm,
             "avg": band_range,
-            "mean": self.summary_map("mean"),
-            "std": self.summary_map("std"),
+            # Whole-cube statistics, computed only when the expression uses them.
+            **{k: self.summary_map(k) for k in ("mean", "std") if k in names},
             "sqrt": np.sqrt,
             "log": np.log,
             "log10": np.log10,
@@ -554,6 +540,25 @@ class NumpyAnalyzer:
         if out.shape != (cube.height, cube.width):
             out = np.broadcast_to(out, (cube.height, cube.width)).astype(np.float32)
         return np.ascontiguousarray(out)
+
+
+_SUMMARIES = {
+    "mean": lambda d: nanmean(d, axis=0),
+    "std": lambda d: np.nanstd(d, axis=0),
+    "max": lambda d: np.nanmax(d, axis=0),
+    "invalid": lambda d: (~np.isfinite(d)).sum(0),
+}
+
+
+def _summary(cube: Cube, kind: str) -> np.ndarray:
+    if kind == "argmax":
+        filled = np.where(np.isfinite(cube.data), cube.data, -np.inf)
+        return cube.axis[np.argmax(filled, axis=0)]
+    if kind not in _SUMMARIES:
+        raise ValueError(f"Unknown summary {kind!r}")
+    with np.errstate(all="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN pixels give NaN
+        return _SUMMARIES[kind](cube.data)
 
 
 def _line_defects(dev: np.ndarray, thresh: float = 8.0) -> list[int]:

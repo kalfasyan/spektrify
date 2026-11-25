@@ -17,8 +17,8 @@ from typing import Any
 
 import numpy as np
 
+from spektrify._numeric import finite_list
 from spektrify.compute import region_mask
-from spektrify.compute._util import finite_list
 from spektrify.io import DEMOS, demosaic_methods, load_cube, supported_suffixes
 from spektrify.learn import Lesson, check_answer, labels_of, lesson_json, summary_json
 from spektrify.model import Cube
@@ -203,7 +203,7 @@ def _product(s: Session, r: Request) -> Binary:
         arr = s.cached(kind, lambda: an.summary_map(kind))
     elif kind == "math":
         expr = r.body.get("expr") or r.get("expr")
-        arr = an.band_math(expr)
+        arr = s.cached(f"math:{expr}", lambda: an.band_math(expr))
         meta["expr"] = expr
     else:
         raise ApiError(400, f"unknown product {kind!r}")

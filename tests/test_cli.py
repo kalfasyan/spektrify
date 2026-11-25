@@ -96,3 +96,10 @@ def test_external_reference_files_via_cli(cube_file: str, tmp_path) -> None:
 def test_missing_reference_file_is_a_clean_error(cube_file: str) -> None:
     r = runner.invoke(app, ["info", cube_file, "-s", "calibrate:white=/nope/white.npy"])
     assert r.exit_code != 0 and "not found" in r.output
+
+
+def test_demo_choices_match_the_demo_registry() -> None:
+    from spektrify.cli import DemoName
+    from spektrify.io import DEMOS
+
+    assert [d.value for d in DemoName] == list(DEMOS)
