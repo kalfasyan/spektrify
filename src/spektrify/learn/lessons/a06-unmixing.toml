@@ -56,8 +56,11 @@ retry = "The formula only knows the leaf and the background, and only one band."
 [[steps]]
 title = "Finding endmembers"
 text = """
-In band space, mixtures of k endmembers fill a **simplex** (a triangle for 3, a tetrahedron
-for 4) whose corners are the pure spectra. Endmember-finding algorithms (PPI, N-FINDR, VCA)
+Picture it with two bands, each pixel a point as in *Comparing materials*. A mixture of
+two materials lies on the straight line between their two points, closer to whichever
+covers more of the pixel. Mixtures of three materials fill the triangle between their three
+points, and in general mixtures of k materials fill a shape called a **simplex** (a
+triangle for 3, a tetrahedron for 4) whose corners are the pure spectra. Endmember-finding algorithms (PPI, N-FINDR, VCA)
 look for the most extreme pixels, usually after PCA to reduce noise.
 
 How many endmembers can one pixel be split into? Each band gives one equation and the
