@@ -51,9 +51,16 @@ show = { specView = "normalized" }
 [[steps]]
 title = "Spectral angle"
 text = """
-**Spectral angle** treats each spectrum as an arrow in a space with one axis per band, and
-measures the angle between two arrows. Brightness changes the arrow's length, not its
-direction, so shaded pixels of the same material stay close.
+**Spectral angle** turns each spectrum into an arrow. With just two bands it is easy to
+draw: plot a pixel as a point, with its value in band 1 across and its value in band 2 up,
+and draw the arrow from the origin (0, 0) to that point. A shaded pixel of the same
+material has both values halved, so its arrow is shorter but points in exactly the same
+direction. A different material has a different ratio between the bands, so its arrow
+points elsewhere.
+
+With 96 bands the space has 96 axes, which nobody can draw, but the angle between two
+arrows is computed the same way. Brightness changes an arrow's length, not its direction,
+so shaded pixels of the same material stay close.
 
 Open one of your pins' menu (right-click it, or press and hold on a touch screen) and
 choose **Find similar pixels**. Dark means a small angle,

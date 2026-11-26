@@ -17,8 +17,9 @@ text = """
 In *What is a spectral cube?* you flipped through the bands. Now look at what changes from
 one band to the next, starting with a leaf.
 
-Our eyes see roughly 400 to 700 nm. Inside that range, chlorophyll absorbs blue and red light
-and reflects a little more green, which is why leaves look green.
+Our eyes see roughly 400 to 700 nm. Inside that range, **chlorophyll**, the pigment that leaves
+use to catch sunlight for growing, absorbs (soaks up) blue and red light and reflects a
+little more green, which is why leaves look green.
 
 Here is band 550 nm (green).
 """

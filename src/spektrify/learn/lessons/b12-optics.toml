@@ -104,7 +104,7 @@ Even a flawless lens can't focus light to a point, because light is a wave. A po
 a small bright spot with faint rings, the **Airy pattern**. Its central spot, out to the
 first dark ring, has a diameter of about **2.44 · λ · N**.
 
-At 550 nm and f/8 that is about 10.7 µm, three pixels on a sensor with 3.45 µm pixels. So
+At 550 nm and f/8 that is about 10.7 µm (micrometres, thousandths of a millimetre), three pixels on a sensor with 3.45 µm pixels. So
 closing the aperture has a limit: beyond some f-number, diffraction blur grows faster than
 depth of field helps. Note the **λ**: at the same f-number, NIR bands are blurred more than
 blue ones, so a spectral cube is not equally sharp at every wavelength.

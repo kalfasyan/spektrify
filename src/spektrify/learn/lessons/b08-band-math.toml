@@ -37,7 +37,9 @@ retry = "Look for the area with the highest values."
 title = "Normalised difference"
 text = """
 A **normalised difference** `(a − b) / (a + b)` does the same job but gives tidy values.
-With near infrared and red it is the best-known vegetation index, **NDVI**.
+An **index** is such a formula that sums up a spectrum in one number. With near infrared
+and red this one is the best-known vegetation index, the **NDVI** (normalised difference
+vegetation index).
 
 For two positive bands it always lies between −1 and +1: it is +1 when only a reflects,
 −1 when only b does, and 0 when they are equal. Healthy leaves, bright in the near infrared

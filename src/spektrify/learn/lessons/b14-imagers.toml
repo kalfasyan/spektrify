@@ -50,8 +50,9 @@ retry = "Which design records the bands at different moments?"
 title = "Push-broom: one line at a time"
 figure = { kind = "camera", show = "pushbroom" }
 text = """
-A **push-broom** imager looks at the scene through a narrow **slit**. A prism or grating
-spreads the light from the slit into its wavelengths, onto a 2-D sensor: one sensor axis is
+A **push-broom** imager looks at the scene through a narrow **slit**. A prism or a **grating** (a
+surface with thousands of fine parallel grooves, which splits light into its colours like
+the rainbow sheen on a CD) spreads the light from the slit into its wavelengths, onto a 2-D sensor: one sensor axis is
 position along the slit, the other is wavelength. Each exposure records **one line of the
 cube, with a full spectrum for every pixel in it**. The object (on a conveyor belt or a
 moving stage) or the camera moves, and line after line builds the image.
@@ -111,7 +112,8 @@ title = "Whisk-broom: one point at a time"
 text = """
 A **whisk-broom** imager measures one spectrum at a time and sweeps a mirror across the
 scene, line by line. Classic airborne instruments such as NASA's AVIRIS work this way, and
-so do lab instruments that move a sample under a point spectrometer.
+so do lab instruments that move a sample under a point **spectrometer** (an instrument
+that measures the spectrum of a single spot).
 
 One detector measures every pixel, so the calibration is uniform and there are no
 column stripes. The price is time. A push-broom sees a whole line at once, but a whisk-broom
