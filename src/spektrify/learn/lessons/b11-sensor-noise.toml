@@ -1,6 +1,6 @@
 id = "sensor-noise"
 title = "Exposure, noise and dynamic range"
-summary = "Shot noise, read noise and saturation: how much light you collect sets how precise every pixel is, and what too much light destroys."
+summary = "Why a pixel's value always wobbles, how much light you need for a clean measurement, and what too little or too much light does."
 level = "basics"
 unit = "How images are captured"
 order = 52
@@ -16,19 +16,26 @@ reading = [
 title = "A simulated sensor"
 figure = { kind = "sensor", show = "counts" }
 text = """
-*Light and what a pixel measures* showed that a pixel counts electrons and turns them into
-counts. Those counts are never exact: this lesson is about how precise they are.
+*Light and what a pixel measures* showed that a pixel is like a bucket that catches
+photons and counts the electrons they free. This lesson asks a simple question: **how
+much can you trust that count?** The short answer is that it always wobbles a little, and
+the amount of light you collect decides how much.
 
-`expose(image, t)` shows what a simple, made-up sensor would record if the image were the
-light reaching it and t the exposure. Its numbers are typical of a machine-vision camera:
+To see this, the demo has a made-up sensor. `expose(image, t)` shows what it would record
+if the image were the light falling on it for an exposure time t. Its numbers are typical
+of an industrial camera:
 
-- a white surface at t = 1 gives **1,000 electrons** on average,
-- each pixel holds at most **10,000 electrons** (the **full well**),
-- the readout adds **5 electrons** of noise,
-- a **12-bit** ADC turns 0 to 10,000 electrons into 0 to 4,095 counts.
+- A white surface at t = 1 fills a pixel with **1,000 electrons** on average.
+- A pixel can hold at most **10,000 electrons**. This limit is called the **full well**:
+  the bucket is full and any extra light spills over.
+- Reading the bucket out is slightly imprecise, like a kitchen scale that is off by a few
+  grams every time you weigh. Here the error is about **5 electrons** per reading. This is
+  the **read noise**.
+- The analogue-to-digital converter (ADC) turns 0 to 10,000 electrons into a whole number
+  from 0 to 4,095 (it has 12 bits, and 2¹² = 4,096 levels).
 
-Here is the 550 nm band at t = 1: `expose(nm(550), 1)`. The background reflects about 18%,
-so each of its pixels collects about 186 electrons.
+Here is the 550 nm band at t = 1: `expose(nm(550), 1)`. The background reflects about 19%
+of the light, so each of its pixels collects about 186 electrons.
 """
 show = { mode = "math", mathExpr = "expose(nm(550), 1)", cmap = "gray" }
 
@@ -36,15 +43,70 @@ show = { mode = "math", mathExpr = "expose(nm(550), 1)", cmap = "gray" }
 title = "Shot noise: light itself is grainy"
 figure = { kind = "sensor", show = "shot" }
 text = """
-Photons arrive at random, like raindrops. If a pixel expects N photons per exposure, the
-count it actually gets varies from shot to shot. The **standard deviation** measures that
-spread: the typical distance of a measurement from its average. For photons it is **√N**
-(a Poisson distribution). This **shot noise** is a property of light, not of the camera,
-so no sensor can beat it.
+Imagine pointing the camera at a perfectly steady lamp and taking ten pictures in a row.
+You might expect one pixel to read the same number every time. It doesn't: you might get
+98, 104, 101, 95, 107, 99, 102, 93, 100, 103.
 
-So the **signal-to-noise ratio (SNR)** from shot noise alone is **N / √N = √N**. Collecting
-four times the light only doubles the SNR. At t = 1 the background gets about 186
-electrons: SNR ≈ 13, which is the speckle you see.
+The reason is that photons arrive **at random**, like raindrops. Leave a bucket out in
+steady rain for exactly one minute, do it again, and you won't catch exactly the same
+number of drops: sometimes a few more, sometimes a few fewer. This unavoidable wobble is
+called **shot noise**. It comes from light itself, not from the camera, so no sensor,
+however good, can get rid of it.
+
+**How big is the wobble?** We describe it with one number, the **standard deviation**:
+roughly, how far a single reading typically lands from the average. If you have computed
+the spread of benchmark timings, it is the same thing. For random arrivals like photons
+there is a remarkably simple rule: **the typical wobble is the square root of the average
+count.**
+
+- Expect 100 photons: the wobble is about √100 = 10, so most readings fall between 90 and
+  110.
+- Expect 10,000 photons: the wobble is about 100, so most readings fall between 9,900 and
+  10,100.
+
+The wobble grows as you collect more light, but much more slowly than the count does. In
+relative terms it shrinks: 10 out of 100 is 10%, but 100 out of 10,000 is only 1%.
+(Statisticians call this kind of randomness a Poisson distribution.)
+"""
+
+[steps.task]
+kind = "choice"
+prompt = "A pixel expects 400 photons per exposure. Between which values will most of its readings fall?"
+options = ["Between 396 and 404", "Between 380 and 420", "Between 300 and 500", "Always exactly 400"]
+answer = 1
+success = "Right: the typical wobble is √400 = 20, so most readings land within about 20 of 400."
+retry = "The typical wobble is the square root of the average count. What is √400?"
+
+[[steps]]
+title = "Signal-to-noise ratio"
+text = """
+Is a wobble of 10 a lot? It depends on what it wobbles around. Being off by 10 when you
+expect 100 is a big error; being off by 10 when you expect 10,000 hardly matters. So what
+counts is the size of the signal **compared with** the noise. That comparison is the
+**signal-to-noise ratio (SNR)**:
+
+**SNR = signal / noise**, the average reading divided by its typical wobble.
+
+Put differently, SNR says how precisely you know a value: SNR 10 means you know it to about
+a tenth (10%), SNR 100 to about a hundredth (1%). It matters because it decides what you
+can tell apart. Two materials whose brightness differs by 5% blur into each other at SNR 10,
+but are clearly separate at SNR 100.
+
+Now let's see what happens to SNR as the light increases, using the wobble rule from the
+last step:
+
+- 100 photons: wobble 10, so SNR = 100 / 10 = **10**.
+- 400 photons: wobble 20, so SNR = 400 / 20 = **20**.
+- 10,000 photons: wobble 100, so SNR = 10,000 / 100 = **100**.
+
+Four times the light (100 → 400) only doubles the SNR (10 → 20), because the wobble grows
+too, just more slowly. In fact the SNR is always the square root of the photon count:
+100 photons give SNR 10, 400 give 20, 10,000 give 100. So to make an image twice as clean,
+you need four times the light.
+
+In the image at t = 1, the background collects about 186 electrons: its wobble is about
+14, and its SNR about 13. Its values wander by roughly 7% from pixel to pixel, which is the
+speckle you see.
 """
 
 [steps.task]
@@ -53,19 +115,27 @@ prompt = "A pixel collects 10,000 electrons. What is its shot-noise-limited SNR?
 options = ["50", "100", "1,000", "10,000"]
 answer = 1
 success = "Right: √10,000 = 100, so the value is uncertain by about 1%. Getting to 0.1% would take 100 times more light (a million electrons), more than one pixel can hold, so you average pixels or frames instead."
-retry = "Shot-noise SNR is √N."
+retry = "First find the typical wobble (the square root of the count), then divide the count by it."
 
 [[steps]]
 title = "Too little light"
 text = """
-Now t = 0.05: `expose(nm(550), 0.05)`. The background gets only about 9 electrons, and
-the image is mostly noise.
+Now a very short exposure, t = 0.05: `expose(nm(550), 0.05)`. The background collects
+only about 9 electrons per pixel, and the picture is mostly noise. Why so bad?
 
-Two independent noises don't add their standard deviations; they add their **variances**
-(the variance is the standard deviation squared, σ²). Shot noise has variance N, read noise
-σ_read², so **SNR = N / √(N + σ_read²)**. With N = 9 and
-σ_read = 5 electrons, SNR ≈ 1.6. In the dark, the **read noise** of the electronics
-dominates. The discs collect more light, so they still stand out a little.
+Two kinds of noise now matter. Shot noise is small in absolute terms: with 9 electrons its
+wobble is √9 = 3. But the read noise, the imprecise scale from the first step, adds its
+wobble of about 5 electrons to *every* reading, however little light there is. So here the
+readout error is bigger than the shot noise, and bigger than half the signal itself.
+
+How do two wobbles combine? Not by simply adding them, because independent errors
+sometimes push in opposite directions and partly cancel. The rule works like Pythagoras:
+square each wobble, add the squares, and take the square root. Here √(3² + 5²) = √34 ≈ 5.8
+electrons. (The squared wobble has its own name, the **variance**.) So the SNR is about
+9 / 5.8 ≈ 1.5: the signal is barely bigger than the noise.
+
+That is the lesson of dim scenes: when light is scarce, the camera's own **read noise**
+sets the limit. The discs reflect more light, so they still stand out a little.
 """
 show = { mode = "math", mathExpr = "expose(nm(550), 0.05)", cmap = "gray" }
 
@@ -78,21 +148,25 @@ options = [
   "Quantisation, because dim values use only a few levels",
 ]
 answer = 0
-success = "Right. Shot noise is √N, which becomes small in absolute terms when N is small; read noise stays at about 5 electrons. Low-read-noise sensors (and cooling) matter most in dim scenes."
+success = "Right. With 9 electrons the shot noise is only about 3, but the readout adds about 5 every time, however dim the scene. Sensors with low read noise matter most in dim light."
 retry = "Which noise stays the same size however little light arrives?"
 
 [[steps]]
 title = "Too much light"
 figure = { kind = "sensor", show = "saturate" }
 text = """
-Now t = 40: `expose(nm(550), 40)`. The background is cleaner (about 7,400 electrons, shot
-SNR about 86), but the four discs reflect about 42 to 46% and would need more than
-16,000 electrons, so every one of their pixels hits the **full well** and reads 4,095.
+Now the opposite, a long exposure, t = 40: `expose(nm(550), 40)`. The background is much
+cleaner: about 7,400 electrons, so its wobble is about 86 and its SNR about 86 too.
 
-A **saturated** (clipped) pixel has lost its information: the shading on the discs is
-gone, and any number computed from it, such as a ratio of two bands, is wrong without
-looking wrong. The usual rule is to expose so the **brightest thing you care about** sits
-just below full well.
+But the four discs reflect 42 to 46% of the light and would need more than 16,000
+electrons. Each bucket holds only 10,000 (the **full well**), so it overflows, and every
+disc pixel reads the maximum, 4,095.
+
+Such a pixel is **saturated**, or **clipped**: the reading only says "at least this much",
+not how much. The shading on the discs is gone, and any number computed from these pixels,
+such as a ratio of two bands, is wrong without looking wrong. So the usual rule is to
+expose just long enough that the **brightest thing you care about** stays a little below
+full well.
 """
 show = { mode = "math", mathExpr = "expose(nm(550), 40)", cmap = "gray" }
 
@@ -111,17 +185,25 @@ retry = "4,095 is the largest number the ADC can output. What was the true value
 [[steps]]
 title = "Dynamic range and bit depth"
 text = """
-The **dynamic range** is the ratio of the largest signal to the noise floor:
-**full well / read noise**. Here 10,000 / 5 = 2,000 : 1.
+Put the last two steps together. A sensor can't measure anything brighter than a full
+bucket, and it can't notice changes smaller than its read noise. The ratio between the two
+is its **dynamic range**: how many distinct brightness steps it can tell apart, from the
+faintest to the brightest.
 
-To record that range in steps no bigger than the noise, the ADC needs about 2,000 levels.
-Since n bits give 2ⁿ levels, count how many doublings reach the ratio: 2¹¹ = 2,048, so
-**about 11 bits**. (Engineers also write it in decibels, 20 · log₁₀(2,000) ≈ 66 dB.)
+A kitchen scale makes a good comparison. One that weighs up to 5 kg in steps of 1 g can
+tell 5,000 weights apart: a dynamic range of 5,000 : 1. For our sensor it is the full well
+divided by the read noise: 10,000 / 5 = **2,000 : 1**.
 
-That is why a 12-bit ADC suits this sensor. Fewer bits would add rounding steps larger than
-the noise (the false contours from *What is a digital image?*); many more bits would only
-record the noise more finely. The **gain**, 10,000 / 4,095 ≈ 2.4 electrons per count, ties
-counts back to electrons.
+This decides how many bits the ADC needs. To record 2,000 distinct steps it needs at least
+2,000 levels. Each bit doubles the number of levels (*What is a digital image?*), and
+2¹¹ = 2,048, so **11 bits** is just enough. A 12-bit ADC therefore suits this sensor.
+With fewer bits, the rounding steps would be coarser than the noise and you would lose
+real detail (the false contours from the first lesson). With many more bits, you would only
+record the noise in finer detail, wasting storage. (Engineers often quote dynamic range in
+decibels: 20 · log₁₀(2,000) ≈ 66 dB.)
+
+One more number links counts back to electrons: the **gain**, here 10,000 / 4,095 ≈ 2.4
+electrons per count.
 """
 
 [steps.task]
@@ -129,25 +211,30 @@ kind = "choice"
 prompt = "A sensor holds 20,000 electrons and has 2 electrons of read noise. Which ADC suits it?"
 options = ["8-bit", "10-bit", "14-bit", "24-bit"]
 answer = 2
-success = "Right: 20,000 / 2 = 10,000 : 1, about 13.3 bits, so 14 bits covers it with no waste."
-retry = "Compute full well / read noise, then the number of bits: 2^bits should just exceed it."
+success = "Right: the dynamic range is 20,000 / 2 = 10,000 : 1. 2¹³ = 8,192 is too few levels and 2¹⁴ = 16,384 is just enough, so 14 bits."
+retry = "First divide the full well by the read noise. Then keep doubling from 1 until you pass that number: each doubling is one bit."
 
 [[steps]]
 title = "Dark current and fixed patterns"
 text = """
-Two more sources finish the picture:
+Two more effects complete the picture.
 
-- **Dark current**: heat frees electrons even with no light. It grows with exposure time
-  and roughly doubles every 6 to 8 °C, which is why scientific cameras are cooled. Its
-  average adds to the offset; its randomness adds noise.
-- **Fixed-pattern noise**: each pixel has a slightly different offset and sensitivity
-  (DSNU and PRNU in the EMVA 1288 standard). It is the same in every frame. Hot and dead
-  pixels are its extreme cases.
+- **Dark current**: heat in the silicon frees a few electrons even in total darkness, as
+  if a little water dripped into each bucket from the side. It grows with exposure time
+  and roughly doubles for every 6 to 8 °C, which is why scientific cameras are cooled. On
+  average it raises the offset, and its randomness adds noise.
+- **Fixed-pattern noise**: no two pixels are exactly alike. Each has a slightly different
+  offset and sensitivity, and these differences are the same in every frame, like a few
+  buckets that are always slightly bigger than the rest. (The camera standard EMVA 1288
+  calls them DSNU and PRNU.) Hot and dead pixels are the extreme cases.
 
-Random noise shrinks when you average frames: averaging N frames divides its standard
-deviation by **√N**, for the same reason that shot noise grows only as √N. Fixed patterns
-don't shrink, but they can be measured once and subtracted (a dark frame) or divided out
-(a flat field).
+The two behave very differently when you **average several frames**, just as you would
+average several runs of a benchmark. Random noise changes from frame to frame, so it
+partly cancels: averaging 4 frames halves it, averaging 16 frames cuts it to a quarter.
+That is the same square-root rule as before, since 4 frames collect 4 times the light.
+A fixed pattern is the same in every frame, so averaging leaves it untouched. Instead you
+measure it once and remove it: subtract an image taken in darkness (a **dark frame**) and
+divide by an image of an evenly lit white target (a **flat field**).
 
 Next, *Lenses, focus and blur* moves in front of the sensor, to the lens that forms the
 image.
@@ -163,5 +250,5 @@ options = [
   "Random noise drops 4 times; fixed patterns stay",
 ]
 answer = 3
-success = "Right: averaging n frames divides random noise by √n = 4, and leaves anything that repeats in every frame. Calibration frames handle that part."
+success = "Right: random noise shrinks with the square root of the number of frames, √16 = 4, while anything that repeats in every frame stays. Dark frames and flat fields handle that part."
 retry = "Averaging cancels what changes between frames. Does a fixed pattern change?"
