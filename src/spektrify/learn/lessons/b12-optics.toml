@@ -16,22 +16,31 @@ reading = [
 title = "Pinholes and lenses"
 figure = { kind = "camera", show = "pinhole" }
 text = """
-*Exposure, noise and dynamic range* was about the sensor. Before light reaches it, a lens
-has to form a sharp image on it.
+*Exposure, noise and dynamic range* was about the sensor. Before light reaches it, something
+has to form a sharp image on it. Start with the simplest camera there is.
 
-A tiny hole in a dark box already makes an image: each point of the scene sends a thin
-cone of light through the hole to one spot on the back wall. But a pinhole lets in very
-little light, and widening it blurs the image.
+**A pinhole.** Make a tiny hole in one side of a dark box. Light from each point of the
+scene can only pass through the hole along one straight line, so it lands on one spot of
+the back wall, and an upside-down image appears. The catch: a tiny hole lets in very little
+light. Make the hole bigger and each scene point lights up a larger patch instead of a spot,
+so the image gets brighter but blurrier.
 
-A **lens** solves this: it bends all the light from one scene point, entering anywhere
-across its opening, back to one image point. For a thin lens with **focal length f**, a
-point at distance u is sharp at distance v behind the lens when **1/f = 1/u + 1/v**. Only
-one distance is perfectly in focus at a time.
+**A lens** gets you both brightness and sharpness. It is a piece of curved glass that bends
+light, so that all the rays from one scene point, wherever they enter the lens, meet again
+at one point behind it. How strongly a lens bends light is described by its **focal
+length f**: the distance behind the lens at which light from something very far away comes
+to a point. A strongly curved lens has a short focal length.
 
-The focal length also sets the **field of view**: the longer f, the narrower the view and
-the larger objects appear: an object's size in the image is proportional to f, so doubling
-f doubles it. (The geometry of projection is in the advanced lesson *Cameras
-and image formation*.)
+For nearer objects the sharp image lies a little further back. The thin-lens rule says
+where: an object at distance u is sharp at distance v behind the lens when
+**1/f = 1/u + 1/v**. For example, a 50 mm lens looking at something 1 m (1,000 mm) away
+gives 1/v = 1/50 − 1/1000, so v ≈ 52.6 mm. The sensor sits at one distance, so **only one
+object distance is perfectly sharp at a time**; that is what focusing adjusts.
+
+The focal length also decides how much of the scene fits on the sensor, the **field of
+view**. A longer focal length makes everything look bigger, like zooming in: doubling f
+doubles the size of each object in the image, so the sensor covers half as wide a slice of
+the scene. (The full geometry is in the advanced lesson *Cameras and image formation*.)
 """
 show = { mode = "band", band = 550, cmap = "gray" }
 
@@ -51,13 +60,22 @@ retry = "A longer focal length acts like a zoom."
 title = "Aperture and f-number"
 figure = { kind = "camera", show = "lens" }
 text = """
-The lens opening (the **aperture**) is described by the **f-number N = f / D**, the focal
-length divided by the opening's diameter. f/2 is a wide opening, f/16 a small one.
+The **aperture** is the opening that lets light through the lens, like the pupil of your
+eye. Photographers describe it by the **f-number**, the focal length divided by the
+opening's diameter: **N = f / D**. A 50 mm lens with a 25 mm wide opening is at f/2; close
+the opening to about 6 mm and it is at f/8. So a *small* f-number means a *wide* opening.
 
-The light reaching each pixel goes as the area of the opening relative to f², so as
-**1 / N²**. The standard steps (f/2.8, f/4, f/5.6, f/8, …) differ by √2 and each halves
-the light: one **stop**. A larger N therefore needs a longer exposure for the same signal
-and SNR.
+How much light reaches each pixel? Two things matter. The light collected grows with the
+**area** of the opening, and area goes with the diameter squared: halve the diameter and
+you get a quarter of the light. Meanwhile, a longer focal length spreads the image over a
+larger area, which dims it in the same squared way. Together, the light per pixel goes as
+(D / f)², which is **1 / N²**.
+
+A worked example: going from f/4 to f/8 doubles N, so the light drops to (1/2)² = 1/4.
+That is why the standard f-numbers (f/2.8, f/4, f/5.6, f/8, …) step by about 1.4 (that is,
+√2): each step halves the light. Photographers call one such halving a **stop**. To keep
+the same signal, and so the same SNR, after closing the aperture by one stop, you double
+the exposure time.
 """
 
 [steps.task]
@@ -66,22 +84,28 @@ prompt = "You close the aperture from f/4 to f/8. How must the exposure time cha
 options = ["2 times longer", "4 times longer", "8 times longer", "It doesn't need to change"]
 answer = 1
 success = "Right: (8 / 4)² = 4, two stops. That is why fast-moving scenes need wide apertures or bright lights."
-retry = "Light goes as 1 / N². Compare (1/4)² with (1/8)²."
+retry = "Doubling the f-number halves the diameter of the opening. What does that do to its area?"
 
 [[steps]]
 title = "Defocus is a blur by a disc"
 text = """
-A point that is not at the focused distance spreads into a small disc on the sensor, the
-**circle of confusion**. Its size grows with the aperture diameter, so stopping down (a
-larger N) increases the **depth of field**, the range of distances that look sharp.
+What happens to a point that is *not* at the focused distance? Its rays meet a little in
+front of or behind the sensor, so on the sensor they form a small disc instead of a point.
+That disc is called the **circle of confusion**. A wider opening sends rays in from a wider
+range of angles, so the disc is bigger. That is why closing the aperture (a larger N)
+increases the **depth of field**: the range of distances that still look sharp.
 
-The image of a single point is the lens's **point spread function (PSF)**. Every point of
-the scene spreads the same way, so every sharp point is replaced by a copy of the PSF and
-the copies add up. That operation is called **convolution**: the image is the sharp image
-**convolved** with
-the PSF. Here it is with a disc of radius 4 pixels: `defocus(nm(550), 4)`. Compare its edges
-with the Gaussian blur you'll meet in *Neighbourhoods and convolution*: a disc gives a
-flatter, harder-edged blur.
+A useful way to think about any blur: the image of one single point of light is called the
+lens's **point spread function (PSF)**, the shape that a point gets smeared into. Every
+point of the scene is smeared in the same way, so the blurred image is what you get if you
+stamp a copy of that shape onto every point, scaled by its brightness, and add all the
+copies up. That operation is called **convolution**. If you have seen a sliding-window or
+kernel operation in code, it is the same idea; *Neighbourhoods and convolution* builds it
+up properly.
+
+Here the PSF is a disc of radius 4 pixels: `defocus(nm(550), 4)`. Edges are softened by a
+fixed amount all round, with a fairly hard-edged blur, unlike the smoother Gaussian blur you
+will meet later.
 """
 show = { mode = "math", mathExpr = "defocus(nm(550), 4)", cmap = "gray" }
 
@@ -100,14 +124,25 @@ retry = "The blur circle's size grows with the size of the opening."
 [[steps]]
 title = "Diffraction: the limit of a perfect lens"
 text = """
-Even a flawless lens can't focus light to a point, because light is a wave. A point becomes
-a small bright spot with faint rings, the **Airy pattern**. Its central spot, out to the
-first dark ring, has a diameter of about **2.44 · λ · N**.
+Even a perfect lens can't focus light to an infinitely small point. The reason is that light
+is a wave, and waves spread out after passing through an opening. You can see the same thing
+with sea waves: when they pass through a narrow harbour entrance they fan out on the other
+side instead of continuing as a straight strip. This spreading is called **diffraction**,
+and the narrower the opening compared with the wavelength, the more the wave spreads.
 
-At 550 nm and f/8 that is about 10.7 µm (micrometres, thousandths of a millimetre), three pixels on a sensor with 3.45 µm pixels. So
-closing the aperture has a limit: beyond some f-number, diffraction blur grows faster than
-depth of field helps. Note the **λ**: at the same f-number, NIR bands are blurred more than
-blue ones, so a spectral cube is not equally sharp at every wavelength.
+For a camera this means a point becomes a small bright spot with faint rings around it,
+called the **Airy pattern**. The diameter of the central spot is about
+**2.44 · λ · N**: it grows with the wavelength λ and with the f-number N (a smaller
+opening spreads the light more).
+
+With numbers: at 550 nm (0.55 µm, where a µm or micrometre is a thousandth of a millimetre)
+and f/8, the spot is 2.44 × 0.55 × 8 ≈ 10.7 µm across. On a sensor with 3.45 µm pixels that
+is about three pixels wide. So closing the aperture has a limit: it sharpens defocus, but
+beyond some f-number the diffraction spot gets bigger than the defocus disc it saves.
+
+Note the λ in the rule: at the same f-number, longer wavelengths spread more. A near
+infrared band is blurrier than a blue one, so a spectral cube is not equally sharp in every
+band.
 """
 
 [steps.task]
@@ -116,21 +151,24 @@ prompt = "How large is the diffraction spot at 1000 nm and f/4?"
 options = ["About 1 µm", "About 2.4 µm", "About 10 µm", "About 100 µm"]
 answer = 2
 success = "Right: 2.44 × 1 µm × 4 ≈ 9.8 µm. The same lens at 500 nm would give 4.9 µm."
-retry = "Use 2.44 · λ · N, with λ = 1 µm."
+retry = "Use 2.44 · λ · N, with λ = 1000 nm = 1 µm and N = 4."
 
 [[steps]]
 title = "Aberrations and vignetting"
 text = """
-Real lenses add their own imperfections:
+Real lenses add imperfections of their own:
 
-- **Chromatic aberration**: glass bends short wavelengths more than long ones, so each
-  wavelength focuses at a slightly different distance (some bands are blurrier) and with a
-  slightly different magnification (bands don't line up near the corners). Lenses for
-  spectral imaging are corrected over a wide wavelength range for this reason.
-- **Geometric distortion**: straight lines bend near the borders (barrel or pincushion).
-- **Vignetting**: the image gets darker towards the corners, partly from the geometry of
-  light hitting the sensor at an angle (the cos⁴ law) and partly from the lens barrel
-  cutting off light. The demo scene has it: the background is darker near the corners.
+- **Chromatic aberration**: glass bends short wavelengths a little more than long ones, the
+  same effect that lets a prism make a rainbow. So each wavelength comes to focus at a
+  slightly different distance (some bands are blurrier) and with a slightly different
+  size (bands don't line up near the corners). Lenses made for spectral imaging are
+  corrected over a wide range of wavelengths for this reason.
+- **Geometric distortion**: straight lines in the scene bow outwards or inwards near the
+  edges of the image (barrel or pincushion distortion).
+- **Vignetting**: the image gets darker towards the corners. Light reaching the corners
+  arrives at a slant, so it is spread over a larger area of the sensor (the cos⁴ law
+  describes how much), and part of it is cut off by the lens barrel. The demo scene has it:
+  the background is darker near the corners.
 
 One problem remains: the sensor still can't tell colours apart. Next, *Colour filter
 arrays and demosaicing* shows how ordinary cameras solve it.

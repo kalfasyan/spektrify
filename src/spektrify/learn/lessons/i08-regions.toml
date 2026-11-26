@@ -64,8 +64,10 @@ Many numbers summarise a region's shape:
 
 - **Area, perimeter, centroid, bounding box**.
 - **Circularity** 4π·area / perimeter²: 1 for a circle, lower for elongated or ragged shapes.
-- **Moments**: averages of x, y, x², xy… over the region. They give orientation and
-  elongation, and Hu's combinations stay the same when the shape moves, rotates or scales.
+- **Moments**: averages over the region's pixels. The average x and y give its centre;
+  the averages of x², y² and x·y say how spread out it is in each direction, and so how
+  elongated it is and which way it points. Hu's combinations of moments stay the same
+  when the shape moves, rotates or scales, which makes them good fingerprints of a shape.
 
 These **hand-crafted features** were the input to classic pattern recognition, and they are
 still the quickest way to sort parts, grains or cells by shape.

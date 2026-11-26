@@ -46,15 +46,18 @@ finds the shift that matches them best, and moves the band back. The shifts it f
 in the cube's metadata.
 
 Toggle **Before / After** and watch the fringes disappear.
-
-Next, *Repairing defects* fixes the dead pixels and stripes found in *Spotting sensor
-problems*.
 """
 pipeline = [{ name = "align" }]
 
 [[steps]]
 title = "Why it matters"
-text = "Misaligned bands don't just look bad: a pixel's spectrum then mixes values from different places."
+text = """
+Misaligned bands don't just look bad: a pixel's spectrum then mixes values from different
+places.
+
+Next, *Repairing defects* fixes the dead pixels and stripes found in *Spotting sensor
+problems*.
+"""
 
 [steps.task]
 kind = "choice"

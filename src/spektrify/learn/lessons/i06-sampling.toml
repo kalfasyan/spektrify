@@ -34,8 +34,15 @@ spacing don't simply disappear: each sample lands a little further along the pat
 the one before, and that slow drift draws a fake, coarser pattern. This is **aliasing**.
 Moiré on photos of fabric or screens is the same effect.
 
-The **sampling theorem** (Nyquist and Shannon) gives the rule: a repeating pattern is
-captured faithfully only with **more than 2 samples per period**. Anything finer aliases.
+You have seen this in films: a car's wheel that spins fast can seem to turn slowly, or
+even backwards, because the camera takes only 24 pictures a second and the spokes move
+almost a full step between them.
+
+The **sampling theorem** (Nyquist and Shannon) gives the rule. A repeating pattern is
+captured faithfully only with **more than 2 samples per period**, that is, per repeat of the
+pattern: you need at least one sample on each crest and one on each trough. It is why audio
+is sampled at 44,100 times a second to record sounds up to about 20,000 vibrations a
+second. Anything finer than the limit aliases.
 """
 show = { mode = "math", mathExpr = "subsample(cos(((x - 128)**2 + (y - 96)**2) / 150), 4)", cmap = "gray" }
 

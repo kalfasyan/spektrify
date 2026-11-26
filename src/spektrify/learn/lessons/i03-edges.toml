@@ -18,9 +18,13 @@ text = """
 The last two lessons averaged neighbours to remove noise. Taking their difference instead
 finds the places where the image changes: the edges.
 
-An edge is a place where brightness changes quickly. On a pixel grid, the derivative is a
-difference between neighbours. The **Sobel** operator takes the difference left to right and
-averages it over three rows to resist noise: `dx(nm(800))`.
+An edge is a place where brightness changes quickly. How fast something changes is what
+mathematicians call the **derivative**. On a pixel grid it is simply the difference between
+neighbours: along a row reading 10, 10, 10, 50, 90, 90, the differences are 0, 0, 40, 40, 0,
+large exactly where the edge is.
+
+The **Sobel** operator takes this left-to-right difference and averages it over three rows,
+so that one noisy pixel can't fake an edge: `dx(nm(800))`.
 
 The diverging colour map shows the sign: red where the image gets brighter to the right,
 blue where it gets darker, pale where nothing changes.
@@ -42,9 +46,12 @@ retry = "Follow a row from left to right: where does the value go up, and where 
 [[steps]]
 title = "Gradient magnitude"
 text = """
-Combine both directions into the **gradient magnitude** `sqrt(dx² + dy²)`:
-`grad(nm(800))`. It is large on every outline, whatever its direction. The direction of the
-gradient (`atan2(dy, dx)`) points across the edge, from dark to bright.
+`dx` only sees edges that cross a row; `dy`, the top-to-bottom difference, sees the
+others. Together they form the **gradient**: an arrow at each pixel pointing in the
+direction where brightness rises fastest, that is, across the edge from dark to bright. Its
+length, the **gradient magnitude**, is how steep the change is. By Pythagoras it is
+`sqrt(dx² + dy²)`: `grad(nm(800))`. It is large on every outline, whatever its direction.
+(Its direction is `atan2(dy, dx)`, the angle of the arrow.)
 """
 show = { mode = "math", mathExpr = "grad(nm(800))", cmap = "gray" }
 
@@ -58,8 +65,9 @@ differentiate, and the outlines come back. σ sets the scale of the edges you fi
 σ keeps fine edges (and some noise), a large σ smooths both away and leaves only the coarse
 outlines.
 
-Because convolution is associative, *blur then differentiate* is one filter: the
-**derivative of a Gaussian**, the standard edge filter.
+Both steps are convolutions, and two convolutions in a row can always be merged into one
+kernel. So *blur, then take differences* is a single filter, the **derivative of a
+Gaussian**: the standard edge filter.
 """
 show = { mode = "math", mathExpr = "grad(b[4])", cmap = "gray" }
 
@@ -98,8 +106,10 @@ retry = "Find an outline that is still bright in this image."
 title = "Second derivatives and Canny"
 figure = { kind = "kernel", op = "laplace" }
 text = """
-The **Laplacian** (`laplace`) is the second derivative: zero on flat areas and even ramps,
-crossing zero right on an edge. Smoothed first (*Laplacian of Gaussian*), its zero crossings
+The **Laplacian** (`laplace`) takes differences twice: it measures how fast the change
+itself changes, the way acceleration is the change of speed. It is zero on flat areas and
+on even ramps, and it swings from positive to negative right on an edge (a **zero
+crossing**). Smoothed first (*Laplacian of Gaussian*), its zero crossings
 give thin, closed outlines (Marr and Hildreth).
 
 **Canny's detector** is the classic recipe: Gaussian smoothing, gradient, **non-maximum

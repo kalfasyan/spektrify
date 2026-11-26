@@ -18,9 +18,15 @@ text = """
 *Sharpening* separated fine detail from coarse structure. The Fourier transform makes that
 idea exact: it splits an image into waves of every size.
 
-Any image can be written as a sum of **waves**: stripes of different spacing (frequency),
-direction, strength and position. The **Fourier transform** tells you how much of each wave
-the image contains.
+Think of music first. A chord is several notes played together, and an audio equaliser
+shows how much bass, middle and treble a song contains: slow vibrations and fast ones. The
+**Fourier transform** does the same for any signal: it breaks it into pure waves and tells
+you how strong each one is.
+
+For an image, the "notes" are soft stripes. Each has a **frequency** (how closely the
+stripes are packed: coarse stripes are low frequencies, fine stripes high ones), a
+direction, a strength and a position. Any image, however complicated, can be built by
+adding enough of these stripes together, just as any sound can be built from pure tones.
 
 `fft(nm(800))` shows that strength (on a log scale) for every wave. The centre is
 frequency zero (the overall brightness); points further out are finer waves; the direction
@@ -74,8 +80,10 @@ show = { mode = "math", mathExpr = "lowpass(cos(((x - 128)**2 + (y - 96)**2) / 1
 title = "The convolution theorem"
 text = """
 The key fact of this lesson: **convolution in the image equals multiplication in the
-frequency domain**. A Gaussian blur multiplies the transform by another Gaussian, which
-fades the high frequencies. That is why blurring and low-pass filtering are the same thing.
+frequency domain**. In music terms, applying a filter to a song is the same as turning each
+slider of the equaliser up or down. A Gaussian blur turns the treble down smoothly: it
+multiplies the transform by another bell shape that fades the high frequencies. That is why
+blurring and low-pass filtering are the same thing.
 
 It is also practical: a large kernel is much faster to apply with an FFT than by sliding it
 over the image.

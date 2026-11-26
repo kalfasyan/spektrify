@@ -18,9 +18,10 @@ noise, but not for all of them.
 
 Noise comes in two broad kinds:
 
-- **Gaussian-like noise**: every pixel is a little off. It comes from the electronics (read
-  noise) and from light itself arriving in discrete photons (**shot noise**, whose variance
-  grows with the signal).
+- **Gaussian-like noise**: every pixel is a little off, by a small random amount. It comes
+  from the electronics (read noise) and from light itself arriving as separate photons
+  (**shot noise**, which grows with the square root of the signal, as in *Exposure, noise
+  and dynamic range*).
 - **Impulse noise**: a few pixels are completely wrong: dead, hot or dropped in
   transmission ('salt and pepper').
 
