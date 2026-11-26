@@ -1,7 +1,7 @@
 <script>
   // The lesson panel: the course catalog, or one step of a lesson (diagram, text, task).
   // All lesson content comes from the server (TOML files), so this file never changes when
-  // lessons are added. Its look lives in learn.css (a warm light theme with a dark variant).
+  // lessons are added. Its look lives in learn.css (the app's colours, light or dark).
   import { learn } from '../../lib/learn.svelte.js';
   import { store } from '../../lib/controller.svelte.js';
   import { markdown } from '../../lib/markdown.js';
