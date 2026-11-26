@@ -15,6 +15,9 @@ reading = [
 title = "Images are sums of waves"
 figure = { kind = "waves", show = "sum" }
 text = """
+*Sharpening* separated fine detail from coarse structure. The Fourier transform makes that
+idea exact: it splits an image into waves of every size.
+
 Any image can be written as a sum of **waves**: stripes of different spacing (frequency),
 direction, strength and position. The **Fourier transform** tells you how much of each wave
 the image contains.
@@ -43,11 +46,11 @@ show = { mode = "math", mathExpr = "fft(b[76])", cmap = "magma" }
 kind = "choice"
 prompt = "Where do the spikes from vertical stripes appear?"
 options = [
-  "On the horizontal line through the centre, because the stripes vary from left to right",
-  "On the vertical line through the centre",
-  "In the corners",
+  "On the vertical axis, since the stripes themselves run up and down",
+  "On the horizontal axis: the stripes vary from left to right",
+  "In the corners, since stripes are a kind of fine detail",
 ]
-answer = 0
+answer = 1
 success = "Right. A pattern that changes along x sits on the horizontal frequency axis. A 'notch' filter that zeroes just those spikes removes the stripes and little else."
 retry = "Vertical stripes change as you move left to right, not up and down."
 
@@ -82,15 +85,18 @@ is a smooth Gaussian: fine waves fade steadily. A box's transform is not smooth:
 then ripples up again (**side lobes**), and some ripples are negative. So a box blur lets
 some fine patterns through, and those with negative weight come out with their contrast
 flipped.
+
+Next, *Sampling, aliasing and pyramids* uses these waves to explain what goes wrong when
+an image is made smaller.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "A box filter's Fourier transform has ripples (side lobes). What does that mean for blurring?"
 options = [
-  "It lets some fine patterns through and even flips some, unlike a Gaussian, whose transform is a smooth Gaussian",
-  "Nothing, all blurs behave the same",
-  "It blurs more strongly than any Gaussian",
+  "It lets some fine patterns through, some with contrast flipped",
+  "Nothing: every blur removes fine patterns in exactly the same way",
+  "It blurs more strongly than any Gaussian ever can",
 ]
 answer = 0
 success = "Right. This is the frequency-domain reason the Gaussian is the preferred blur."

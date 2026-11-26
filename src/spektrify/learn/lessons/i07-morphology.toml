@@ -13,6 +13,9 @@ reading = [
 [[steps]]
 title = "A mask with flaws"
 text = """
+The filters so far worked on grey values. This unit goes back to the yes/no masks of
+*Thresholds and Otsu's method* and cleans them up.
+
 Thresholds rarely give clean masks. This one, `nm(800) > 0.3`, finds the bright objects in
 the near infrared, but the dead column cuts the leaf in two and the saturated square adds a
 speck that isn't an object.
@@ -50,12 +53,8 @@ show = { mode = "math", mathExpr = "erode(nm(800) > 0.3, 2)", cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "On a greyscale image, erosion with a square is the same as…"
-options = [
-  "Taking the minimum over the square",
-  "Taking the mean over the square",
-  "Taking the maximum over the square",
-]
-answer = 0
+options = ["The maximum over the square", "The mean over the square", "The minimum over the square"]
+answer = 2
 success = "Right, and dilation is the maximum. That's why morphology works on grey images too, and why max pooling in neural networks is a dilation followed by subsampling."
 retry = "A pixel survives erosion only if all its neighbours are 'on'. On grey values, what operation does that?"
 
@@ -85,6 +84,8 @@ Opening and closing don't commute: opening then closing can give a different mas
 closing then opening, for example when a speck sits next to a hole. Try both orders and
 look. The size of the structuring element is the decision that matters: it says how big
 something must be to count as an object.
+
+Next, *Regions and shape* splits a clean mask into separate objects and measures each one.
 """
 show = { mode = "math", mathExpr = "opening(closing(nm(800) > 0.3, 1), 3)", cmap = "gray" }
 
@@ -92,9 +93,9 @@ show = { mode = "math", mathExpr = "opening(closing(nm(800) > 0.3, 1), 3)", cmap
 kind = "choice"
 prompt = "Your mask has salt (white specks) and pepper (black holes). In which order do you clean it?"
 options = [
-  "Opening for the white specks and closing for the black holes; the order matters and should be checked on your data",
-  "Erosion only",
-  "Dilation only",
+  "Opening for the white specks, closing for the black holes",
+  "Erode until both the white specks and the black holes are gone",
+  "Dilate until both the black holes and the white specks are gone",
 ]
 answer = 0
 success = "Right. Each removes one kind of flaw; which to run first depends on which flaw would otherwise grow."

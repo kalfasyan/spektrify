@@ -34,12 +34,12 @@ show = { mode = "rgb", rgb = [600, 535, 460] }
 kind = "choice"
 prompt = "Which of these does NOT give a colour image from colour-blind silicon?"
 options = [
-  "A higher-resolution sensor",
   "A prism that splits the light onto three sensors",
   "Three shots through a red, a green and a blue filter",
+  "A sensor with twice as many, smaller pixels",
   "A tiny colour filter on top of every pixel",
 ]
-answer = 0
+answer = 2
 success = "Right. The other three all work: three sensors (costly, bulky), a filter wheel (needs a still scene) or a mosaic of filters (one shot, one sensor). Almost every camera uses the last."
 retry = "More pixels still can't tell wavelengths apart."
 
@@ -62,8 +62,8 @@ show = { mode = "math", mathExpr = "bayer(nm(600), nm(535), nm(460))", cmap = "g
 [steps.task]
 kind = "choice"
 prompt = "What fraction of the pixels of a Bayer sensor measure red light?"
-options = ["One quarter", "One third", "One half", "All of them, a little"]
-answer = 0
+options = ["One third", "One quarter", "One half", "All of them, a little"]
+answer = 1
 success = "Right: one red, two green and one blue in every 2 × 2 tile. At three quarters of the pixels, red must be guessed."
 retry = "Count the filters in the 2 × 2 tile."
 
@@ -85,11 +85,11 @@ show = { mode = "math", mathExpr = "debayer(bayer(nm(600), nm(535), nm(460)), 0)
 kind = "choice"
 prompt = "Which channel would you expect bilinear demosaicing to rebuild best?"
 options = [
+  "Blue, because its short wavelength focuses most sharply",
+  "Red, because the sensor is most sensitive to it",
   "Green, because it has twice as many samples",
-  "Red, because it is the longest wavelength",
-  "Blue, because it has the least light",
 ]
-answer = 0
+answer = 2
 success = "Right. On this photo the green error is about half the red one (RMS 0.027 against 0.049). Better methods use the sharp green channel to guide red and blue, since edges usually sit at the same place in all three."
 retry = "Which colour fills half the pixels?"
 
@@ -115,9 +115,9 @@ show = { mode = "math", mathExpr = "debayer(bayer(cos(((x - 128)**2 + (y - 128)*
 kind = "choice"
 prompt = "A camera photographs a fine black-and-white striped shirt and shows rainbow bands on it. What is happening?"
 options = [
-  "The stripes are finer than the colour filters' sampling, so demosaicing aliases them into false colour",
-  "The shirt reflects infrared",
-  "The sensor has too few bits",
+  "The stripes are finer than the colour mosaic, so demosaicing errs",
+  "The shirt's fibres reflect infrared, which shows up as false colour",
+  "The sensor has too few bits to record pure black and pure white",
 ]
 answer = 0
 success = "Right. A blur filter before the sensor or a higher-resolution sensor prevents it; good demosaicing reduces it."
@@ -141,7 +141,7 @@ Bayer is not the only design:
 [steps.task]
 kind = "choice"
 prompt = "A 5 × 5 multispectral mosaic sensor has 2048 × 1088 pixels. About how many pixels measure each band?"
-options = ["About 89,000", "About 2.2 million", "About 445,000", "About 25"]
-answer = 0
+options = ["About 25", "About 89,000", "About 445,000", "About 2.2 million"]
+answer = 1
 success = "Right: 2048 × 1088 / 25 ≈ 89,000, roughly a 410 × 218 image per band. Snapshot spectral cameras trade spatial resolution for speed."
 retry = "Each band gets one pixel in every 5 × 5 tile."

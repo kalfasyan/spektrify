@@ -14,6 +14,8 @@ reading = [
 title = "Noisy spectra"
 figure = { kind = "spectrum", show = "smooth" }
 text = """
+The previous lessons cleaned the images. This one cleans each pixel's spectrum.
+
 Every measurement has noise, so a single pixel's spectrum is jagged. Here the image shows the
 raw data.
 """
@@ -60,6 +62,9 @@ figure = { kind = "spectrum", show = "snv" }
 text = """
 **SNV** subtracts each spectrum's mean and divides by its standard deviation. Like the Shape
 view, it removes brightness and shading, but it changes the data itself, ready for modelling.
+
+That completes the intermediate level. The advanced level starts with *Corners and local
+features*: finding points that can be matched between images.
 """
 pipeline = [{ name = "snv" }]
 
@@ -78,10 +83,10 @@ text = "Every pre-treatment removes something. Make sure it isn't the thing you 
 kind = "choice"
 prompt = "When is SNV a bad idea?"
 options = [
+  "When spectra come from different lighting conditions",
   "When absolute brightness is what you want to measure",
-  "When spectra are noisy",
-  "Never",
+  "Never: removing scale differences always helps",
 ]
-answer = 0
+answer = 1
 success = "Right. SNV throws away overall level on purpose."
 retry = "Think about what SNV removes."

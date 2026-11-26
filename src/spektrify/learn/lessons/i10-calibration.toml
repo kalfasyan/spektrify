@@ -13,6 +13,9 @@ reading = [
 [[steps]]
 title = "What the camera records"
 text = """
+*Light and what a pixel measures* showed that raw counts mix the material with the lamp,
+the lens and the sensor. This lesson removes the setup and keeps the material.
+
 This is the same scene as the other lessons, but as an uncalibrated camera records it: in
 **raw counts**. Each count mixes the material with the lamp's spectrum, the sensor's
 sensitivity, the lens and the exposure time.
@@ -64,6 +67,9 @@ Finally, divide every band by the white tile's level in that band:
 
 The lamp and the sensor cancel out, because they affect the scene and the tile equally. What
 is left is a property of the material.
+
+Next, *Aligning the bands* fixes another problem of real cameras: bands that don't line
+up.
 """
 pipeline = [
   { name = "calibrate", params = { dark = "100" } },
@@ -86,9 +92,9 @@ text = "Calibration takes a few extra images at capture time: a dark frame and a
 kind = "choice"
 prompt = "Why convert to reflectance before comparing spectra?"
 options = [
-  "It makes files smaller",
-  "It removes the lamp, sensor and exposure, so spectra from different days and cameras can be compared",
-  "It removes noise",
+  "It removes the noise, so that small differences become visible",
+  "It removes the lamp, sensor and exposure, leaving the material",
+  "It scales the values to 0–1, which most algorithms need",
 ]
 answer = 1
 success = "Exactly. Raw counts describe your setup; reflectance describes the material."

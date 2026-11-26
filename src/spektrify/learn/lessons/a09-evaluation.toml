@@ -15,6 +15,9 @@ reading = [
 title = "Accuracy can lie"
 figure = { kind = "scatter", show = "metrics" }
 text = """
+*Supervised classification* built models. Before trusting one you have to measure it, and
+measuring is easy to get wrong.
+
 Treat this mask, `nm(800) > 0.4`, as a model that predicts 'leaf'. Compared with the true
 leaf, every pixel falls in one of four boxes, the **confusion matrix**:
 
@@ -51,11 +54,12 @@ recall 0.96 (it misses parts of the darker vein), IoU 0.83. A vegetation-index m
 kind = "choice"
 prompt = "You lower the threshold so the mask grows. What usually happens?"
 options = [
-  "Recall rises and precision falls",
   "Both rise",
+  "Recall rises and precision falls",
   "Precision rises and recall falls",
+  "Both fall",
 ]
-answer = 0
+answer = 1
 success = "Right. A threshold trades one against the other; a precision–recall curve shows every trade-off, and average precision summarises it."
 retry = "A bigger mask finds more of the leaf, and more of everything else."
 
@@ -76,9 +80,9 @@ papers.
 kind = "choice"
 prompt = "You have 30 cubes of 30 different fruits. How do you split?"
 options = [
-  "By cube: whole fruits go to training or to testing, never both",
-  "Randomly by pixel",
-  "Train and test on all the data",
+  "By cube: each fruit goes wholly to training or to testing",
+  "Randomly by pixel, so that both sets cover every fruit evenly",
+  "Train and test on all the data, to use every label",
 ]
 answer = 0
 success = "Right. Split by whatever unit you'll meet as 'new' in practice: object, image, day, field or batch."
@@ -94,16 +98,19 @@ A single score hides where a model fails. Senior practice:
 - Give an **uncertainty** (cross-validation spread, bootstrap intervals). A 1% difference
   on 50 test images may be noise.
 - Compare against a **simple baseline**, such as an index with a threshold.
+
+Next, *Convolutional networks* builds a much more powerful model out of the convolutions
+from the intermediate level.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "Model B beats model A by 0.5% IoU on one test split of 40 images. What do you conclude?"
 options = [
-  "Nothing yet: check the variation across splits or bootstrap samples first",
-  "B is better; ship it",
-  "A is better",
+  "B is better: any gain on held-out test data is real",
+  "Nothing yet: first check how scores vary across splits",
+  "A is better: B's small gain is most likely overfitting",
 ]
-answer = 0
+answer = 1
 success = "Right. Without an uncertainty estimate, a small difference is not evidence."
 retry = "Would the difference survive a different choice of 40 test images?"

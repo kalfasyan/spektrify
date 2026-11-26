@@ -14,6 +14,9 @@ reading = [
 [[steps]]
 title = "Start from the data"
 text = """
+This last lesson uses everything so far, from light and calibration to models, on one real
+problem.
+
 A sorting system has worked for months. After the lamp was replaced, accuracy dropped. The
 model, code and samples haven't changed.
 
@@ -28,11 +31,11 @@ pipeline = []
 kind = "choice"
 prompt = "What do you check first?"
 options = [
-  "Whether calibration still uses current dark and white references, by comparing the white tile's spectrum before and after the change",
-  "Retrain the model with more layers",
-  "Lower the decision threshold",
+  "Whether the model needs retraining, perhaps with more layers",
+  "Whether calibration uses current dark and white references",
+  "Whether the decision threshold should be lowered",
 ]
-answer = 0
+answer = 1
 success = "Right. A new lamp changes the illumination spectrum; stale white references turn that into a shift in every 'reflectance'."
 retry = "What changed? Follow the light."
 
@@ -49,9 +52,9 @@ that follows. Many production systems never need more.
 kind = "choice"
 prompt = "Your deep model scores 0.91 IoU; a threshold on an index scores 0.89. What does this tell you?"
 options = [
-  "The extra complexity buys little; consider whether it's worth its cost, data needs and failure modes",
-  "The deep model is clearly the right choice",
-  "The index must be wrong",
+  "The extra complexity buys little; weigh it against its costs",
+  "The deep model is clearly better and should be used",
+  "The index must have a bug, since it comes so close to the model",
 ]
 answer = 0
 success = "Right. Without the baseline, 0.91 would have looked impressive."
@@ -70,9 +73,9 @@ show = { mode = "rgb", rgb = [830, 640, 545] }
 kind = "choice"
 prompt = "What is the most likely cause?"
 options = [
-  "Band misregistration: edge pixels mix object and background across bands",
-  "Too few training epochs",
-  "The wrong colour map",
+  "Band misregistration: edge pixels mix object and background",
+  "Too few training epochs, so the model never learned the edges",
+  "The colour map hides the edges in the display",
 ]
 answer = 0
 success = "Right. Fix it upstream (the align step), not by training the model to live with it."
@@ -89,11 +92,11 @@ A line must handle 100 items per second. Each item is a 256 × 256 cube with 96 
 kind = "choice"
 prompt = "About 1.26 GB per second is too much for your link. Which change cuts the data the most while keeping what the model needs?"
 options = [
-  "Select or bin the bands the task actually needs (for example from PCA or feature importance), and crop to the item",
-  "Use a bigger GPU",
-  "Save as JPEG",
+  "Save the frames as JPEG, which compresses them about tenfold",
+  "Keep only the bands the task needs, and crop to the item",
+  "Buy a bigger GPU to keep up with the data rate",
 ]
-answer = 0
+answer = 1
 success = "Right. Ten well-chosen bands are a tenfold saving. Lossy image compression would distort the spectra."
 retry = "Reduce the data at the source, without destroying the spectra."
 
@@ -114,9 +117,9 @@ view = "quality"
 kind = "choice"
 prompt = "Which signal warns you earliest that the lamp is ageing?"
 options = [
-  "A slow change in the white reference's raw spectrum",
-  "A drop in model accuracy reported by customers",
-  "A change in file size",
+  "A slow drift in the white reference's raw spectrum",
+  "A drop in the model's accuracy, as reported by customers",
+  "A change in the size of the saved files over time",
 ]
 answer = 0
 success = "Right. Watch the inputs, and you see problems before the outputs fail."

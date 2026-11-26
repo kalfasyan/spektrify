@@ -16,6 +16,9 @@ reading = [
 title = "One layer, from known parts"
 figure = { kind = "layers", show = "cnn" }
 text = """
+The classifiers so far judged each pixel by its spectrum alone. Convolutional networks
+also learn from its neighbourhood, using the filters you already know.
+
 A convolutional layer does three things you've already seen:
 
 1. **convolve** with a small kernel (here a smoothed horizontal derivative),
@@ -33,11 +36,11 @@ show = { mode = "math", mathExpr = "maximum(dx(gauss(nm(800), 1)), 0)", cmap = "
 kind = "choice"
 prompt = "Why is the nonlinearity essential?"
 options = [
-  "Without it, any stack of convolutions is just one convolution, so depth would add nothing",
-  "It makes the network faster",
-  "It removes noise",
+  "It speeds up training by keeping all the values small and positive",
+  "It removes noise from each feature map",
+  "Without it, a stack of convolutions collapses into one",
 ]
-answer = 0
+answer = 2
 success = "Right. Convolutions compose into a single convolution; the nonlinearity between them is what lets layers build complex features."
 retry = "Recall from the convolution lesson: what are two blurs in a row?"
 
@@ -58,7 +61,7 @@ show = { mode = "math", mathExpr = "subsample(dilate(maximum(dx(gauss(nm(800), 1
 [steps.task]
 kind = "choice"
 prompt = "Two 3 × 3 convolutions in a row (no pooling). How large is the receptive field?"
-options = ["3 × 3", "5 × 5", "9 × 9"]
+options = ["3 × 3", "5 × 5", "6 × 6", "9 × 9"]
 answer = 1
 success = "Right: each layer adds 2 pixels. Pooling and strides make it grow much faster."
 retry = "The second layer sees 3 × 3 outputs of the first, each of which saw 3 × 3 pixels."
@@ -82,8 +85,8 @@ kind = "choice"
 prompt = "What does a convolutional layer learn during training?"
 options = [
   "The weights of its kernels (and a bias per kernel)",
-  "The size of the image",
-  "The labels",
+  "The size and the number of its kernels, and their layout",
+  "The labels of the training pixels",
 ]
 answer = 0
 success = "Right. The architecture (kernel sizes, layer count) is chosen by you; the weights are learned."
@@ -100,12 +103,14 @@ So a first layer on a 96-band cube is large. Options:
 - **1-D** convolutions along the spectrum, per pixel (spectral shape only, small models),
 - **3-D** convolutions over bands and space together (spectral-spatial features, costly),
 - reduce bands first with PCA or band selection.
+
+Next, *Modern architectures* shows how today's networks are built from these layers.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "A 3 × 3 convolution from 96 bands to 32 feature maps. How many weights, ignoring biases?"
-options = ["288", "27,648", "9"]
-answer = 1
+options = ["9", "288", "3,072", "27,648"]
+answer = 3
 success = "Right: 3 × 3 × 96 × 32 = 27,648. With only a few labelled cubes, that's a lot to learn, which is why band reduction or pretraining help."
 retry = "Each of the 32 kernels has 3 × 3 × 96 weights."

@@ -56,8 +56,8 @@ show = { mode = "band", band = 550, cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "A camera stores 10 bits per pixel. How many grey levels can it record?"
-options = ["10", "100", "1,024", "1,023"]
-answer = 2
+options = ["100", "1,024", "1,023", "10"]
+answer = 1
 success = "Right: 2¹⁰ = 1,024 levels, numbered 0 to 1,023."
 retry = "n bits give 2ⁿ values: start from 2 values for 1 bit and double once for every extra bit."
 
@@ -78,11 +78,11 @@ show = { mode = "math", mathExpr = "quantize(stretch(nm(550)), 4)", cmap = "gray
 kind = "choice"
 prompt = "Two materials differ by 0.2% in brightness. What do you need to tell them apart?"
 options = [
-  "A higher bit depth, so the difference falls into different levels",
-  "A bigger image",
-  "A colour map",
+  "A sharper lens, so the boundary between the materials is crisper",
+  "A colour map, so the small difference shows up as a change of hue",
+  "A higher bit depth, so the two values fall into different levels",
 ]
-answer = 0
+answer = 2
 success = "Yes. With 8 bits one level is about 0.4% of the range, too coarse; 12 bits gives about 0.025%. Noise must also be below that difference."
 retry = "The difference is in the values, not in space or display."
 
@@ -102,8 +102,9 @@ show = { mode = "math", mathExpr = "subsample(nm(550), 8)", cmap = "gray" }
 kind = "choice"
 prompt = "Can you still be sure the target is round?"
 options = [
-  "Yes, sampling never changes shapes",
-  "No. Details smaller than the spacing between samples are lost or distorted",
+  "Yes: sampling never changes a shape, only how sharp it looks",
+  "No: detail finer than the pixel spacing is lost or distorted",
+  "Yes, as long as the image is then shown at a larger zoom level",
 ]
 answer = 1
 success = "Right. The lesson 'Sampling, aliasing and pyramids' shows that coarse sampling can even invent patterns."
@@ -120,6 +121,9 @@ which is a classic source of bugs.
 A pixel has 4 neighbours that share a side, and 8 if you count the corners. Many operations
 later in the course, such as filters and region labelling, are defined on these
 neighbourhoods.
+
+So far each pixel holds one number, for one wavelength. Next, *What is a spectral cube?*
+gives every pixel a whole list of numbers, one per wavelength.
 """
 show = { mode = "band", band = 550, cmap = "gray" }
 

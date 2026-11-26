@@ -16,6 +16,9 @@ reading = [
 title = "Pinholes and lenses"
 figure = { kind = "camera", show = "pinhole" }
 text = """
+*Exposure, noise and dynamic range* was about the sensor. Before light reaches it, a lens
+has to form a sharp image on it.
+
 A tiny hole in a dark box already makes an image: each point of the scene sends a thin
 cone of light through the hole to one spot on the back wall. But a pinhole lets in very
 little light, and widening it blurs the image.
@@ -36,11 +39,11 @@ show = { mode = "band", band = 550, cmap = "gray" }
 kind = "choice"
 prompt = "You swap a 25 mm lens for a 50 mm lens on the same camera. What happens?"
 options = [
-  "The view narrows and objects appear twice as large",
-  "The image gets twice as bright",
-  "The view widens",
+  "The view widens and objects look half as large",
+  "The view narrows and objects look twice as large",
+  "The view stays the same and the image gets brighter",
 ]
-answer = 0
+answer = 1
 success = "Right: magnification grows with focal length, so the same sensor covers half the width of the scene."
 retry = "A longer focal length acts like a zoom."
 
@@ -60,8 +63,8 @@ and SNR.
 [steps.task]
 kind = "choice"
 prompt = "You close the aperture from f/4 to f/8. How must the exposure time change to keep the same signal?"
-options = ["4 times longer", "2 times longer", "It doesn't need to change", "8 times longer"]
-answer = 0
+options = ["2 times longer", "4 times longer", "8 times longer", "It doesn't need to change"]
+answer = 1
 success = "Right: (8 / 4)² = 4, two stops. That is why fast-moving scenes need wide apertures or bright lights."
 retry = "Light goes as 1 / N². Compare (1/4)² with (1/8)²."
 
@@ -86,11 +89,11 @@ show = { mode = "math", mathExpr = "defocus(nm(550), 4)", cmap = "gray" }
 kind = "choice"
 prompt = "Part of your sample is out of focus. What helps without moving anything?"
 options = [
+  "Open the aperture (smaller f-number) to let in more light",
+  "Keep the aperture as it is and expose for longer",
   "Close the aperture (larger f-number) and expose longer",
-  "Open the aperture (smaller f-number)",
-  "Use a longer exposure at the same aperture",
 ]
-answer = 0
+answer = 2
 success = "Right: a smaller opening shrinks the blur circles, at the cost of light. But don't stop down too far: diffraction is next."
 retry = "The blur circle's size grows with the size of the opening."
 
@@ -110,8 +113,8 @@ blue ones, so a spectral cube is not equally sharp at every wavelength.
 [steps.task]
 kind = "choice"
 prompt = "How large is the diffraction spot at 1000 nm and f/4?"
-options = ["About 10 µm", "About 1 µm", "About 100 µm", "About 2.4 µm"]
-answer = 0
+options = ["About 1 µm", "About 2.4 µm", "About 10 µm", "About 100 µm"]
+answer = 2
 success = "Right: 2.44 × 1 µm × 4 ≈ 9.8 µm. The same lens at 500 nm would give 4.9 µm."
 retry = "Use 2.44 · λ · N, with λ = 1 µm."
 
@@ -128,6 +131,9 @@ Real lenses add their own imperfections:
 - **Vignetting**: the image gets darker towards the corners, partly from the geometry of
   light hitting the sensor at an angle (the cos⁴ law) and partly from the lens barrel
   cutting off light. The demo scene has it: the background is darker near the corners.
+
+One problem remains: the sensor still can't tell colours apart. Next, *Colour filter
+arrays and demosaicing* shows how ordinary cameras solve it.
 """
 
 [steps.task]
@@ -135,8 +141,8 @@ kind = "choice"
 prompt = "A uniform white board looks darker in the corners, by the same factor in every frame. How do you remove it?"
 options = [
   "Divide by an image of a uniform white target (a flat field)",
-  "Blur the image",
-  "Subtract a dark frame",
+  "Subtract an image taken with the lens cap on (a dark frame)",
+  "Blur the image so the dark corners blend into the centre",
 ]
 answer = 0
 success = "Right. Vignetting multiplies the signal, so it is divided out, together with the pixel-to-pixel sensitivity differences. The lesson *From raw counts to reflectance* does exactly this."

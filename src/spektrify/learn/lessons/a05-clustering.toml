@@ -16,6 +16,9 @@ reading = [
 title = "Grouping without labels"
 figure = { kind = "scatter", show = "kmeans" }
 text = """
+In *Principal component analysis* materials showed up as clusters of points. k-means finds
+such clusters automatically.
+
 **k-means** groups pixels into k clusters by spectrum:
 
 1. pick k starting spectra (spread out: k-means++),
@@ -32,9 +35,9 @@ show = { mode = "math", mathExpr = "kmeans(6)", cmap = "turbo" }
 kind = "choice"
 prompt = "The background is one material, yet it is split into two clusters. Why?"
 options = [
-  "Its brightness varies across the image (uneven lighting, vignetting), and Euclidean distance counts brightness differences",
-  "k-means is random",
-  "The background has two materials",
+  "Its brightness varies, and Euclidean distance counts brightness",
+  "k-means is random, so it splits large clusters apart by chance",
+  "The background really is made of two different materials",
 ]
 answer = 0
 success = "Right. k-means finds whatever differences are largest, wanted or not."
@@ -70,16 +73,19 @@ cluster, **mean shift** finds the number of clusters itself, and **superpixels**
 cluster on spectrum *and* position to get compact image regions. Clustering is best for
 exploring a scene and proposing regions; telling materials apart reliably needs labels,
 which is the next unit.
+
+Before that, *Mixed pixels and unmixing* handles the pixels that hold more than one
+material.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "You want clusters by spectral shape, not brightness. What do you change?"
 options = [
-  "Normalise each spectrum first (for example SNV) or use spectral angle as the distance",
-  "Use more clusters",
-  "Use fewer bands",
+  "Ask for more clusters, so that the shapes separate",
+  "Use fewer bands, so that differences in brightness matter less",
+  "Normalise each spectrum (e.g. SNV) or use spectral angle",
 ]
-answer = 0
+answer = 2
 success = "Right. The features and the distance decide what 'similar' means; the algorithm only follows."
 retry = "Recall the 'Comparing materials' lesson."

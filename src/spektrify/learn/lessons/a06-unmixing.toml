@@ -14,6 +14,9 @@ reading = [
 title = "Mixed pixels"
 figure = { kind = "scatter", show = "unmix" }
 text = """
+*Clustering into segments* put each pixel into one cluster. But a pixel on a border holds
+a bit of two materials.
+
 A pixel collects light from a small area. Where that area covers two materials, at every
 object border and wherever the camera is coarse compared to the objects, the spectrum is a
 **mixture**.
@@ -42,11 +45,11 @@ show = { mode = "math", mathExpr = "clip((box(nm(800), 4) - 0.2) / (0.5 - 0.2), 
 kind = "choice"
 prompt = "The upper discs also come out at 1 ('pure leaf') in this map. Why?"
 options = [
-  "One band can't tell leaf from disc: both are bright at 800 nm. Using all bands separates them",
-  "The discs contain chlorophyll",
-  "The clip function is wrong",
+  "The discs contain chlorophyll too, so they are partly leaf",
+  "One band can't tell leaf from disc: both are bright at 800 nm",
+  "Clipping to 0–1 turns every bright pixel into exactly 1, 'leaf'",
 ]
-answer = 0
+answer = 1
 success = "Right. With many bands you solve a least-squares problem for all abundances at once; with the constraints above it is 'fully constrained' unmixing."
 retry = "The formula only knows the leaf and the background, and only one band."
 
@@ -63,12 +66,14 @@ unknown abundances.
 
 The linear model fails when light bounces between materials before reaching the camera:
 intimate mixtures such as powders, or leaves in a canopy. Those need nonlinear models.
+
+Next, *Finding the unusual* looks for the rare pixels that fit no material at all.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "With C bands and the sum-to-one constraint, at most how many endmembers can be unmixed?"
-options = ["C + 1", "2", "Unlimited"]
-answer = 0
+options = ["2", "C", "C + 1", "Unlimited"]
+answer = 2
 success = "Right: C equations plus the sum-to-one constraint. In practice noise and similar endmembers lower that limit a lot."
 retry = "Count the equations: one per band, plus one for the sum."

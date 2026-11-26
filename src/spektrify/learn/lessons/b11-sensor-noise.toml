@@ -16,6 +16,9 @@ reading = [
 title = "A simulated sensor"
 figure = { kind = "sensor", show = "counts" }
 text = """
+*Light and what a pixel measures* showed that a pixel counts electrons and turns them into
+counts. Those counts are never exact: this lesson is about how precise they are.
+
 `expose(image, t)` shows what a simple, made-up sensor would record if the image were the
 light reaching it and t the exposure. Its numbers are typical of a machine-vision camera:
 
@@ -47,8 +50,8 @@ electrons: SNR ≈ 13, which is the speckle you see.
 [steps.task]
 kind = "choice"
 prompt = "A pixel collects 10,000 electrons. What is its shot-noise-limited SNR?"
-options = ["100", "1,000", "10,000", "50"]
-answer = 0
+options = ["50", "100", "1,000", "10,000"]
+answer = 1
 success = "Right: √10,000 = 100, so the value is uncertain by about 1%. Getting to 0.1% would take 100 times more light (a million electrons), more than one pixel can hold, so you average pixels or frames instead."
 retry = "Shot-noise SNR is √N."
 
@@ -70,9 +73,9 @@ show = { mode = "math", mathExpr = "expose(nm(550), 0.05)", cmap = "gray" }
 kind = "choice"
 prompt = "At very low light, which noise sets the limit?"
 options = [
-  "Read noise, because it doesn't shrink with the signal",
-  "Shot noise, because it is always the largest",
-  "Quantisation, because there are too few bits",
+  "Read noise, because it stays the same however weak the signal",
+  "Shot noise, because it is always the largest of the noise sources",
+  "Quantisation, because dim values use only a few levels",
 ]
 answer = 0
 success = "Right. Shot noise is √N, which becomes small in absolute terms when N is small; read noise stays at about 5 electrons. Low-read-noise sensors (and cooling) matter most in dim scenes."
@@ -97,11 +100,11 @@ show = { mode = "math", mathExpr = "expose(nm(550), 40)", cmap = "gray" }
 kind = "choice"
 prompt = "A disc reads 4,095 in band A and 2,000 in band B. What can you say about its ratio A / B?"
 options = [
-  "Nothing reliable: A is clipped, so the true ratio is at least 2.05 but could be much larger",
-  "It is 2.05",
-  "It is about 1, because saturated pixels are white",
+  "It is exactly 2.05, the ratio of the two readings",
+  "It is about 1, since a saturated pixel is simply white",
+  "It is at least 2.05, and maybe far more: A is clipped",
 ]
-answer = 0
+answer = 2
 success = "Right. Clipping only tells you the value was at least the maximum. Spectral tools should mask saturated pixels, as the lesson on sensor problems does."
 retry = "4,095 is the largest number the ADC can output. What was the true value?"
 
@@ -124,8 +127,8 @@ counts back to electrons.
 [steps.task]
 kind = "choice"
 prompt = "A sensor holds 20,000 electrons and has 2 electrons of read noise. Which ADC suits it?"
-options = ["14-bit", "8-bit", "10-bit", "24-bit"]
-answer = 0
+options = ["8-bit", "10-bit", "14-bit", "24-bit"]
+answer = 2
 success = "Right: 20,000 / 2 = 10,000 : 1, about 13.3 bits, so 14 bits covers it with no waste."
 retry = "Compute full well / read noise, then the number of bits: 2^bits should just exceed it."
 
@@ -145,16 +148,20 @@ Random noise shrinks when you average frames: averaging N frames divides its sta
 deviation by **√N**, for the same reason that shot noise grows only as √N. Fixed patterns
 don't shrink, but they can be measured once and subtracted (a dark frame) or divided out
 (a flat field).
+
+Next, *Lenses, focus and blur* moves in front of the sensor, to the lens that forms the
+image.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "You average 16 frames of a still scene. What happens?"
 options = [
-  "Random noise drops 4 times; fixed-pattern noise stays",
   "All noise drops 16 times",
-  "Fixed-pattern noise drops 4 times; random noise stays",
+  "Both kinds of noise drop 4 times",
+  "Random noise drops 16 times; fixed patterns stay",
+  "Random noise drops 4 times; fixed patterns stay",
 ]
-answer = 0
+answer = 3
 success = "Right: averaging n frames divides random noise by √n = 4, and leaves anything that repeats in every frame. Calibration frames handle that part."
 retry = "Averaging cancels what changes between frames. Does a fixed pattern change?"

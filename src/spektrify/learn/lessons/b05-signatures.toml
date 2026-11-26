@@ -14,6 +14,9 @@ reading = [
 title = "Same material, different brightness"
 figure = { kind = "spectrum", show = "angle" }
 text = """
+*Colour and composites* showed that three numbers can't tell some materials apart. This
+lesson compares whole spectra instead.
+
 The four discs are lit from above, so their edges are darker than their centres. The material
 is the same everywhere on a disc; only the amount of light differs.
 """
@@ -55,6 +58,10 @@ direction, so shaded pixels of the same material stay close.
 Open one of your pins' menu (right-click it, or press and hold on a touch screen) and
 choose **Find similar pixels**. Dark means a small angle,
 that is, similar.
+
+The spectra here are clean values between 0 and 1. The next unit asks where such numbers
+come from: *Light and what a pixel measures* follows the light from the lamp into the
+camera.
 """
 show = { mode = "similarity", simDeg = 5, specView = "values" }
 
@@ -62,9 +69,9 @@ show = { mode = "similarity", simDeg = 5, specView = "values" }
 kind = "choice"
 prompt = "Why does spectral angle find both upper discs, shaded edges included?"
 options = [
-  "Because they have the same brightness",
-  "Because the angle ignores brightness and compares only the shape of the spectra",
-  "Because they are close to each other in the image",
+  "Both discs have the same brightness, shaded edges included",
+  "The angle compares only the shape of the spectra, not brightness",
+  "The angle favours pixels that lie close to each other in the image",
 ]
 answer = 1
 success = "Yes. That makes spectral angle robust to shading and illumination changes."

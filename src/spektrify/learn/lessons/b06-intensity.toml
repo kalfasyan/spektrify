@@ -14,6 +14,9 @@ reading = [
 title = "One rule for every pixel"
 figure = { kind = "tone", curve = "linear" }
 text = """
+You now know where the numbers in a cube come from. This unit starts changing them,
+beginning with the simplest kind of change: each value on its own.
+
 The simplest image operation looks at each pixel on its own: **output = T(input)**, the same
 function T everywhere. The neighbours play no part. These are called **point operations**.
 
@@ -45,8 +48,8 @@ show = { mode = "math", mathExpr = "log(nm(670))", cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "Which values does a log transform spread apart?"
-options = ["The dark (small) values", "The bright (large) values", "All values equally"]
-answer = 0
+options = ["The bright (large) values", "The dark (small) values", "All values equally"]
+answer = 1
 success = "Right. The log curve is steep near zero and flat for large values."
 retry = "Think of log(1), log(10) and log(100): equal steps for ever larger gaps."
 
@@ -82,6 +85,9 @@ The viewer already applies a **linear stretch** for display: it maps a low perce
 black and a high one to white (see the Stretch panel). Any linear transform `a·x + b`
 (with a > 0) is undone by that stretch. Only **nonlinear** transforms, such as log and gamma,
 change what you see.
+
+Choosing a good stretch or gamma is easier when you can see how the values are spread out.
+That is what *Histograms*, next, shows.
 """
 show = { mode = "math", mathExpr = "2 * nm(670) + 1", cmap = "gray" }
 
@@ -89,8 +95,9 @@ show = { mode = "math", mathExpr = "2 * nm(670) + 1", cmap = "gray" }
 kind = "choice"
 prompt = "Do display stretches and gamma change your data?"
 options = [
-  "No. They only change how values are mapped to the screen",
-  "Yes, they rewrite the pixel values",
+  "No: they only change how values are shown on screen",
+  "Yes: they rewrite the pixel values stored in the cube",
+  "Only gamma does; a linear stretch leaves them alone",
 ]
 answer = 0
 success = "Right. Keep display adjustments and measurements apart: compute on the data, stretch only for viewing."

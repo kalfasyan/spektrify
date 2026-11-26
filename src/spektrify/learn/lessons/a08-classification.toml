@@ -16,6 +16,9 @@ reading = [
 title = "Learning from examples"
 figure = { kind = "scatter", show = "boundary" }
 text = """
+The previous unit found structure without labels. With labelled examples you can teach a
+model to name each material.
+
 In **supervised** learning you have examples whose answer is known, pairs (x, y), and want a
 function that predicts y for new x. In pixel classification x is a pixel's features (its
 spectrum, an index, local texture) and y its material.
@@ -50,11 +53,11 @@ straight boundary, nonlinear models (kernels, decision trees, neural networks) b
 kind = "choice"
 prompt = "Two classes, nearest centroid, Euclidean distance. What is the boundary?"
 options = [
-  "The plane halfway between the two centres, perpendicular to the line joining them",
-  "A circle around one centre",
-  "There is none",
+  "A sphere around the centre of the class with fewer pixels",
+  "The perpendicular bisector: a plane halfway between the centres",
+  "A curved surface that wraps around the more spread-out class",
 ]
-answer = 0
+answer = 1
 success = "Right: the perpendicular bisector. That's why nearest centroid is a linear classifier."
 retry = "Which points are exactly as far from one centre as from the other?"
 
@@ -76,7 +79,11 @@ next lesson.
 [steps.task]
 kind = "choice"
 prompt = "A model has 100% accuracy on its training pixels and 60% on a new image. What is the most likely problem?"
-options = ["Overfitting", "Underfitting", "The new image is too large"]
+options = [
+  "Overfitting: it memorised its training pixels",
+  "Underfitting: the model is too simple",
+  "The new image is larger than the training ones",
+]
 answer = 0
 success = "Right. A big gap between training and test performance is the signature of overfitting."
 retry = "Perfect on what it has seen, poor on what it hasn't."
@@ -90,12 +97,15 @@ from. Of 1,000 items with 1 in 100 defective (10 defects, 990 good), a test that
 90% of defects and wrongly flags 10% of good items flags 9 defects and 99 good ones; a
 flagged item is defective only 9 / 108 ≈ 8% of the time. The prior P(class) matters enormously
 when one class is rare, such as defects on a production line.
+
+Next, *Evaluating a model honestly* shows how to measure whether a classifier really
+works.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "1 item in 1,000 is defective. A detector catches 99% of defects and falsely flags 1% of good items. When it flags an item, how likely is it really defective?"
-options = ["About 99%", "About 50%", "About 9%"]
-answer = 2
+options = ["About 9%", "About 50%", "About 99%"]
+answer = 0
 success = "Right. Per 1,000 items: about 1 true alarm and about 10 false ones, so roughly 1 in 11. Rare classes need very low false-positive rates, or a second check."
 retry = "Count per 1,000 items: how many true alarms, how many false ones?"

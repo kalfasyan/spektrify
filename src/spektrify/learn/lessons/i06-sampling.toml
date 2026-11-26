@@ -15,6 +15,9 @@ reading = [
 title = "A pattern with every frequency"
 figure = { kind = "waves", show = "sum" }
 text = """
+*The frequency domain* described images as waves, from coarse to fine. A grid of pixels
+can only hold waves up to a certain fineness.
+
 This **zone plate**, `cos(((x - 128)**2 + (y - 96)**2) / 150)`, has rings that get finer from the centre outwards, so it
 contains every spacing from coarse to fine. At full resolution every ring is drawn
 correctly: even the finest ones, at the corners, still have more than 2 pixels per ring.
@@ -39,7 +42,7 @@ show = { mode = "math", mathExpr = "subsample(cos(((x - 128)**2 + (y - 96)**2) /
 [steps.task]
 kind = "choice"
 prompt = "The sampling theorem says how many samples per period a pattern needs to be captured faithfully. How many?"
-options = ["At least 1", "More than 2", "At least 10"]
+options = ["At least 1", "More than 2", "At least 4", "At least 10"]
 answer = 1
 success = "Right: more than two per period (the Nyquist rate). Sampling every 4th pixel can only represent patterns coarser than 8 pixels per period."
 retry = "A wave goes up and down once per period; you need to catch both."
@@ -60,11 +63,11 @@ show = { mode = "math", mathExpr = "subsample(gauss(cos(((x - 128)**2 + (y - 96)
 kind = "choice"
 prompt = "Fabric whose weave repeats every 1.5 pixels on the sensor. What will the photo show?"
 options = [
-  "Moiré: a false, coarser pattern, unless the optics blur the weave first",
-  "The weave, perfectly sharp",
-  "Nothing: the weave is simply invisible",
+  "The weave, slightly soft but with its true spacing and direction",
+  "Flat grey: a pattern that fine simply averages out to nothing",
+  "Moiré: a false, coarser pattern, unless the optics blur it first",
 ]
-answer = 0
+answer = 2
 success = "Right: 1.5 pixels per period is fewer than 2 samples per period, so the weave aliases into a coarse false pattern."
 retry = "Compare 1.5 pixels per period with the Nyquist rate."
 
@@ -80,6 +83,9 @@ two blurs: `gauss(nm(800), 2) - gauss(nm(800), 4)`.
 Pyramids let algorithms work coarse-to-fine: find a rough match on a small image, refine it
 on larger ones. Registration, optical flow, blending and the pooling layers of neural
 networks all use the idea.
+
+That ends the unit on filters. The next unit works on masks: *Morphology* cleans up the
+yes/no images that thresholds give.
 """
 show = { mode = "math", mathExpr = "gauss(nm(800), 2) - gauss(nm(800), 4)", cmap = "diverging" }
 
@@ -87,10 +93,10 @@ show = { mode = "math", mathExpr = "gauss(nm(800), 2) - gauss(nm(800), 4)", cmap
 kind = "choice"
 prompt = "Why search for a large shift on a coarse pyramid level first?"
 options = [
-  "A 32-pixel shift is only 2 pixels at 1/16 scale, so the search is small and fine detail can't mislead it",
-  "Coarse images are more accurate",
-  "It is the only way to compute a shift",
+  "Coarse levels are sharper, so the shift found there is more precise",
+  "A 32-pixel shift is just 2 pixels at 1/16 size: a quick search",
+  "Fine levels have too much noise to compute any shift",
 ]
-answer = 0
+answer = 1
 success = "Right. Coarse levels give a fast, robust first guess; fine levels give accuracy."
 retry = "What happens to the size of a shift when the image shrinks?"

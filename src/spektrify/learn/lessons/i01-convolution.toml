@@ -15,6 +15,9 @@ reading = [
 title = "A very noisy band"
 figure = { kind = "kernel", op = "box" }
 text = """
+Every operation in the basics looked at one pixel at a time. Filters also look at its
+neighbours.
+
 This band (471 nm, band 4) is buried in noise: every pixel is off by a random amount,
 independently of its neighbours. But neighbouring pixels usually show the *same* material.
 So averaging a pixel with its neighbours keeps the signal and averages the noise away.
@@ -38,7 +41,7 @@ show = { mode = "math", mathExpr = "box(b[4], 2)", cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "Averaging 25 pixels with independent noise divides the noise's standard deviation by…"
-options = ["25", "5", "2"]
+options = ["2", "5", "12.5", "25"]
 answer = 1
 success = "Right: by √25 = 5. Noise averages down with the square root of the number of samples, which is why halving noise costs four times the pixels."
 retry = "Independent noise averages down with the square root of the number of samples."
@@ -61,8 +64,8 @@ show = { mode = "math", mathExpr = "gauss(b[4], 1.5)", cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "You blur with σ = 3, then again with σ = 4. Which single blur gives the same result?"
-options = ["σ = 7", "σ = 5", "σ = 12"]
-answer = 1
+options = ["σ = 5", "σ = 7", "σ = 12"]
+answer = 0
 success = "Right: variances add, 3² + 4² = 5². Chaining Gaussians is how image pyramids and scale spaces are built."
 retry = "It's the variances (σ²) that add, not σ."
 
@@ -79,12 +82,15 @@ Any operation with both properties is a convolution. Gaussian and box kernels ar
 **separable**: a 2-D pass equals a horizontal 1-D pass followed by a vertical one, which
 costs 2k instead of k² operations per pixel. The convolutional networks at the end of the
 course are stacks of exactly this operation, with kernels learned from data.
+
+Next, *Noise and denoising* compares this kind of averaging with filters that handle other
+kinds of noise better.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "A separable 15 × 15 kernel. Roughly how many multiplications per pixel does it need when done as two 1-D passes?"
-options = ["225", "30", "15"]
+options = ["15", "30", "225"]
 answer = 1
 success = "Right: 15 + 15 = 30 instead of 225. That factor matters on large images and cubes."
 retry = "Each 1-D pass needs 15 multiplications per pixel."

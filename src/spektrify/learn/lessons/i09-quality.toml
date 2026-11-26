@@ -13,6 +13,9 @@ reading = [
 [[steps]]
 title = "A noisy band"
 text = """
+The last lessons kept running into a dead column and a saturated square. This unit deals
+with such faults, starting with finding them.
+
 Sensors are least sensitive at the ends of their range, so the first and last bands are often
 noisy. One band in this demo is much worse than the others.
 """
@@ -78,13 +81,16 @@ title = "The quality report"
 text = """
 The **Quality** tab measures all of this for every band: signal-to-noise ratio, striping,
 missing and saturated values, and a list of findings with the bands to look at.
+
+Next, *From raw counts to reflectance* removes the largest effect of all: the lamp and the
+camera.
 """
 view = "quality"
 
 [steps.task]
 kind = "choice"
 prompt = "Which of these problems can only be flagged or masked, never truly fixed?"
-options = ["Stripes", "Saturated (clipped) values", "Uneven illumination"]
-answer = 1
+options = ["Saturated (clipped) values", "Stripes in a few columns", "Uneven illumination across the scene"]
+answer = 0
 success = "Right. Once a pixel saturates, the true value is lost. Avoid it at capture time."
 retry = "Think about which problem destroys information instead of distorting it."
