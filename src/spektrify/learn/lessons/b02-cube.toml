@@ -18,14 +18,28 @@ text = """
 The previous lesson treated an image as one grid of numbers, measured at a single
 wavelength. A spectral cube stacks many such grids.
 
-A normal photo stores three numbers per pixel: red, green and blue. A **spectral cube** stores
-many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
-450 nm (blue) to 950 nm (near infrared).
+First, what is a wavelength? Light is a **wave**. Picture the ripples that spread across a
+pond when you drop a stone in, or a long rope that you flick up and down: a pattern of
+high points (**crests**) and low points (troughs) travels along it. The **wavelength** is
+the distance from one crest to the next. Light is not made of water or rope (it is a wave
+of electric and magnetic fields), but it has crests all the same.
 
-Light is a wave, and the distance between two crests, its **wavelength**, decides its
-colour. Wavelengths of light are tiny, so they are measured in **nanometres** (nm, a
-millionth of a millimetre): blue light is about 450 nm, red about 650 nm. Wavelengths past
-about 700 nm are **near infrared**, invisible to the eye.
+Those crests are extremely close together, so light's wavelength is measured in
+**nanometres** (nm): a nanometre is a millionth of a millimetre. Green light has a
+wavelength of about 550 nm, so more than a hundred of its crests fit across the width of a
+human hair.
+
+Our eyes turn wavelength into **colour**, much as our ears turn the spacing of sound waves
+into pitch. The longest waves we can see look red (about 650 to 700 nm), the shortest
+violet (about 400 nm), and a rainbow is simply all of them laid out in order. Waves longer
+than about 700 nm are **near infrared**: real light, but invisible to us, like a note too
+low to hear.
+
+Now the cube. A normal photo stores three numbers per pixel: red, green and blue. A
+**spectral cube** stores many: one greyscale picture for each **band**, a narrow slice of
+wavelengths such as 450 to 455 nm. Each band's picture shows how much light of just those
+wavelengths every pixel received. This demo has 96 bands from 450 nm (blue) to 950 nm
+(near infrared).
 
 Flip through the bands with the slider under the image (on a keyboard, the **← →** keys do
 the same).

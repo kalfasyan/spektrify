@@ -19,17 +19,36 @@ text = """
 The lessons so far took each pixel's value as given. This unit asks how a camera actually
 produces those numbers, starting with light itself.
 
-Light is not a smooth flow. It arrives as a shower of separate, tiny packets of energy
-called **photons**, a bit like rain is made of separate drops.
+*What is a spectral cube?* described light as a wave, like ripples on a pond or a flicked rope:
+its **wavelength**, written λ (lambda), is the distance from one crest to the next. For
+visible light that is a few hundred nanometres, and our eyes see it as colour: about
+450 nm looks blue, 550 nm green and 650 nm red. To understand a camera you need a second fact
+about light.
 
-Every photon has a **wavelength**, written λ (lambda) and measured in nanometres (nm). For
-visible light, the wavelength is what our eyes see as colour: about 450 nm looks blue,
-550 nm green and 650 nm red.
+**Light arrives in packets.** When light is absorbed, by your eye or by a camera, it isn't
+soaked up smoothly, like water into a sponge. It is delivered in separate, tiny bundles of
+energy called **photons**, the way rain arrives as separate drops. Each photon is a small
+piece of the wave, and it carries that wave's wavelength with it.
 
-The wavelength also sets how much energy one photon carries: **the shorter the wavelength,
-the more energy**. The rule is E = h·c / λ, or in handy units **E ≈ 1240 / λ**, which gives
-the energy in electronvolts (eV, a tiny unit of energy) when λ is in nm. A blue 450 nm
-photon carries about 2.8 eV; a 900 nm photon only about 1.4 eV.
+So in the rain picture:
+
+- each **drop** is one photon;
+- **brightness** is how hard it rains: how many drops arrive each second;
+- **wavelength** belongs to each drop, like a colour painted on it. It is not the gap
+  between drops: dim red light and bright red light have the same wavelength, they just
+  bring fewer or more photons.
+
+**The wavelength sets how much energy each photon carries: the shorter the wavelength, the
+more energy.** Think of the rope again: to squeeze its crests closer together you have to
+shake it faster, which takes more effort. It is why ultraviolet light, with waves shorter
+than violet, can burn your skin, while the longer infrared waves from a radiator only warm
+it.
+
+The exact rule is E = h·c / λ, where h and c are two constants of nature (Planck's
+constant and the speed of light). In handy units it becomes **E ≈ 1240 / λ**, with λ in nm
+and the energy E in **electronvolts** (eV): the energy one electron gains when a 1-volt
+battery pushes it along. A blue 450 nm photon carries about 2.8 eV; a 900 nm photon only
+about 1.4 eV.
 
 - **Visible** light runs from about 400 nm (violet) to 700 nm (red).
 - **Near infrared (NIR)**, 700 to about 1000 nm, is invisible to us but most cameras in

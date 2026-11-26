@@ -18,7 +18,8 @@ text = """
 *Band math and indices* ended with masks built from rules such as 'greater than 1.3'. This
 lesson is about choosing that number.
 
-**Thresholding** is the simplest segmentation: every pixel above a value becomes 1 (white),
+**Segmentation** means splitting an image into meaningful regions, such as object and
+background. **Thresholding** is the simplest way to do it: every pixel above a value becomes 1 (white),
 every other pixel 0 (black). The result is a **mask**.
 
 Here: `nm(800) > 0.4`, the pixels that are bright in the near infrared.
@@ -60,7 +61,8 @@ draws one line. On red light (`nm(670)`) it splits 'darkest material' from 'ever
 else', which happens to isolate the leaf but would fail with a second dark material.
 
 When the histogram has more than two peaks, or one group is tiny, use several thresholds,
-a better feature or a classifier.
+a better feature (such as an index), or a **classifier**: a model that learns the rule
+from labelled examples, covered in the advanced level.
 
 That completes the basics: every operation so far looked at one pixel at a time. The
 intermediate level starts with *Neighbourhoods and convolution*, which lets each pixel use

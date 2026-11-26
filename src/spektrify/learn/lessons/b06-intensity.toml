@@ -40,8 +40,10 @@ In plain red (670 nm) the leaf is almost black and looks flat. The **log transfo
 `log(nm(670))` stretches dark values apart and squeezes bright ones together, so detail in
 the dark parts becomes visible: look for the leaf's central vein.
 
-Logs are also how we handle values that span many orders of magnitude, such as the Fourier
-spectra later in the course.
+The logarithm counts multiplications instead of steps: log₁₀(1) = 0, log₁₀(10) = 1,
+log₁₀(100) = 2. Going from 1 to 10 is as big a step as going from 10 to 100, so the small
+values get as much room as the large ones. That is also how we handle values that span many
+factors of ten, such as the Fourier spectra later in the course.
 """
 show = { mode = "math", mathExpr = "log(nm(670))", cmap = "gray" }
 
@@ -57,7 +59,9 @@ retry = "Think of log(1), log(10) and log(100): equal steps for ever larger gaps
 title = "Gamma"
 figure = { kind = "tone", curve = "gamma" }
 text = """
-A **power law** `x ** γ` (on values scaled to 0..1) is the adjustable version: γ below 1
+A **power law** `x ** γ` raises each value to the power γ (gamma), on values scaled to
+0..1. For example 0.25 ** 0.5 = 0.5, so a dark quarter becomes a middle grey. It is the
+adjustable version of the log: γ below 1
 brightens the dark tones, γ above 1 darkens them. Here γ = 0.4:
 `stretch(nm(670)) ** 0.4`.
 
@@ -82,8 +86,9 @@ text = """
 This image is `2 * nm(670) + 1`. It looks exactly like plain 670 nm. Why?
 
 The viewer already applies a **linear stretch** for display: it maps a low percentile to
-black and a high one to white (see the Stretch panel). Any linear transform `a·x + b`
-(with a > 0) is undone by that stretch. Only **nonlinear** transforms, such as log and gamma,
+black and a high one to white (see the Stretch panel). Any **linear** transform, a straight-line
+rule `a·x + b` (with a > 0) that only scales and shifts the values, is undone by that
+stretch. Only **nonlinear** transforms, such as log and gamma,
 change what you see.
 
 Choosing a good stretch or gamma is easier when you can see how the values are spread out.

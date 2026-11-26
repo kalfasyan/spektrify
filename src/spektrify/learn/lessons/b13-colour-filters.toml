@@ -22,8 +22,10 @@ scikit-image library). It has three bands, blue, green and red. Their wavelength
 (460, 535 and 600 nm) only mark where each colour filter is most sensitive; the real
 filters are about 100 nm wide.
 
-The values have been converted back to **linear light** (the sRGB encoding of the file
-undone), so they are proportional to what a sensor would collect.
+Image files don't store light directly: to suit the eye, which notices differences in
+dark tones more than in bright ones, they store brightness on a curved scale (the **sRGB**
+encoding, a gamma of about 2.2). Here that curve has been undone, giving **linear light**:
+values proportional to the light a sensor would collect.
 
 The previous lesson ended with a problem: the sensor is colour-blind. How do you get
 three colours out of it?
@@ -103,8 +105,10 @@ blue are equal everywhere, so after demosaicing **red minus blue should be zero*
 It isn't: `debayer(bayer(z), 0) - debayer(bayer(z), 2)`. Near the centre the difference
 is tiny. It grows as the rings get finer, and where they approach the spacing of the red
 and blue pixels (every second pixel) the camera invents strong colour fringes and ghost
-rings that aren't in the scene: **false colour** and **moiré**. It is the aliasing of *Sampling, aliasing and pyramids*, happening inside the
-sensor.
+rings that aren't in the scene: **false colour** and **moiré**. This is **aliasing**: when a pattern is finer than the spacing of the samples, the samples
+can't follow it and trace out a false, coarser pattern instead, the way a fast-spinning
+wheel in a film can seem to turn slowly backwards. The intermediate lesson *Sampling,
+aliasing and pyramids* explains it in detail; here it happens inside the sensor.
 
 Real cameras fight it with an **optical low-pass filter** (a slight blur in front of the
 sensor) and smarter demosaicing.
