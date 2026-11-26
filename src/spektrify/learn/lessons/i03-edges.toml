@@ -15,6 +15,9 @@ reading = [
 title = "A derivative is a difference"
 figure = { kind = "kernel", op = "dx" }
 text = """
+The last two lessons averaged neighbours to remove noise. Taking their difference instead
+finds the places where the image changes: the edges.
+
 An edge is a place where brightness changes quickly. On a pixel grid, the derivative is a
 difference between neighbours. The **Sobel** operator takes the difference left to right and
 averages it over three rows to resist noise: `dx(nm(800))`.
@@ -28,11 +31,11 @@ show = { mode = "math", mathExpr = "dx(nm(800))", cmap = "diverging" }
 kind = "choice"
 prompt = "The leaf is bright in the near infrared. Why is its left edge red and its right edge blue?"
 options = [
-  "Going right, you enter the bright leaf on its left edge and leave it on its right edge",
-  "The leaf is lit from the left",
-  "The colour map is reversed on one side",
+  "The leaf is lit from the left, so its left edge is the brightest",
+  "The colour map is reversed on the right half of the image",
+  "dx is positive entering the bright leaf and negative leaving it",
 ]
-answer = 0
+answer = 2
 success = "Right. dx is positive entering a bright object and negative leaving it. Horizontal edges barely show in dx; dy catches those."
 retry = "Follow a row from left to right: where does the value go up, and where down?"
 
@@ -64,11 +67,11 @@ show = { mode = "math", mathExpr = "grad(b[4])", cmap = "gray" }
 kind = "choice"
 prompt = "What does a larger σ in the smoothing step do to the edges you find?"
 options = [
+  "More, finer edges: the smoothing makes them easier to see",
   "Fewer, coarser edges: fine detail and noise are smoothed away",
-  "More and finer edges",
-  "Nothing",
+  "The same edges as before, only with less noise in between them",
 ]
-answer = 0
+answer = 1
 success = "Right. σ picks the scale of the edges, a trade-off between noise and detail."
 retry = "Think about what blur removes before the derivative sees it."
 
@@ -102,6 +105,8 @@ give thin, closed outlines (Marr and Hildreth).
 **Canny's detector** is the classic recipe: Gaussian smoothing, gradient, **non-maximum
 suppression** (keep only the peak across each edge, so edges are one pixel thin) and
 **hysteresis** (a high threshold to start an edge, a lower one to continue it).
+
+Next, *Sharpening* uses the same differences to make edges look crisper.
 """
 show = { mode = "math", mathExpr = "laplace(gauss(nm(800), 2))", cmap = "diverging" }
 
@@ -109,9 +114,9 @@ show = { mode = "math", mathExpr = "laplace(gauss(nm(800), 2))", cmap = "divergi
 kind = "choice"
 prompt = "Why does Canny use two thresholds?"
 options = [
-  "Weak edge pixels are kept only if they connect to strong ones, so edges don't break up and isolated noise is dropped",
-  "One threshold is for horizontal edges, the other for vertical",
-  "To run faster",
+  "Weak edge pixels are kept only where they connect to strong ones",
+  "One threshold is for horizontal edges, the other for vertical ones",
+  "One threshold finds rising edges, the other finds falling ones",
 ]
 answer = 0
 success = "Exactly. Hysteresis uses connectivity as evidence: a faint pixel on a strong edge is probably real."

@@ -14,6 +14,9 @@ reading = [
 [[steps]]
 title = "Homogeneous coordinates"
 text = """
+*Cameras and image formation* modelled one camera. This lesson relates two or more views
+of the same scene.
+
 Write an image point (x, y) as **(x, y, 1)**, and treat (kx, ky, k) as the same point for
 any k ≠ 0. This small trick makes every transformation of the plane a 3 × 3 matrix, from
 simple to general:
@@ -28,8 +31,8 @@ Points with a last coordinate of 0 are 'at infinity': where parallel lines meet.
 [steps.task]
 kind = "choice"
 prompt = "A homography has 8 degrees of freedom and each point match gives 2 equations. How many matches does it need at least?"
-options = ["2", "4", "8"]
-answer = 1
+options = ["2", "3", "4", "8"]
+answer = 2
 success = "Right: 4 matches, no three on a line. The direct linear transform (DLT) solves for it; normalise the coordinates first for a stable result."
 retry = "Divide the degrees of freedom by the equations each match gives."
 
@@ -49,11 +52,11 @@ different positions can't be aligned by any single warp.
 kind = "choice"
 prompt = "Which pair of photos can be aligned exactly with one homography?"
 options = [
-  "Two shots of a poster taken from different angles",
   "Two shots of a room taken from different positions",
   "Two shots of a tree taken while walking past it",
+  "Two shots of a poster taken from different angles",
 ]
-answer = 0
+answer = 2
 success = "Right: the poster is a plane. In the room and the tree, near and far things shift by different amounts (parallax)."
 retry = "Which scene is flat?"
 
@@ -74,9 +77,9 @@ F is estimated from 8 or more matches (the eight-point algorithm, inside RANSAC)
 kind = "choice"
 prompt = "Why does epipolar geometry make stereo matching much easier?"
 options = [
-  "The search for each match shrinks from the whole image to one line",
-  "It removes the need for features",
-  "It makes the images identical",
+  "Each match is searched for along one line, not the whole image",
+  "It removes the need to detect and match features in the images",
+  "After warping, the two images become exactly identical",
 ]
 answer = 0
 success = "Right. After rectification the epipolar lines are image rows, so stereo matching becomes a 1-D search along each row."
@@ -94,16 +97,20 @@ together to minimise the **reprojection error**: the distance, in pixels, betwee
 3-D point projects and where it was observed. The errors in the data are errors in where
 features were found in the image, measured in pixels, so an error in pixels weighs every
 measurement fairly; algebraic errors such as x′ᵀ F x have no such meaning.
+
+That ends the unit on geometry. The next unit, starting with *Principal component
+analysis*, looks at the spectra instead of positions, and finds structure without any
+labels.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "Why minimise reprojection error, rather than an algebraic error such as x′ᵀ F x?"
 options = [
-  "It is measured in pixels, where the measurement noise lives, so the fit is statistically meaningful",
-  "It is faster to compute",
-  "It needs no initial guess",
+  "It is faster to compute than any algebraic error, even for big scenes",
+  "It is in pixels, where the noise lives, so the fit is statistically sound",
+  "It has a closed-form solution, so it never needs a first guess at all",
 ]
-answer = 0
+answer = 1
 success = "Right. It is the maximum-likelihood estimate under Gaussian pixel noise. It needs a good starting point, which the algebraic methods provide."
 retry = "Which error has a physical unit tied to the measurements?"

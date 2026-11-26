@@ -15,6 +15,9 @@ reading = [
 title = "A stack of pictures"
 figure = { kind = "cube", focus = "stack" }
 text = """
+The previous lesson treated an image as one grid of numbers, measured at a single
+wavelength. A spectral cube stacks many such grids.
+
 A normal photo stores three numbers per pixel: red, green and blue. A **spectral cube** stores
 many: one greyscale picture for each narrow band of wavelengths. This demo has 96 bands from
 450 nm (blue) to 950 nm (near infrared).
@@ -82,6 +85,9 @@ pixel along the edges changes across wavelengths.
 
 Drag to rotate, zoom with the mouse wheel or a pinch, and use the sliders in the panel to cut
 into the cube.
+
+Next, *Bands and wavelengths* looks at what the bands show, and why the same leaf looks so
+different from one band to the next.
 """
 view = "3d"
 
@@ -94,7 +100,7 @@ view = "image"
 [steps.task]
 kind = "choice"
 prompt = "How many numbers does the cube hold?"
-options = ["96", "49,152", "About 4.7 million"]
-answer = 2
+options = ["About 4.7 million", "49,152", "About 470,000", "96"]
+answer = 0
 success = "Right: 192 × 256 × 96 = 4,718,592 numbers. Real cubes are often a hundred times larger, which is why fast tools matter."
 retry = "Count every pixel in every band: rows × columns × bands."

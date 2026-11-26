@@ -16,6 +16,9 @@ reading = [
 title = "The pinhole camera"
 figure = { kind = "camera", show = "pinhole" }
 text = """
+*Corners and local features* matched points between images. To know where those points
+come from, you need a model of the camera.
+
 The simplest camera model is a pinhole. A point at (X, Y, Z) in front of the camera lands
 on the image at **x = f·X / Z, y = f·Y / Z**, where f is the focal length. Dividing by depth
 Z is **perspective**: far things look smaller and parallel lines meet at vanishing points.
@@ -29,11 +32,11 @@ camera is. Together: **x ≃ K [R | t] X**, the projection matrix.
 kind = "choice"
 prompt = "An object moves from 1 m to 2 m away from the camera. What happens to its image?"
 options = [
-  "Its width halves and its area drops to a quarter",
   "Its width and its area both halve",
-  "It stays the same size",
+  "Its width halves and its area quarters",
+  "Its size stays the same, but it gets dimmer",
 ]
-answer = 0
+answer = 1
 success = "Right: width and height both halve (x = f·X/Z), so the area drops to a quarter. Fewer pixels per object also means more noise in its average spectrum."
 retry = "x = f·X/Z: what happens to x when Z doubles, and to the area?"
 
@@ -52,8 +55,8 @@ kind = "choice"
 prompt = "You measure the length of parts anywhere in the image. What must you do first?"
 options = [
   "Calibrate the camera and correct the lens distortion",
-  "Increase the exposure",
-  "Convert to reflectance",
+  "Convert to reflectance, using a white reference tile",
+  "Raise the resolution until every edge looks sharp and clean",
 ]
 answer = 0
 success = "Right. Reflectance calibration fixes values; geometric calibration fixes positions."
@@ -74,6 +77,9 @@ stay straight only when the motion is steady, and calibration has to estimate th
 as well as K. Filter-wheel and snapshot cameras are frame cameras and follow the pinhole
 model, with one subtlety: each band can have a slightly different K (chromatic
 aberration), so bands are calibrated or aligned separately.
+
+Next, *Geometry of several views* combines several such cameras: aligning images, and
+recovering 3-D from them.
 """
 
 [steps.task]
@@ -81,8 +87,8 @@ kind = "choice"
 prompt = "A push-broom camera on a conveyor belt makes round parts look oval. Which parameter of its geometric model is off?"
 options = [
   "The along-track scale (belt speed × line period)",
-  "The focal length",
-  "The lens distortion",
+  "The focal length, which sets the across-track scale",
+  "The lens distortion, which bends lines near the edges",
 ]
 answer = 0
 success = "Right. Across the slit the camera behaves like a pinhole camera; along the belt, the scale comes from the motion, so a speed mismatch stretches or squashes everything."

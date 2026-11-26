@@ -14,6 +14,9 @@ reading = [
 title = "The RX detector"
 figure = { kind = "scatter", show = "anomaly" }
 text = """
+Clustering and unmixing describe the common materials of a scene. Anomaly detection looks
+for the pixels that fit none of them.
+
 **RX** learns what the scene looks like on average (the mean spectrum and how bands vary
 together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.
 This is a distance measured in units of the scene's own spread: a step in a direction where
@@ -46,11 +49,11 @@ show = { mode = "anomaly", anomaly = "rx", anomalyTop = 0.2 }
 kind = "choice"
 prompt = "RX also flags the saturated white square left of the leaf. Why?"
 options = [
-  "They are targets too",
-  "Sensor defects are unlike the background as well, so they look anomalous",
-  "RX is broken",
+  "Defects differ from the background too, so they score high",
+  "The square is a real target hidden in the scene",
+  "RX simply flags the brightest pixels in the image, whatever they are",
 ]
-answer = 1
+answer = 0
 success = "Right. Repair defects first (or expect them in the results), otherwise they crowd out real targets."
 retry = "RX only knows 'different from the scene', not why."
 
@@ -59,5 +62,8 @@ title = "PCA residual"
 text = """
 Another way: keep the top *k* principal components as a model of the scene and look at what
 they **can't** explain. Rare materials end up in the residual.
+
+Without labels, these methods can only say 'unusual'. Next, *Supervised classification*
+uses labelled examples to say what a pixel is.
 """
 show = { mode = "anomaly", anomaly = "residual", anomalyK = 3, anomalyTop = 0 }

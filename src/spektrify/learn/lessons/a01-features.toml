@@ -17,6 +17,9 @@ reading = [
 title = "What makes a point easy to find again?"
 figure = { kind = "kernel", op = "corner" }
 text = """
+The intermediate level ended with clean, aligned cubes. The advanced level starts with
+geometry: how to find the same point in two images.
+
 To stitch images, track motion or align bands we need points that can be found again in
 another image. Take a small window and imagine shifting it:
 
@@ -30,8 +33,12 @@ show = { mode = "math", mathExpr = "grad(nm(670))", cmap = "gray" }
 [steps.task]
 kind = "choice"
 prompt = "Which point can be located exactly in a second image?"
-options = ["A point in the middle of the background", "A point on the smooth rim of a disc", "The corner of a square"]
-answer = 2
+options = [
+  "A point on the smooth rim of a disc",
+  "The corner of a square",
+  "A point in the middle of the background",
+]
+answer = 1
 success = "Right. Only a corner constrains both directions."
 retry = "Where does shifting the window in *any* direction change what you see?"
 
@@ -56,11 +63,11 @@ show = { mode = "math", mathExpr = "harris(minimum(nm(800), 0.6), 1.5) > 0.05", 
 kind = "choice"
 prompt = "Besides the small square, two corners are found on the leaf. Where are they?"
 options = [
-  "Where the dead column cuts the leaf's outline, at its top and bottom",
-  "All along the leaf's outline",
-  "In the middle of the leaf",
+  "Spread all along the leaf's outline, wherever it curves sharply",
+  "Where the dead column cuts the leaf's outline, top and bottom",
+  "At the leaf's tip and its stem, where the outline is sharpest",
 ]
-answer = 0
+answer = 1
 success = "Right: those are T-junctions, where two edges meet. The smooth outlines of the leaf and discs are edges, not corners."
 retry = "Zoom in on the white specks: where do two different edges meet?"
 
@@ -102,9 +109,9 @@ keeps a match only if the best is clearly better than the second best.
 kind = "choice"
 prompt = "Why reject a match whose best and second-best candidates are almost equally close?"
 options = [
-  "It's ambiguous, as on repeated patterns, and likely to be wrong",
-  "It is too accurate",
-  "Descriptors can only match once",
+  "It is ambiguous, as on repeated patterns, and likely wrong",
+  "Close candidates mean the descriptor is too short to trust",
+  "Each descriptor may only be used in a single match",
 ]
 answer = 0
 success = "Right. On a brick wall every brick looks alike; the ratio test drops such guesses."
@@ -120,15 +127,18 @@ how many other matches agree. Small samples matter: if half the matches are righ
 pair is all-correct with probability ½ · ½ = 1/4, but a random set of 8 only 1/256. Keep the
 model with the most agreement, then refit on those
 inliers.
+
+Matching points is half of geometry. Next, *Cameras and image formation* describes how a
+camera maps the 3-D world onto those points.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "Why does RANSAC sample the minimum number of matches?"
 options = [
-  "The smaller the sample, the more likely it is to contain no outlier at all",
-  "It is the most accurate fit",
-  "To save memory",
+  "Smaller samples are more likely to contain no outlier",
+  "A minimal fit is the most accurate fit that can be made",
+  "Fewer matches per fit means less memory and less time",
 ]
 answer = 0
 success = "Right. With 50% outliers a sample of 4 is clean 1 time in 16; a sample of 10, 1 time in 1,024."

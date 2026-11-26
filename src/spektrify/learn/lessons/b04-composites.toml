@@ -15,6 +15,9 @@ reading = [
 title = "True colour"
 figure = { kind = "cube", focus = "rgb" }
 text = """
+*Bands and wavelengths* showed one band at a time, in grey. A screen can show three at
+once, as red, green and blue.
+
 Your eye has three kinds of colour receptors (cones), sensitive to broad, overlapping ranges
 that peak near 420, 530 and 560 nm. So the eye reduces a whole spectrum to just **three
 numbers**, and a screen recreates colour with three primaries: red, green and blue.
@@ -75,6 +78,9 @@ right to an RGB camera.
 
 A spectral camera keeps the whole curve, so metamers are easy to tell apart. This is one of
 the main reasons to use one.
+
+A composite shows only three bands. Next, *Comparing materials* uses all of them, by
+comparing whole spectra.
 """
 show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
 
@@ -82,11 +88,11 @@ show = { mode = "rgb", rgb = [640, 550, 465], specView = "values" }
 kind = "choice"
 prompt = "Two powders look the same to an RGB camera. What can a spectral camera add?"
 options = [
-  "Nothing: same colour means same spectrum",
-  "Their full spectra, which may differ even though their RGB values match",
-  "Only a sharper image",
+  "Their full spectra, which can differ even when the RGB values match",
+  "Nothing: two materials with the same colour always have the same spectrum",
+  "A sharper image, since each band is recorded on its own",
 ]
-answer = 1
+answer = 0
 success = "Right. Same colour does not mean same spectrum; checking for counterfeits and contamination relies on this."
 retry = "Think about how many numbers the RGB camera keeps, and how many the spectrum has."
 
@@ -99,10 +105,10 @@ show = { mode = "rgb", rgb = [800, 650, 550] }
 kind = "choice"
 prompt = "In that composite, what does a bright red area usually mean?"
 options = [
-  "Hot objects",
-  "Material that reflects strongly in the near infrared, such as healthy vegetation",
-  "Surfaces painted red",
+  "Strong reflection in the near infrared, as from healthy leaves",
+  "Surfaces that are red to the eye, such as red paint",
+  "Warm objects, because near-infrared light shows how hot things are",
 ]
-answer = 1
+answer = 0
 success = "Right. False colour shows reflectance in the bands you chose, not heat or visible colour."
 retry = "Remember which band was put into the red channel."

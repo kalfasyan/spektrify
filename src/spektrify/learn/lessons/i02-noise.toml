@@ -13,6 +13,9 @@ reading = [
 [[steps]]
 title = "Two kinds of noise"
 text = """
+*Neighbourhoods and convolution* averaged noise away. That works well for some kinds of
+noise, but not for all of them.
+
 Noise comes in two broad kinds:
 
 - **Gaussian-like noise**: every pixel is a little off. It comes from the electronics (read
@@ -75,13 +78,16 @@ than a median does, because it uses every value instead of only the middle one.
 Edge-preserving filters such as the **bilateral filter** and **non-local means** average only
 over similar-looking pixels; learned denoisers go further. All of them guess at the true
 image, so check that they don't remove what you want to measure.
+
+Blurring smooths things out. Next, *Gradients and edges* does the opposite: it looks for
+where the image changes.
 """
 show = { mode = "math", mathExpr = "median(nm(670), 3)", cmap = "gray" }
 
 [steps.task]
 kind = "choice"
 prompt = "A band with fine, even 'TV static' everywhere. Which filter suits it best?"
-options = ["Median", "Gaussian", "Neither can help"]
-answer = 1
+options = ["Gaussian", "Median", "Neither can help"]
+answer = 0
 success = "Right. For Gaussian-like noise, a weighted average is the efficient choice; the median wins on outliers."
 retry = "Static everywhere is Gaussian-like, not impulse noise."

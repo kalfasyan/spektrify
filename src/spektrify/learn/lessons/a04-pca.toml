@@ -14,6 +14,9 @@ reading = [
 title = "Many bands, few stories"
 figure = { kind = "scatter", show = "pca" }
 text = """
+The geometry lessons were about positions. This unit treats the spectra as data, starting
+with how much new information all those bands really hold.
+
 Neighbouring bands are highly **correlated** (when one is bright, so is the other): band
 600 nm looks almost exactly like 605 nm.
 **PCA** finds new axes, mixtures of all bands, ordered by how much of the variation in the
@@ -30,8 +33,8 @@ kind = "choice"
 prompt = "What does 'variance explained' tell you?"
 options = [
   "How much of the cube's variation those components capture",
-  "How many objects are in the scene",
-  "The noise level of each band",
+  "How many different materials are present in the scene",
+  "How much noise each band contains, from the worst band to the best",
 ]
 answer = 0
 success = "Right. Often a handful of components carry almost all the variation of a hundred bands."
@@ -65,11 +68,11 @@ show = { mode = "pca", pcaOffset = 0, pcaAsRgb = false }
 kind = "choice"
 prompt = "You keep the first 3 components to train a classifier for a rare defect. What is the risk?"
 options = [
-  "The defect's signal may sit in a component you dropped, because it adds little variance overall",
-  "None: the first components always contain everything important",
-  "The classifier will be slower",
+  "None: the first components always keep everything that matters",
+  "A rare defect adds little variance, so it may be dropped",
+  "The classifier will run slower, because it has fewer inputs",
 ]
-answer = 0
+answer = 1
 success = "Right. PCA is unsupervised; for a task, check what the dropped components contain or use a supervised reduction such as LDA."
 retry = "PCA ranks by variance over the whole image. How much variance can a few pixels add?"
 
@@ -79,5 +82,8 @@ text = """
 Place every pixel as a point at its first three component scores and materials become
 **clusters**. In the 3D view, choose **PCA cloud**, then rotate. Points that sit far from
 every cluster are unusual pixels.
+
+Clusters in that cloud are groups of similar pixels. Next, *Clustering into segments*
+finds them automatically.
 """
 view = "3d"

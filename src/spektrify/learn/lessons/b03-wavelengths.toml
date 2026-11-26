@@ -14,6 +14,9 @@ reading = [
 title = "Why leaves look green"
 figure = { kind = "spectrum", show = "absorb" }
 text = """
+In *What is a spectral cube?* you flipped through the bands. Now look at what changes from
+one band to the next, starting with a leaf.
+
 Our eyes see roughly 400 to 700 nm. Inside that range, chlorophyll absorbs blue and red light
 and reflects a little more green, which is why leaves look green.
 
@@ -54,6 +57,9 @@ air pockets scatter that light around until much of it comes back out. This **re
 from dark in the red to bright in the near infrared, is one of the most
 useful features in plant science: its position and steepness change with stress and
 chlorophyll content.
+
+Next, *Colour and composites* puts three bands on screen at once, to make colour pictures
+out of them.
 """
 
 [steps.task]
@@ -72,10 +78,10 @@ text = "Leaves reflect much more near-infrared light than visible light."
 kind = "choice"
 prompt = "Why is a healthy leaf so bright in the near infrared?"
 options = [
-  "Chlorophyll glows in the near infrared",
-  "The leaf's internal cell structure scatters near-infrared light back, and nothing in it absorbs that light",
-  "The camera is simply more sensitive there",
+  "Chlorophyll glows in the near infrared, adding light of its own",
+  "The camera is far more sensitive there than in visible light",
+  "Its cells scatter that light back, and nothing absorbs it",
 ]
-answer = 1
+answer = 2
 success = "Exactly. Pigments don't absorb there, so the light bounces around the cell walls and much of it comes back out."
 retry = "Not quite. Think about what absorbs light in a leaf, and what happens when nothing does."

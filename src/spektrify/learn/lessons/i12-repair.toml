@@ -13,6 +13,9 @@ reading = [
 title = "Bad pixels"
 figure = { kind = "pipeline" }
 text = """
+*Spotting sensor problems* found dead pixels, a saturated square and stripes. These are
+the steps that repair them.
+
 The **badpixels** step finds pixels, rows and columns that differ wildly from their
 neighbours (dead, hot, or missing) and replaces them with the local median.
 
@@ -35,6 +38,9 @@ title = "Destriping"
 text = """
 The **destripe** step estimates each column's offset from its neighbours and removes it,
 keeping any structure wider than its window. Here it runs after badpixels on the striped band.
+
+The images are now clean. *Smoothing and normalising spectra*, next, cleans the spectra
+themselves.
 """
 show = { mode = "band", band = "#76" }
 pipeline = [
@@ -46,9 +52,9 @@ pipeline = [
 kind = "choice"
 prompt = "Destriping keeps structure wider than its window. What can go wrong if the window is too small?"
 options = [
-  "Real narrow objects, such as thin lines, can be flattened as if they were stripes",
-  "Nothing",
-  "The image gets brighter",
+  "Real narrow objects, such as thin lines, get flattened like stripes",
+  "Nothing: a smaller window only makes the repair more local and precise",
+  "The whole band gets brighter or darker than it should be",
 ]
 answer = 0
 success = "Right. Every repair is a trade-off: check the result on details you care about."

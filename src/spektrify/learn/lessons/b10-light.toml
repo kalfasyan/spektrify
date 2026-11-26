@@ -16,6 +16,9 @@ reading = [
 title = "Light comes in photons"
 figure = { kind = "sensor", show = "photons" }
 text = """
+The lessons so far took each pixel's value as given. This unit asks how a camera actually
+produces those numbers, starting with light itself.
+
 Light is not a smooth flow. It arrives as a shower of separate, tiny packets of energy
 called **photons**, a bit like rain is made of separate drops.
 
@@ -41,8 +44,8 @@ show = { mode = "band", band = 700, cmap = "gray", specView = "values" }
 [steps.task]
 kind = "choice"
 prompt = "Which photon carries more energy?"
-options = ["One at 450 nm (blue)", "One at 900 nm (near infrared)", "They carry the same"]
-answer = 0
+options = ["One at 900 nm (near infrared)", "They carry the same energy", "One at 450 nm (blue)"]
+answer = 2
 success = "Right: energy goes as 1/λ, so a 450 nm photon carries twice the energy of a 900 nm one (about 2.8 eV against 1.4 eV)."
 retry = "E = h·c / λ: what happens to E when λ gets smaller?"
 
@@ -75,11 +78,11 @@ deep into the silicon, and many go right through it before they are absorbed.
 kind = "choice"
 prompt = "Why can't an ordinary silicon camera image at 1500 nm?"
 options = [
-  "Those photons don't have enough energy to free an electron in silicon",
-  "The lens blocks all infrared",
-  "The pixels are too large",
+  "Silicon reflects almost all light longer than 1100 nm",
+  "Its photons have too little energy to free an electron",
+  "The glass in the lens blocks all infrared beyond 1000 nm",
 ]
-answer = 0
+answer = 1
 success = "Right. A 1500 nm photon carries about 0.83 eV, below silicon's 1.1 eV band gap. SWIR cameras use other materials with smaller band gaps, such as InGaAs (about 900 to 1700 nm)."
 retry = "Compare the photon energy at 1500 nm (1240 / 1500 eV) with silicon's band gap."
 
@@ -111,9 +114,9 @@ The next lessons show both.
 kind = "choice"
 prompt = "Two bare pixels each collect 1,000 electrons. One was lit by red light, the other by blue. Can you tell which is which from the numbers?"
 options = [
-  "No. The electrons carry no record of the photons' wavelength",
-  "Yes, red light gives larger electrons",
-  "Yes, from the noise",
+  "No: each electron is the same, whatever the photon's colour",
+  "Yes: blue photons free electrons that carry more electric charge",
+  "Yes: the value from red light is noticeably noisier",
 ]
 answer = 0
 success = "Right. That is why every colour and spectral camera puts something wavelength-selective in front of the sensor."
@@ -167,16 +170,15 @@ lamps, can't be compared directly. The lesson *From raw counts to reflectance* r
 One surprise: for a surface that fills the pixel, the value **does not change with
 distance**. Twice as far, each pixel sees a patch four times larger, but receives a quarter
 as much light from each point of it, so the two cancel.
+
+Next, *Exposure, noise and dynamic range* asks how precise those counts are, and what
+happens with too little or too much light.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "You photograph an evenly lit wall from 2 m, then from 4 m, with the same settings. What happens to the pixel values on the wall?"
-options = [
-  "They stay about the same",
-  "They halve",
-  "They drop to a quarter",
-]
-answer = 0
+options = ["They drop to a quarter", "They stay about the same", "They halve"]
+answer = 1
 success = "Right. The light from each point drops as 1/distance², but each pixel collects from an area that grows as distance². Small objects that no longer fill a pixel do get dimmer."
 retry = "Each pixel now sees a larger piece of the wall. Does that make up for the dimmer light from each point?"

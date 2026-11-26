@@ -14,6 +14,8 @@ reading = [
 title = "Which pixels belong together?"
 figure = { kind = "pixels", show = "neighbours" }
 text = """
+*Morphology* gave a clean mask. The next step is to split it into separate objects.
+
 A mask says *which* pixels are 'on', not *how many objects* there are. **Connected
 components** gives each group of touching pixels its own number. Two pixels touch if they
 are neighbours: with **8-connectivity** (used here) diagonal neighbours count, with
@@ -26,8 +28,8 @@ show = { mode = "math", mathExpr = "components(nm(550) > 0.35)", cmap = "turbo" 
 [steps.task]
 kind = "choice"
 prompt = "How many separate objects does it number? (Neighbouring numbers can look alike in colour.)"
-options = ["4", "5", "1"]
-answer = 1
+options = ["1", "4", "5"]
+answer = 2
 success = "Five: the four discs and the saturated square. Labelling counts what the mask contains, defects included."
 retry = "Count every separate blob, including tiny ones. Zoom in left of the leaf."
 
@@ -67,12 +69,15 @@ Many numbers summarise a region's shape:
 
 These **hand-crafted features** were the input to classic pattern recognition, and they are
 still the quickest way to sort parts, grains or cells by shape.
+
+The masks in these lessons were spoiled by a dead column and a saturated square. The next
+unit, starting with *Spotting sensor problems*, finds such faults in the data itself.
 """
 
 [steps.task]
 kind = "choice"
 prompt = "Which shape has the highest circularity?"
-options = ["A square", "A disc", "A long thin rectangle"]
-answer = 1
+options = ["A disc", "A square", "A long thin rectangle"]
+answer = 0
 success = "Right: exactly 1 for a disc, about 0.785 (π/4) for a square, and close to 0 for a thin rectangle."
 retry = "The disc encloses the most area for its perimeter."

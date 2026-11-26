@@ -14,6 +14,9 @@ reading = [
 title = "Divide one band by another"
 figure = { kind = "spectrum", show = "edge" }
 text = """
+So far each operation used one band. Combining bands, as *Comparing materials* did with
+whole spectra, can cancel effects such as shading.
+
 Dividing bands cancels anything that scales both of them equally, such as shading or a
 brighter lamp. Here the near infrared (800 nm) is divided by red (670 nm), the two sides of
 the red edge.
@@ -45,7 +48,7 @@ show = { mode = "math", mathExpr = "(nm(800) - nm(670)) / (nm(800) + nm(670))" }
 [steps.task]
 kind = "choice"
 prompt = "A pixel reflects 0.6 in the near infrared (a) and 0.2 in the red (b). What is its normalised difference?"
-options = ["3", "0.5", "0.4"]
+options = ["0.4", "0.5", "0.67", "3"]
 answer = 1
 success = "Right: (0.6 − 0.2) / (0.6 + 0.2) = 0.4 / 0.8 = 0.5. The ratio a / b would be 3."
 retry = "Put the numbers in (a − b) / (a + b): the difference on top, the sum below."
@@ -61,6 +64,9 @@ are greener than red **and** fairly bright:
 
 Edit the expression in the Band math box and press Enter to try your own. Also available: `b[i]`
 (band by index), `avg(λ1, λ2)`, `mean`, `std`, `sqrt`, `log`, `where` and more.
+
+A rule such as `> 1.3` is a threshold. Next, *Thresholds and Otsu's method* shows how to
+choose one, and when to let the data choose it.
 """
 show = { mode = "math", mathExpr = "(nm(520) / nm(650) > 1.3) * (nm(520) > 0.3)" }
 
