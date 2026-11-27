@@ -27,11 +27,19 @@ show = { mode = "band", band = "#4", cmap = "gray" }
 [[steps]]
 title = "The box filter"
 text = """
-`box(b[4], 2)` replaces each pixel by the mean of the 5 × 5 square around it. Averaging N
-values whose noise is independent divides the noise's standard deviation by **√N** (the
-rule from *Exposure, noise and dynamic range*), so 25 pixels give 5 times less noise. The table of
-weights (here 25 equal weights of 1/25) is called the **kernel**. Sliding the kernel over
-the image and taking the weighted sum at every position is **convolution**.
+The simplest fix: replace each pixel by the average of the square around it.
+`box(b[4], 2)` uses a 5 × 5 square, 25 pixels in all.
+
+How much does that help? Each pixel's error is random: some are too high, some too low, so
+in an average they partly cancel. They don't cancel completely, though, and the rule is the
+square-root rule from *Exposure, noise and dynamic range*: averaging 4 values halves the
+typical error, averaging 25 cuts it to a fifth (√25 = 5), averaging 100 to a tenth. It is the
+same reason you average many runs of a benchmark instead of trusting one.
+
+The grid of weights used in the average (here 25 equal weights of 1/25 each) is called the
+**kernel**. Sliding the kernel across the image and computing the weighted sum at every
+position is called **convolution**. If you have written a sliding-window loop over a 2-D
+array, you have written a convolution.
 
 At the image border part of the square falls outside. Something has to fill it in: zeros
 (which darken the border), the nearest pixel, or a mirror image. spektrify mirrors.
@@ -50,14 +58,18 @@ retry = "Independent noise averages down with the square root of the number of s
 title = "The Gaussian filter"
 figure = { kind = "kernel", op = "gauss" }
 text = """
-The box treats a pixel at the corner of the square like the centre. A **Gaussian kernel**
-gives weights that fall off smoothly with distance; σ (in pixels) sets the scale:
-`gauss(b[4], 1.5)`.
+The box gives a pixel in the corner of the square as much say as the centre pixel, which
+is a bit crude: nearer neighbours are more likely to show the same thing. A **Gaussian
+kernel** fixes that. Its weights follow the familiar bell curve: largest in the middle and
+fading smoothly with distance. One number, **σ** (sigma, in pixels), sets how wide the bell
+is: weights are still large within about σ of the centre and nearly zero beyond 3σ.
+Here σ = 1.5: `gauss(b[4], 1.5)`.
 
-The Gaussian is the default blur in vision. It treats all directions alike, it creates no
-blocky artefacts, and blurring twice is the same as blurring once with a larger σ. The σs
-combine like the sides of a right triangle: **σ = √(σ₁² + σ₂²)**, so σ = 6 then σ = 8 is
-one blur with σ = 10.
+The Gaussian is the default blur in image processing. It treats all directions alike, it
+creates no blocky artefacts, and blurring twice is the same as blurring once with a wider
+bell. The widths combine like the sides of a right-angled triangle (the same Pythagoras
+rule as for combining noises): σ = 6 followed by σ = 8 equals one blur with σ = 10, since
+6² + 8² = 10².
 """
 show = { mode = "math", mathExpr = "gauss(b[4], 1.5)", cmap = "gray" }
 
@@ -74,13 +86,16 @@ title = "Why convolution is everywhere"
 text = """
 Convolution has two properties that make it the workhorse of image processing:
 
-- **Linear**: filtering a sum of images equals the sum of the filtered images.
-- **Shift-invariant**: the same kernel is applied everywhere, so an object is treated alike
-  wherever it appears.
+- **Linear**: filtering the sum of two images gives the same result as filtering each and
+  adding the results, and making an image twice as bright makes the filtered image twice
+  as bright.
+- **Shift-invariant**: the same kernel is used everywhere, so an object is treated the same
+  way wherever it sits in the image.
 
-Any operation with both properties is a convolution. Gaussian and box kernels are also
-**separable**: a 2-D pass equals a horizontal 1-D pass followed by a vertical one, which
-costs 2k instead of k² operations per pixel. The convolutional networks at the end of the
+Any operation with both properties is a convolution. Box and Gaussian kernels have a third,
+practical property: they are **separable**. A 2-D blur equals a blur along each row
+followed by a blur along each column. For a 15 × 15 kernel that is 15 + 15 = 30
+multiplications per pixel instead of 15 × 15 = 225. The convolutional networks at the end of the
 course are stacks of exactly this operation, with kernels learned from data.
 
 Next, *Noise and denoising* compares this kind of averaging with filters that handle other

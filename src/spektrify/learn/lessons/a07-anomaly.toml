@@ -17,11 +17,15 @@ text = """
 Clustering and unmixing describe the common materials of a scene. Anomaly detection looks
 for the pixels that fit none of them.
 
-**RX** learns what the scene looks like on average (the mean spectrum and how bands vary
-together) and scores every pixel by how far it is from that: its *Mahalanobis distance*.
-This is a distance measured in units of the scene's own spread: a step in a direction where
-the bands normally vary a lot counts little, the same step in an unusual direction counts a
-lot. So anything unlike the bulk of the scene, a rare material or a faulty pixel, scores
+**RX** learns what the scene looks like on average (the mean spectrum, and how the bands
+vary together) and scores every pixel by how far it is from that average.
+
+"How far" is measured in a fair way. Compare heights: a person 10 cm taller than average is
+unremarkable, but a newborn 10 cm longer than average would be extraordinary, because
+newborns vary much less. RX does the same in every direction of spectrum space: a step in a
+direction where the scene's spectra normally vary a lot counts for little, and the same step
+in a direction where they hardly vary counts for a lot. This is the **Mahalanobis
+distance**, distance measured in units of the scene's own spread. So anything unlike the bulk of the scene, a rare material or a faulty pixel, scores
 high.
 Bright means unusual.
 

@@ -45,14 +45,22 @@ retry = "Where does shifting the window in *any* direction change what you see?"
 [[steps]]
 title = "The Harris detector"
 text = """
-Harris and Stephens turned this into a formula. Around each pixel, collect the gradients in
-the **structure tensor** (the averages of dx², dy² and dx·dy), a 2 × 2 matrix. Its two
-**eigenvalues** are two numbers that summarise it: they say how
-much the window changes in its most and least changing directions:
+Harris and Stephens turned this test into arithmetic. Around each pixel, look at the
+gradients (*Gradients and edges*) in a small window and ask two questions: in the direction
+where the window changes *most*, how strongly does it change? And in the direction where it
+changes *least*?
 
-- both small: flat; one large: edge; both large: **corner**.
+The averages of dx², dy² and dx·dy over the window, arranged as a 2 × 2 table (the
+**structure tensor**), hold exactly that information. Its two **eigenvalues** are the two
+answers: the amount of change in the most-changing and the least-changing direction. You
+don't need to compute them by hand; just read them like this:
 
-The Harris response `det − k·trace²` is positive only when both are large. Detection keeps
+- both small: the window looks the same however you shift it, a **flat** area;
+- one large, one small: it changes across but not along, an **edge**;
+- both large: it changes whichever way you shift it, a **corner**.
+
+The **Harris response** `det − k·trace²` is a cheap way to combine them into one score
+that is positive only when both are large. Detection keeps
 the pixels whose response is above a threshold (here 5% of the strongest):
 `harris(minimum(nm(800), 0.6), 1.5) > 0.05`. The `minimum` caps the saturated square so it
 can't drown out everything else. White pixels are detections; zoom in to see where they sit.

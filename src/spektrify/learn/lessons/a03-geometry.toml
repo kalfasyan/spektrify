@@ -17,9 +17,13 @@ text = """
 *Cameras and image formation* modelled one camera. This lesson relates two or more views
 of the same scene.
 
-Write an image point (x, y) as **(x, y, 1)**, and treat (kx, ky, k) as the same point for
-any k ≠ 0. This small trick makes every transformation of the plane a 3 × 3 matrix, from
-simple to general:
+First, a bookkeeping trick. Rotating or scaling a point is a matrix multiplication, but
+moving it (adding an offset) is not, which makes chains of transformations awkward. The fix:
+write an image point (x, y) with an extra 1, as **(x, y, 1)**, and agree that (kx, ky, k)
+means the same point for any k ≠ 0 (divide by the last number to get back to x and y).
+These are **homogeneous coordinates**, and with them every transformation of the image
+plane, moves included, becomes one 3 × 3 matrix. Chaining transformations is then just
+multiplying matrices. From simple to general:
 
 - **translation** (2 numbers), **rigid** (+ rotation, 3), **similarity** (+ scale, 4),
 - **affine** (parallel lines stay parallel, 6),
@@ -64,9 +68,15 @@ retry = "Which scene is flat?"
 title = "Epipolar geometry"
 figure = { kind = "camera", show = "epipolar" }
 text = """
-With two views of a 3-D scene, a point in image 1 could be anywhere along a ray. Seen from
-camera 2 that ray is a line, the **epipolar line**, so the match must lie on it. The
-**fundamental matrix** F captures this: matching points satisfy **x′ᵀ F x = 0**. With
+Take two photos of a 3-D scene from different places. A pixel in photo 1 tells you the
+direction of the scene point, but not how far away it is: the point could be anywhere along
+a line of sight (a **ray**) from camera 1. Seen from camera 2, that ray appears as a line
+across photo 2, the **epipolar line**. So the matching pixel in photo 2 must lie somewhere
+on that line, and you only need to search along it.
+
+The **fundamental matrix** F, a 3 × 3 matrix, packs this relation for every pixel at once:
+matching points x (in photo 1) and x′ (in photo 2), in homogeneous coordinates, satisfy
+**x′ᵀ F x = 0**. With
 calibrated cameras the same role is played by the **essential matrix** E = [t]ₓ R, which
 contains the relative rotation and the direction of translation.
 

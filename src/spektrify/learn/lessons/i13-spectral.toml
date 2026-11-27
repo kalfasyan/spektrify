@@ -31,9 +31,15 @@ success = "Each band's value wobbles around the true curve. Smoothing helps."
 [[steps]]
 title = "Savitzky–Golay smoothing"
 text = """
-**Savitzky–Golay** smoothing fits a small polynomial to a moving window of bands and keeps its
-centre value. Compared with a plain moving average of the same width, it keeps the height
-and width of narrow peaks much better.
+The obvious fix is a moving average along the spectrum: replace each band by the mean of
+it and its neighbours. That smooths the noise, but it also flattens narrow peaks, because a
+peak's top gets averaged with its lower sides.
+
+**Savitzky–Golay** smoothing is smarter. For each band it takes a small window of
+neighbouring bands, fits a smooth curve through them (a low-degree polynomial, such as a
+parabola, by least squares) and keeps the curve's value at the centre. A parabola can bend
+to follow a peak, so peaks keep their height and width much better than with a plain
+average.
 
 Toggle **Before / After** and watch the leaf's curve.
 """
@@ -42,7 +48,8 @@ pipeline = [{ name = "smooth", params = { window = 9, order = 2 } }]
 [[steps]]
 title = "Derivatives"
 text = """
-The same fit gives the **derivative** for free: how fast the spectrum changes per nanometre.
+The fitted curve also gives the **derivative** for free: its slope, which says how fast the
+spectrum rises or falls per nanometre.
 Derivatives remove constant offsets and turn slopes into peaks, so the red edge becomes a
 single peak.
 """
@@ -60,7 +67,9 @@ retry = "Look for the highest point of the leaf's curve in the plot and click th
 title = "Standard normal variate"
 figure = { kind = "spectrum", show = "snv" }
 text = """
-**SNV** subtracts each spectrum's mean and divides by its standard deviation. Like the Shape
+**SNV** (standard normal variate) puts every spectrum on the same footing. It subtracts
+the spectrum's own average, so it is centred on zero, and divides by its own standard
+deviation (its typical spread), so it has the same overall size as every other spectrum. Like the Shape
 view, it removes brightness and shading, but it changes the data itself, ready for modelling.
 
 That completes the intermediate level. The advanced level starts with *Corners and local

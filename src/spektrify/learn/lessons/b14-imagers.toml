@@ -140,7 +140,7 @@ jump to any band in its range.
 
 It is simple and flexible (you choose the bands), and each band uses the whole sensor. But
 the bands are taken at **different times**: anything that moves, or a filter that shifts the
-image slightly, **misregisters** the bands. The raw capture demo has this problem, and
+image slightly, **misregisters** the bands: they no longer line up with each other. The raw capture demo has this problem, and
 *Aligning the bands* fixes it.
 """
 
